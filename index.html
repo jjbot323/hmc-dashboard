@@ -1,0 +1,2002 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hills Holdco - Operating Model Dashboard</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+  :root {
+    --bg: #f4f5f7; --card: #ffffff; --card2: #f0f1f3; --border: #e2e4e8;
+    --text: #1f1f1f; --text2: #6b7280; --accent: #dc0505; --accent-light: #fef2f2;
+    --green: #16a34a; --red: #dc2626; --yellow: #ca8a04; --orange: #ea580c;
+    --purple: #7c3aed; --cyan: #0891b2;
+    --charcoal: #1f1f1f; --charcoal-light: #333333;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+  .header { background: var(--charcoal); padding: 28px 32px 0; border-bottom: none; }
+  .header h1 { font-size: 22px; font-weight: 700; letter-spacing: -0.3px; color: #ffffff; }
+  .header p { color: #a1a1aa; font-size: 13px; margin-top: 6px; }
+  .header .accent-bar { width: 48px; height: 3px; background: var(--accent); margin-bottom: 10px; border-radius: 2px; }
+
+  /* Tab navigation */
+  .tab-nav { display: flex; gap: 0; background: var(--charcoal); padding: 18px 32px 0; overflow-x: auto; border-bottom: 4px solid var(--accent); }
+  .tab-btn { padding: 10px 22px; font-size: 12.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: #a1a1aa; background: transparent; border: none; cursor: pointer; border-bottom: 3px solid transparent; margin-bottom: -4px; transition: all 0.2s; white-space: nowrap; font-family: inherit; }
+  .tab-btn:hover { color: #ffffff; background: rgba(255,255,255,0.05); }
+  .tab-btn.active { color: #ffffff; border-bottom-color: var(--accent); background: rgba(255,255,255,0.08); }
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+
+  .container { max-width: 1600px; margin: 0 auto; padding: 28px 32px; }
+  .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; margin-bottom: 24px; }
+  .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; margin-bottom: 24px; }
+  .grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 18px; margin-bottom: 24px; }
+  .grid-2-1 { display: grid; grid-template-columns: 2fr 1fr; gap: 18px; margin-bottom: 24px; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 22px; box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.02); transition: box-shadow 0.2s; }
+  .card:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.06); }
+  .card-header { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; color: var(--text2); margin-bottom: 14px; padding-bottom: 10px; border-bottom: 1px solid var(--border); }
+  .kpi { text-align: center; padding: 8px 16px; }
+  .kpi .value { font-size: 28px; font-weight: 800; margin: 6px 0; color: var(--charcoal); }
+  .kpi .label { font-size: 11px; color: var(--text2); text-transform: uppercase; letter-spacing: 0.8px; font-weight: 600; }
+  .kpi .delta { font-size: 12px; font-weight: 600; margin-top: 6px; }
+  .delta.up { color: var(--green); }
+  .delta.down { color: var(--red); }
+  .delta.warn { color: var(--yellow); }
+  .section-title { font-size: 17px; font-weight: 800; margin: 36px 0 18px; padding-bottom: 10px; border-bottom: 3px solid var(--accent); display: flex; align-items: center; gap: 10px; color: var(--charcoal); text-transform: uppercase; letter-spacing: 0.3px; cursor: pointer; user-select: none; transition: color 0.2s; }
+  .section-title:hover { color: var(--accent); }
+  .section-title::before { content: '\25BC'; font-size: 11px; margin-right: 6px; display: inline-block; transition: transform 0.3s; }
+  .section-title.collapsed::before { transform: rotate(-90deg); }
+  .section-content { overflow: hidden; transition: max-height 0.4s ease, opacity 0.3s ease; max-height: 5000px; opacity: 1; }
+  .section-content.hidden { max-height: 0; opacity: 0; margin-bottom: 0; }
+  .badge { display: inline-block; padding: 3px 10px; border-radius: 4px; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; }
+  .badge-pass { background: #dcfce7; color: var(--green); }
+  .badge-fail { background: #fef2f2; color: var(--red); }
+  .badge-warn { background: #fefce8; color: var(--yellow); }
+  .badge-info { background: var(--accent-light); color: var(--accent); }
+  table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+  thead { background: #f8f9fa; }
+  th { text-align: left; padding: 10px 12px; color: var(--charcoal); font-weight: 700; text-transform: uppercase; font-size: 10px; letter-spacing: 0.5px; border-bottom: 2px solid var(--border); }
+  td { padding: 8px 12px; border-bottom: 1px solid #f0f1f3; color: #374151; }
+  tr:hover td { background: #fafbfc; }
+  .num { text-align: right; font-variant-numeric: tabular-nums; }
+  .neg { color: var(--red); }
+  .pos { color: var(--green); }
+  .chart-container { position: relative; height: 280px; }
+  .chart-sm { height: 220px; }
+  .scroll-x { overflow-x: auto; }
+  /* Detail modal/drawer */
+  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1000; backdrop-filter: blur(3px); }
+  .modal-overlay.active { display: flex; align-items: center; justify-content: center; }
+  .modal { background: #fff; border-radius: 12px; max-width: 900px; width: 92%; max-height: 85vh; overflow-y: auto; padding: 32px; box-shadow: 0 20px 60px rgba(0,0,0,0.2); position: relative; }
+  .modal h2 { font-size: 18px; font-weight: 800; color: var(--charcoal); margin-bottom: 16px; text-transform: uppercase; letter-spacing: 0.3px; border-bottom: 3px solid var(--accent); padding-bottom: 8px; }
+  .modal .close-btn { position: absolute; top: 16px; right: 20px; background: none; border: none; font-size: 24px; cursor: pointer; color: var(--text2); line-height: 1; }
+  .modal .close-btn:hover { color: var(--accent); }
+  .modal p, .modal li { font-size: 13px; line-height: 1.7; color: #374151; }
+  .modal ul { padding-left: 18px; margin: 8px 0; }
+  .modal .stat-row { display: flex; gap: 16px; margin: 12px 0; flex-wrap: wrap; }
+  .modal .stat-box { flex: 1; min-width: 140px; background: #f8f9fa; border-radius: 8px; padding: 12px 16px; border-left: 3px solid var(--accent); }
+  .modal .stat-box .stat-val { font-size: 20px; font-weight: 800; color: var(--charcoal); }
+  .modal .stat-box .stat-label { font-size: 10px; color: var(--text2); text-transform: uppercase; letter-spacing: 0.5px; }
+  .modal .source { font-size: 10px; color: #9ca3af; font-style: italic; margin-top: 4px; }
+  .card.kpi.clickable { cursor: pointer; transition: all 0.2s; border: 2px solid transparent; }
+  .card.kpi.clickable:hover { border-color: var(--accent); transform: translateY(-2px); box-shadow: 0 6px 16px rgba(220,5,5,0.1); }
+  .news-card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 18px; cursor: pointer; transition: all 0.2s; }
+  .news-card:hover { border-color: var(--accent); box-shadow: 0 4px 12px rgba(220,5,5,0.08); transform: translateY(-1px); }
+  .news-tag { display: inline-block; padding: 2px 8px; border-radius: 3px; font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; margin-bottom: 6px; }
+  .news-tag.positive { background: #dcfce7; color: #16a34a; }
+  .news-tag.negative { background: #fef2f2; color: #dc2626; }
+  .news-tag.neutral { background: #f3f4f6; color: #6b7280; }
+  .news-card h4 { font-size: 13px; font-weight: 700; color: var(--charcoal); margin-bottom: 4px; line-height: 1.4; }
+  .news-card p { font-size: 11px; color: var(--text2); line-height: 1.5; margin: 0; }
+  .news-card .news-source { font-size: 10px; color: #9ca3af; margin-top: 6px; }
+  .market-kpi { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; margin-bottom: 20px; }
+  .market-kpi .mkpi { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 14px; text-align: center; }
+  .market-kpi .mkpi .mv { font-size: 22px; font-weight: 800; color: var(--charcoal); }
+  .market-kpi .mkpi .ml { font-size: 9px; color: var(--text2); text-transform: uppercase; letter-spacing: 0.5px; }
+  .market-kpi .mkpi .md { font-size: 11px; font-weight: 600; margin-top: 2px; }
+  @media (max-width: 1200px) { .grid-4, .market-kpi { grid-template-columns: repeat(2, 1fr); } .tab-nav { padding: 12px 16px 0; } .tab-btn { padding: 8px 14px; font-size: 11px; } }
+  @media (max-width: 768px) { .grid-4, .grid-3, .grid-2, .grid-2-1, .market-kpi { grid-template-columns: 1fr; } }
+
+  /* Password Gate */
+  #auth-gate { position: fixed; inset: 0; z-index: 9999; background: var(--charcoal); display: flex; align-items: center; justify-content: center; }
+  #auth-gate.hidden { display: none; }
+  .auth-box { background: #ffffff; border-radius: 12px; padding: 48px 40px; width: 380px; max-width: 90vw; box-shadow: 0 20px 60px rgba(0,0,0,0.4); text-align: center; }
+  .auth-box .accent-bar { width: 48px; height: 3px; background: var(--accent); margin: 0 auto 16px; border-radius: 2px; }
+  .auth-box h2 { font-size: 20px; font-weight: 800; color: var(--charcoal); margin-bottom: 6px; }
+  .auth-box p { font-size: 13px; color: var(--text2); margin-bottom: 24px; }
+  .auth-box input { width: 100%; padding: 12px 16px; border: 2px solid var(--border); border-radius: 8px; font-size: 14px; font-family: inherit; outline: none; transition: border-color 0.2s; }
+  .auth-box input:focus { border-color: var(--accent); }
+  .auth-box input.error { border-color: var(--red); animation: shake 0.4s ease; }
+  .auth-box button { width: 100%; margin-top: 14px; padding: 12px; background: var(--charcoal); color: #fff; border: none; border-radius: 8px; font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; cursor: pointer; transition: background 0.2s; font-family: inherit; }
+  .auth-box button:hover { background: var(--accent); }
+  .auth-box .error-msg { color: var(--red); font-size: 12px; margin-top: 10px; min-height: 18px; font-weight: 600; }
+  @keyframes shake { 0%,100% { transform: translateX(0); } 25% { transform: translateX(-8px); } 75% { transform: translateX(8px); } }
+  #dashboard-content { display: none; }
+  #dashboard-content.visible { display: block; }
+</style>
+</head>
+<body>
+
+<!-- Password Gate -->
+<div id="auth-gate">
+  <div class="auth-box">
+    <div class="accent-bar"></div>
+    <h2>Hills Holdco</h2>
+    <p>Enter password to access the dashboard</p>
+    <form id="auth-form" onsubmit="return handleAuth(event)">
+      <input type="password" id="auth-input" placeholder="Password" autocomplete="off" autofocus>
+      <button type="submit">Access Dashboard</button>
+    </form>
+    <div class="error-msg" id="auth-error"></div>
+  </div>
+</div>
+
+<div id="dashboard-content">
+
+<div class="header">
+  <div class="accent-bar"></div>
+  <h1>Hills Holdco - Operating Model Dashboard</h1>
+  <p>Confidential | Data through January 2026 (Actuals) | Model as of March 27, 2026</p>
+</div>
+
+<div class="tab-nav">
+  <button class="tab-btn active" onclick="switchTab('financial')">Financial Overview</button>
+  <button class="tab-btn" onclick="switchTab('inventory')">Inventory & Working Capital</button>
+  <button class="tab-btn" onclick="switchTab('oem')">OEM-Level Performance</button>
+  <button class="tab-btn" onclick="switchTab('branch')">Branch-Level Performance</button>
+  <button class="tab-btn" onclick="switchTab('liquidity')">Liquidity & Covenants</button>
+  <button class="tab-btn" onclick="switchTab('market')">Market Intelligence</button>
+</div>
+
+<!-- ==================== TAB 1: FINANCIAL OVERVIEW ==================== -->
+<div class="tab-panel active" id="tab-financial">
+<div class="container">
+
+<!-- KPI CARDS -->
+<div class="section-title" onclick="toggleSection(this)">Key Performance Indicators <span class="badge badge-info">FY 2025 Actual</span></div>
+<div class="section-content">
+<div class="grid-4">
+  <div class="card kpi">
+    <div class="label">Total Revenue</div>
+    <div class="value">$243.9M</div>
+    <div class="delta up">+3.9% vs FY2024 ($234.8M)</div>
+  </div>
+  <div class="card kpi">
+    <div class="label">Fully Adjusted EBITDA</div>
+    <div class="value" style="color:var(--orange)">$15.0M</div>
+    <div class="delta down">-32.7% vs FY2024 ($22.3M)</div>
+  </div>
+  <div class="card kpi">
+    <div class="label">EBITDA Margin</div>
+    <div class="value">6.1%</div>
+    <div class="delta down">vs 9.5% FY2024</div>
+  </div>
+  <div class="card kpi">
+    <div class="label">Net Income</div>
+    <div class="value" style="color:var(--red)">($7.1M)</div>
+    <div class="delta down">vs ($4.6M) FY2024</div>
+  </div>
+</div>
+<div class="grid-4">
+  <div class="card kpi">
+    <div class="label">Total Debt (Dec '25)</div>
+    <div class="value">$109.6M</div>
+    <div class="delta warn">Leverage: 7.3x Fully Adj. EBITDA</div>
+  </div>
+  <div class="card kpi">
+    <div class="label">PNC Availability (Dec '25)</div>
+    <div class="value" style="color:var(--green)">$37.7M</div>
+    <div class="delta warn">Jan '26: $33.0M</div>
+  </div>
+  <div class="card kpi">
+    <div class="label">FCCR (Dec '25 TTM)</div>
+    <div class="value" style="color:var(--orange)">1.28x</div>
+    <div class="delta up">Covenant: 1.00x - PASS</div>
+  </div>
+  <div class="card kpi">
+    <div class="label">Total Assets</div>
+    <div class="value">$176.4M</div>
+    <div class="delta down">-2.9% vs FY2024</div>
+  </div>
+</div>
+</div>
+
+<!-- INCOME STATEMENT -->
+<div class="section-title" onclick="toggleSection(this)">Income Statement - Annual Summary</div>
+<div class="section-content">
+<div class="grid-2-1">
+  <div class="card">
+    <div class="card-header">Revenue & EBITDA Trend</div>
+    <div class="chart-container"><canvas id="revEbitdaChart"></canvas></div>
+  </div>
+  <div class="card">
+    <div class="card-header">FY2025 Revenue Mix</div>
+    <div class="chart-container"><canvas id="revMixChart"></canvas></div>
+  </div>
+</div>
+<div class="card" style="margin-bottom:24px;">
+  <div class="card-header">P&L Summary ($000s)</div>
+  <div class="scroll-x">
+  <table>
+    <thead>
+      <tr><th>Line Item</th><th class="num">FY2023A</th><th class="num">FY2024A</th><th class="num">FY2025A</th><th class="num">FY2026E</th><th class="num">FY2027E</th><th class="num">FY2028E</th></tr>
+    </thead>
+    <tbody id="isTable"></tbody>
+  </table>
+  </div>
+</div>
+</div>
+
+<!-- MARGIN ANALYSIS -->
+<div class="section-title" onclick="toggleSection(this)">Gross Margin Analysis</div>
+<div class="section-content">
+<div class="grid-2">
+  <div class="card">
+    <div class="card-header">Gross Margin % by Segment</div>
+    <div class="chart-container"><canvas id="gmChart"></canvas></div>
+  </div>
+  <div class="card">
+    <div class="card-header">SG&A Composition (FY2025A)</div>
+    <div class="chart-container"><canvas id="sgaChart"></canvas></div>
+  </div>
+</div>
+</div>
+
+<!-- MONTHLY TRENDS -->
+<div class="section-title" onclick="toggleSection(this)">Monthly Trends (Jan 2025 - Dec 2026E)</div>
+<div class="section-content">
+<div class="grid-2">
+  <div class="card">
+    <div class="card-header">Monthly Revenue</div>
+    <div class="chart-container"><canvas id="monthRevChart"></canvas></div>
+  </div>
+  <div class="card">
+    <div class="card-header">Monthly Fully Adjusted EBITDA</div>
+    <div class="chart-container"><canvas id="monthEbitdaChart"></canvas></div>
+  </div>
+</div>
+</div>
+
+</div>
+</div>
+
+<!-- ==================== TAB 2: INVENTORY & WORKING CAPITAL ==================== -->
+<div class="tab-panel" id="tab-inventory">
+<div class="container">
+
+<!-- INVENTORY & TURNS -->
+<div class="section-title" onclick="toggleSection(this)">Inventory & Working Capital</div>
+<div class="section-content">
+<div class="grid-2">
+  <div class="card">
+    <div class="card-header">Inventory Composition</div>
+    <div class="chart-container"><canvas id="invChart"></canvas></div>
+  </div>
+  <div class="card">
+    <div class="card-header">Monthly Cash & Working Capital Balances</div>
+    <div class="chart-container"><canvas id="wcChart"></canvas></div>
+  </div>
+</div>
+</div>
+
+<!-- BALANCE SHEET -->
+<div class="section-title" onclick="toggleSection(this)">Balance Sheet Highlights</div>
+<div class="section-content">
+<div class="card" style="margin-bottom:24px;">
+  <div class="card-header">Balance Sheet Summary ($000s)</div>
+  <div class="scroll-x">
+  <table>
+    <thead>
+      <tr><th>Line Item</th><th class="num">FY2023A</th><th class="num">FY2024A</th><th class="num">FY2025A</th><th class="num">FY2026E</th><th class="num">FY2027E</th><th class="num">FY2028E</th></tr>
+    </thead>
+    <tbody id="bsTable"></tbody>
+  </table>
+  </div>
+</div>
+</div>
+
+</div>
+</div>
+
+<!-- ==================== TAB 3: OEM-LEVEL PERFORMANCE ==================== -->
+<div class="tab-panel" id="tab-oem">
+<div class="container">
+
+<!-- EQUIPMENT SALES BY OEM -->
+<div class="section-title" onclick="toggleSection(this)">Equipment Sales by OEM (FY2025 Actuals)</div>
+<div class="section-content">
+<div class="grid-2">
+  <div class="card">
+    <div class="card-header">Equipment Sales by OEM - FY2025</div>
+    <div class="chart-container" style="height:350px;"><canvas id="oemSalesChart"></canvas></div>
+  </div>
+  <div class="card">
+    <div class="card-header">Equipment GP Margin % by OEM - FY2025</div>
+    <div class="chart-container" style="height:350px;"><canvas id="oemMarginChart"></canvas></div>
+  </div>
+</div>
+<div class="grid-2">
+  <div class="card">
+    <div class="card-header">OEM Equipment Sales Trend (FY2023-FY2025)</div>
+    <div class="chart-container"><canvas id="oemTrendChart"></canvas></div>
+  </div>
+  <div class="card">
+    <div class="card-header">Equipment Sales by Branch - FY2025 YTD</div>
+    <div class="chart-container" style="height:280px;"><canvas id="eqBranchChart"></canvas></div>
+  </div>
+</div>
+<div class="card" style="margin-bottom:24px;">
+  <div class="card-header">Equipment Sales by OEM Detail ($000s)</div>
+  <div class="scroll-x">
+  <table>
+    <thead><tr><th>OEM</th><th class="num">FY2023</th><th class="num">FY2024</th><th class="num">FY2025</th><th class="num">FY25 GP $</th><th class="num">FY25 GP %</th><th class="num">FY26E</th></tr></thead>
+    <tbody id="oemTable"></tbody>
+  </table>
+  </div>
+</div>
+</div>
+
+<!-- REVENUE BY DEPARTMENT & OEM -->
+<div class="section-title" onclick="toggleSection(this)">Revenue by Department & OEM (All Departments)</div>
+<div class="section-content">
+<div class="grid-3">
+  <div class="card">
+    <div class="card-header">CASE Revenue by Department (FY2022-25)</div>
+    <div class="chart-container"><canvas id="caseDeptChart"></canvas></div>
+  </div>
+  <div class="card">
+    <div class="card-header">Hitachi Revenue by Department (FY2022-25)</div>
+    <div class="chart-container"><canvas id="hitachiDeptChart"></canvas></div>
+  </div>
+  <div class="card">
+    <div class="card-header">Truck OEMs Revenue by Department (FY2022-25)</div>
+    <div class="chart-container"><canvas id="truckDeptChart"></canvas></div>
+  </div>
+</div>
+</div>
+
+<!-- PARTS & SERVICE BY OEM -->
+<div class="section-title" onclick="toggleSection(this)">Parts & Service Revenue by OEM</div>
+<div class="section-content">
+<div class="grid-2">
+  <div class="card">
+    <div class="card-header">Top Parts Revenue by OEM (FY2023-25)</div>
+    <div class="chart-container"><canvas id="partsOemChart"></canvas></div>
+  </div>
+  <div class="card">
+    <div class="card-header">Top Service Revenue by OEM (FY2023-25)</div>
+    <div class="chart-container"><canvas id="serviceOemChart"></canvas></div>
+  </div>
+</div>
+</div>
+
+</div>
+</div>
+
+<!-- ==================== TAB 4: BRANCH-LEVEL PERFORMANCE ==================== -->
+<div class="tab-panel" id="tab-branch">
+<div class="container">
+
+<!-- HMC LOCATION PERFORMANCE -->
+<div class="section-title" onclick="toggleSection(this)">HMC Location Performance (FY2024)</div>
+<div class="section-content">
+<div class="grid-2">
+  <div class="card">
+    <div class="card-header">Revenue by Location</div>
+    <div class="chart-container" style="height:350px;"><canvas id="locRevChart"></canvas></div>
+  </div>
+  <div class="card">
+    <div class="card-header">Adjusted EBITDA by Location</div>
+    <div class="chart-container" style="height:350px;"><canvas id="locEbitdaChart"></canvas></div>
+  </div>
+</div>
+<div class="card" style="margin-bottom:24px;">
+  <div class="card-header">HMC Location Detail - FY2024 ($000s)</div>
+  <div class="scroll-x">
+  <table>
+    <thead>
+      <tr><th>Location</th><th class="num">Revenue</th><th class="num">Gross Profit</th><th class="num">GP %</th><th class="num">SG&A</th><th class="num">Adj. EBITDA</th><th class="num">EBITDA %</th></tr>
+    </thead>
+    <tbody id="hmcLocTable"></tbody>
+  </table>
+  </div>
+</div>
+</div>
+
+<!-- RJV LOCATIONS -->
+<div class="section-title" onclick="toggleSection(this)">RJV Location Performance (FY2024)</div>
+<div class="section-content">
+<div class="card" style="margin-bottom:24px;">
+  <div class="card-header">RJV Location Detail - FY2024 ($000s)</div>
+  <div class="scroll-x">
+  <table>
+    <thead>
+      <tr><th>Location</th><th class="num">Revenue</th><th class="num">Gross Profit</th><th class="num">GP %</th><th class="num">SG&A</th><th class="num">Adj. EBITDA</th><th class="num">EBITDA %</th></tr>
+    </thead>
+    <tbody id="rjvLocTable"></tbody>
+  </table>
+  </div>
+</div>
+</div>
+
+<!-- TOTAL SALES BY LOCATION -->
+<div class="section-title" onclick="toggleSection(this)">Total Sales by Location - All OEMs (FY2022-2025)</div>
+<div class="section-content">
+<div class="grid-2">
+  <div class="card">
+    <div class="card-header">Total Revenue by Branch - FY2025</div>
+    <div class="chart-container" style="height:400px;"><canvas id="branchRevChart25"></canvas></div>
+  </div>
+  <div class="card">
+    <div class="card-header">Branch EBITDA - FY2025</div>
+    <div class="chart-container" style="height:400px;"><canvas id="branchEbitdaChart25"></canvas></div>
+  </div>
+</div>
+<div class="card" style="margin-bottom:24px;">
+  <div class="card-header">FY2025 Branch P&L Summary ($000s) - All 18 Locations</div>
+  <div class="scroll-x">
+  <table>
+    <thead><tr><th>Branch</th><th class="num">Total Rev</th><th class="num">New EQ</th><th class="num">Parts</th><th class="num">Service</th><th class="num">Rental</th><th class="num">Gross Margin</th><th class="num">GM %</th><th class="num">SG&A</th><th class="num">Adj EBITDA</th><th class="num">EBITDA %</th></tr></thead>
+    <tbody id="branchPLTable"></tbody>
+  </table>
+  </div>
+</div>
+</div>
+
+<!-- RENTAL BY OEM & LOCATION -->
+<div class="section-title" onclick="toggleSection(this)">Rental Revenue Analysis</div>
+<div class="section-content">
+<div class="grid-2">
+  <div class="card">
+    <div class="card-header">Rental Revenue by Location - FY2025</div>
+    <div class="chart-container" style="height:350px;"><canvas id="rentalLocChart"></canvas></div>
+  </div>
+  <div class="card">
+    <div class="card-header">CASE vs All OEM Sales by Location - FY2025</div>
+    <div class="chart-container" style="height:350px;"><canvas id="caseVsAllChart"></canvas></div>
+  </div>
+</div>
+</div>
+
+</div>
+</div>
+
+<!-- ==================== TAB 5: LIQUIDITY & COVENANTS ==================== -->
+<div class="tab-panel" id="tab-liquidity">
+<div class="container">
+
+<!-- DEBT & LIQUIDITY -->
+<div class="section-title" onclick="toggleSection(this)">Debt Structure & Liquidity</div>
+<div class="section-content">
+<div class="grid-2">
+  <div class="card">
+    <div class="card-header">Debt Composition Over Time</div>
+    <div class="chart-container"><canvas id="debtChart"></canvas></div>
+  </div>
+  <div class="card">
+    <div class="card-header">PNC Revolver & Availability</div>
+    <div class="chart-container"><canvas id="availChart"></canvas></div>
+  </div>
+</div>
+<div class="card" style="margin-bottom:24px;">
+  <div class="card-header">Debt Detail ($000s)</div>
+  <div class="scroll-x">
+  <table>
+    <thead>
+      <tr><th>Debt Facility</th><th class="num">FY2023A</th><th class="num">FY2024A</th><th class="num">FY2025A</th><th class="num">FY2026E</th><th class="num">FY2027E</th><th class="num">FY2028E</th></tr>
+    </thead>
+    <tbody id="debtTable"></tbody>
+  </table>
+  </div>
+</div>
+</div>
+
+<!-- BORROWING BASE ANALYSIS -->
+<div class="section-title" onclick="toggleSection(this)">Borrowing Base & Availability Analysis</div>
+<div class="section-content">
+<div class="grid-4">
+  <div class="card kpi">
+    <div class="label">Gross Availability (Dec '25)</div>
+    <div class="value">$58.6M</div>
+    <div class="delta warn">Facility Limit: $80.0M</div>
+  </div>
+  <div class="card kpi">
+    <div class="label">Net Availability (Dec '25)</div>
+    <div class="value" style="color:var(--green)">$15.1M</div>
+    <div class="delta down">Jan '26: $7.9M (facility drops to $65M)</div>
+  </div>
+  <div class="card kpi">
+    <div class="label">Total Ineligibles (Dec '25)</div>
+    <div class="value" style="color:var(--accent)">$74.9M</div>
+    <div class="delta warn">AR: $4.3M | Inv: $51.6M | Parts: $5.2M</div>
+  </div>
+  <div class="card kpi">
+    <div class="label">Collateral Utilization</div>
+    <div class="value">72%</div>
+    <div class="delta warn">Revolver / Capacity</div>
+  </div>
+</div>
+<div class="grid-2">
+  <div class="card">
+    <div class="card-header">Borrowing Base Waterfall - December 2025</div>
+    <div class="chart-container" style="height:340px;"><canvas id="bbcWaterfallChart"></canvas></div>
+  </div>
+  <div class="card">
+    <div class="card-header">Availability Trend vs Revolver Balance</div>
+    <div class="chart-container" style="height:340px;"><canvas id="bbcAvailTrendChart"></canvas></div>
+  </div>
+</div>
+<div class="grid-2">
+  <div class="card">
+    <div class="card-header">Collateral Value by Asset Class</div>
+    <div class="chart-container"><canvas id="collateralChart"></canvas></div>
+  </div>
+  <div class="card">
+    <div class="card-header">Ineligibles as % of Gross Balances</div>
+    <div class="chart-container"><canvas id="ineligiblePctChart"></canvas></div>
+  </div>
+</div>
+<div class="card" style="margin-bottom:24px;">
+  <div class="card-header">Borrowing Base Detail ($000s)</div>
+  <div class="scroll-x">
+  <table>
+    <thead>
+      <tr><th>Component</th><th class="num">Aug '25</th><th class="num">Sep '25</th><th class="num">Oct '25</th><th class="num">Nov '25</th><th class="num">Dec '25</th><th class="num">Jan '26</th><th class="num">Mar '26E</th><th class="num">Jun '26E</th><th class="num">Sep '26E</th><th class="num">Dec '26E</th></tr>
+    </thead>
+    <tbody id="bbcTable"></tbody>
+  </table>
+  </div>
+</div>
+<div class="card" style="margin-bottom:24px;">
+  <div class="card-header">Ineligibles & Advance Rate Detail ($000s)</div>
+  <div class="scroll-x">
+  <table>
+    <thead>
+      <tr><th>Component</th><th class="num">Aug '25</th><th class="num">Sep '25</th><th class="num">Oct '25</th><th class="num">Nov '25</th><th class="num">Dec '25</th><th class="num">Jan '26</th><th class="num">Mar '26E</th><th class="num">Jun '26E</th><th class="num">Sep '26E</th><th class="num">Dec '26E</th></tr>
+    </thead>
+    <tbody id="ineligTable"></tbody>
+  </table>
+  </div>
+</div>
+</div>
+
+<!-- COVENANT COMPLIANCE -->
+<div class="section-title" onclick="toggleSection(this)">Covenant Compliance</div>
+<div class="section-content">
+<div class="grid-2">
+  <div class="card">
+    <div class="card-header">Fixed Charge Coverage Ratio (TTM)</div>
+    <div class="chart-container"><canvas id="fccrChart"></canvas></div>
+  </div>
+  <div class="card">
+    <div class="card-header">Leverage Ratio (Debt / Covenant EBITDA)</div>
+    <div class="chart-container"><canvas id="levChart"></canvas></div>
+  </div>
+</div>
+<div class="card" style="margin-bottom:24px;">
+  <div class="card-header">Covenant Summary - Recent Periods</div>
+  <div class="scroll-x">
+  <table>
+    <thead>
+      <tr><th>Metric</th><th class="num">Sep '25</th><th class="num">Dec '25</th><th class="num">Mar '26E</th><th class="num">Jun '26E</th><th class="num">Sep '26E</th><th class="num">Dec '26E</th></tr>
+    </thead>
+    <tbody id="covTable"></tbody>
+  </table>
+  </div>
+</div>
+</div>
+
+</div>
+</div>
+
+<!-- ==================== TAB 6: MARKET INTELLIGENCE ==================== -->
+<div class="tab-panel" id="tab-market">
+<div class="container">
+
+<div class="section-title" onclick="toggleSection(this)">Market Intelligence & Industry Outlook <span class="badge badge-info">March 2026</span></div>
+<div class="section-content">
+
+<div class="market-kpi">
+  <div class="mkpi"><div class="mv">$2.19T</div><div class="ml">US Construction Spend (SAAR)</div><div class="md" style="color:#ca8a04">-0.3% MoM (Jan '26)</div></div>
+  <div class="mkpi"><div class="mv">3.50-3.75%</div><div class="ml">Fed Funds Rate</div><div class="md" style="color:#6b7280">1 cut expected in '26</div></div>
+  <div class="mkpi"><div class="mv">$131B</div><div class="ml">IIJA Remaining to Deploy</div><div class="md" style="color:#16a34a">Expires Sep 30, 2026</div></div>
+  <div class="mkpi"><div class="mv">8.31M</div><div class="ml">Construction Jobs (Jan '26)</div><div class="md" style="color:#16a34a">+33K in month</div></div>
+  <div class="mkpi"><div class="mv">8.1 mo</div><div class="ml">ABC Backlog Indicator</div><div class="md" style="color:#6b7280">Steady, large firms up</div></div>
+</div>
+
+<div class="grid-3" style="margin-bottom:20px;">
+  <div class="news-card" onclick="openModal('modalConstSpend')">
+    <span class="news-tag negative">Softening</span>
+    <h4>Private Construction Spending Down 2.9% in 2025</h4>
+    <p>Private construction fell to $1.65T from $1.70T in 2024. Residential -2.6%, nonresidential -3.1%. Public spending rose, led by +3.3% highway.</p>
+    <div class="news-source">Census Bureau, Feb 2026 -- Click for detail</div>
+  </div>
+  <div class="news-card" onclick="openModal('modalIIJA')">
+    <span class="news-tag positive">Tailwind</span>
+    <h4>IIJA Spending Accelerating in Final Year</h4>
+    <p>$275B obligated of $581B available. $131B remains for FY2026. Record $209B transportation construction expected. 113,000+ projects funded.</p>
+    <div class="news-source">USDOT / ARTBA, Mar 2026 -- Click for detail</div>
+  </div>
+  <div class="news-card" onclick="openModal('modalSoutheast')">
+    <span class="news-tag positive">Strong</span>
+    <h4>Southeast US Construction Market: Steady Gains Through 2027</h4>
+    <p>NC, GA, VA lead data center and infrastructure build. NC among top transportation construction growth markets for 2026. VA had 54 new data center filings in 9 months.</p>
+    <div class="news-source">ConstructConnect / ENR, Mar 2026 -- Click for detail</div>
+  </div>
+</div>
+
+<div class="grid-3" style="margin-bottom:20px;">
+  <div class="news-card" onclick="openModal('modalHitachi')">
+    <span class="news-tag neutral">Evolving</span>
+    <h4>Hitachi CM Rebranding to Landcros; New Products at ConExpo</h4>
+    <p>FY2025 revenue down 2.5% globally. Americas market share growing. ITOCHU raising stake to 33%. New ZW120-7 loader and ZX890 excavator launched.</p>
+    <div class="news-source">HCM / Equipment World, Mar 2026 -- Click for detail</div>
+  </div>
+  <div class="news-card" onclick="openModal('modalCNH')">
+    <span class="news-tag negative">Watch</span>
+    <h4>CNH Searching for Construction Business Partner</h4>
+    <p>Construction sales -3% to ~$3B in FY2025. 25% dealer reduction completed. CEO restarted partner discussions. 2026 demand expected flat.</p>
+    <div class="news-source">CNH / Equipment World, Mar 2026 -- Click for detail</div>
+  </div>
+  <div class="news-card" onclick="openModal('modalRental')">
+    <span class="news-tag positive">Growth</span>
+    <h4>Rental Market Expanding: URI Guides $17B Revenue for 2026</h4>
+    <p>North America rental market $36.8B growing at 4.2% CAGR. United Rentals fleet productivity +2.2%. Sunbelt US rental revenue +6%. Utilization at 57%.</p>
+    <div class="news-source">URI / Sunbelt / ARA, Mar 2026 -- Click for detail</div>
+  </div>
+</div>
+
+<div class="grid-3">
+  <div class="news-card" onclick="openModal('modalDealerMA')">
+    <span class="news-tag neutral">Trend</span>
+    <h4>Dealer M&A Accelerating in 2025-2026</h4>
+    <p>PE-backed roll-ups driving consolidation. James River acquires JESCO. Wildcat Equity invests in Groff Tractor. Technology and scale are key drivers.</p>
+    <div class="news-source">CSG Talent / PwC, 2026 -- Click for detail</div>
+  </div>
+  <div class="news-card" onclick="openModal('modalLabor')">
+    <span class="news-tag negative">Constraint</span>
+    <h4>92% of Firms Report Difficulty Hiring Qualified Workers</h4>
+    <p>Construction wages up 4.3% YoY to $40.55/hr. 8.31M total employed but demand outpacing supply. Large firms carry highest backlog since 2021.</p>
+    <div class="news-source">BLS / AGC / ABC, Feb 2026 -- Click for detail</div>
+  </div>
+  <div class="news-card" onclick="openModal('modalOutlook')">
+    <span class="news-tag positive">Outlook</span>
+    <h4>2026 Outlook: Mixed but Infrastructure-Led Recovery</h4>
+    <p>Dodge Momentum Index up 37% in 2025. Data centers drove record $25.2B in Jan starts. Transportation construction forecast at record $209B.</p>
+    <div class="news-source">Dodge / ARTBA / Deloitte, Mar 2026 -- Click for detail</div>
+  </div>
+</div>
+
+</div>
+</div>
+</div>
+
+<!-- ========== MODALS ========== -->
+<div class="modal-overlay" id="modalConstSpend" onclick="closeModal(this)">
+<div class="modal" onclick="event.stopPropagation()">
+  <button class="close-btn" onclick="closeModal(this.closest('.modal-overlay'))">&times;</button>
+  <h2>U.S. Construction Spending</h2>
+  <div class="stat-row">
+    <div class="stat-box"><div class="stat-val">$2.19T</div><div class="stat-label">Total SAAR (Jan '26)</div></div>
+    <div class="stat-box"><div class="stat-val">-0.3%</div><div class="stat-label">MoM Change</div></div>
+    <div class="stat-box"><div class="stat-val">$905B</div><div class="stat-label">Private Residential</div></div>
+    <div class="stat-box"><div class="stat-val">$529B</div><div class="stat-label">Public Construction</div></div>
+  </div>
+  <ul>
+    <li><strong>Private construction:</strong> $1,647.5B in 2025, down 2.9% from $1,696B in 2024</li>
+    <li><strong>Private residential:</strong> $905.2B, down 2.6% YoY -- mortgage rates remain elevated</li>
+    <li><strong>Private nonresidential:</strong> $742.4B, down 3.1% YoY</li>
+    <li><strong>Public construction:</strong> Trending higher, highway spending +3.3% MoM in Jan '26</li>
+    <li><strong>Key takeaway:</strong> Private spending softened on higher financing costs; public spending accelerating via IIJA</li>
+  </ul>
+  <p class="source">Source: U.S. Census Bureau - Monthly Construction Spending (Jan 2026 release, Feb 27, 2026)</p>
+</div></div>
+
+<div class="modal-overlay" id="modalIIJA" onclick="closeModal(this)">
+<div class="modal" onclick="event.stopPropagation()">
+  <button class="close-btn" onclick="closeModal(this.closest('.modal-overlay'))">&times;</button>
+  <h2>IIJA Infrastructure Spending</h2>
+  <div class="stat-row">
+    <div class="stat-box"><div class="stat-val">$711.8B</div><div class="stat-label">Total IIJA Grant Funding</div></div>
+    <div class="stat-box"><div class="stat-val">$275.1B</div><div class="stat-label">Obligated (47%)</div></div>
+    <div class="stat-box"><div class="stat-val">$119.4B</div><div class="stat-label">Actually Spent (21%)</div></div>
+    <div class="stat-box"><div class="stat-val">$131.2B</div><div class="stat-label">Remaining for FY2026</div></div>
+  </div>
+  <ul>
+    <li><strong>Highway & Bridge:</strong> States committed $249B to 113,000+ projects through Dec 2025</li>
+    <li><strong>2026 transportation construction:</strong> Expected to reach record $209.1B (+3% YoY per ARTBA)</li>
+    <li><strong>Authorization expires Sept 30, 2026</strong> -- Congress must reauthorize or risk funding gap</li>
+    <li><strong>FY2026 rescissions:</strong> $2.3B cut from IIJA (incl $879M EV charging) but core highway/bridge programs intact</li>
+    <li><strong>HMC Impact:</strong> Southeast states are major IIJA beneficiaries -- NC ~$7.7B, SC ~$5.0B, GA ~$9.0B in highway formula funds</li>
+  </ul>
+  <p class="source">Sources: USDOT, GAO, ARTBA Highway Dashboard, FHWA (Dec 2024-Mar 2026)</p>
+</div></div>
+
+<div class="modal-overlay" id="modalSoutheast" onclick="closeModal(this)">
+<div class="modal" onclick="event.stopPropagation()">
+  <button class="close-btn" onclick="closeModal(this.closest('.modal-overlay'))">&times;</button>
+  <h2>Southeast US Construction Market</h2>
+  <div class="stat-row">
+    <div class="stat-box"><div class="stat-val">$7.7B</div><div class="stat-label">NC IIJA Highway Funds</div></div>
+    <div class="stat-box"><div class="stat-val">$5.0B</div><div class="stat-label">SC IIJA Highway Funds</div></div>
+    <div class="stat-box"><div class="stat-val">$9.0B</div><div class="stat-label">GA IIJA Highway Funds</div></div>
+    <div class="stat-box"><div class="stat-val">54</div><div class="stat-label">VA Data Center Filings (9mo)</div></div>
+  </div>
+  <ul>
+    <li><strong>North Carolina:</strong> 2026 outlook led by power transmission, data centers, water/wastewater. Among largest transportation markets expected to show growth</li>
+    <li><strong>Virginia:</strong> Dominant data center market nationally. Northern VA remains #1 hub with massive expansion</li>
+    <li><strong>Georgia:</strong> Named among top growth markets. ~800 MW cumulative data center capacity added in 2024</li>
+    <li><strong>Tennessee:</strong> Nashville remains top-5 real estate market; 1.5-2% annual population growth</li>
+    <li><strong>Building permits (annual):</strong> NC ~57K, GA ~39K, TN ~27K, SC ~25K, VA ~20K</li>
+    <li>Southern US broadly: "Steady gains through 2027" driven by logistics, manufacturing, and civil infrastructure</li>
+  </ul>
+  <p class="source">Sources: ConstructConnect, NC Construction News, ENR, Cumming Insights (2025-2026)</p>
+</div></div>
+
+<div class="modal-overlay" id="modalHitachi" onclick="closeModal(this)">
+<div class="modal" onclick="event.stopPropagation()">
+  <button class="close-btn" onclick="closeModal(this.closest('.modal-overlay'))">&times;</button>
+  <h2>Hitachi Construction Machinery</h2>
+  <div class="stat-row">
+    <div class="stat-box"><div class="stat-val">-2.5%</div><div class="stat-label">FY2025 Revenue (Global)</div></div>
+    <div class="stat-box"><div class="stat-val">-14%</div><div class="stat-label">Adj Operating Income</div></div>
+    <div class="stat-box"><div class="stat-val">33.4%</div><div class="stat-label">ITOCHU New Stake</div></div>
+    <div class="stat-box"><div class="stat-val">2027</div><div class="stat-label">Rebrand to "Landcros"</div></div>
+  </div>
+  <ul>
+    <li><strong>Global:</strong> Revenue Y1.37T, down 2.5% YoY. Op income -14% on volume declines and mix</li>
+    <li><strong>Americas:</strong> North American market share increased YoY despite revenue decline (dealer inventory normalization)</li>
+    <li><strong>Ownership:</strong> ITOCHU Corp raising stake from 20.4% to 33.4%, completion expected April 2026</li>
+    <li><strong>ConExpo 2026 launches:</strong> ZW120-7 wheel loader, ZX890 mass excavation excavator, plus autonomy demos with Gravis Robotics</li>
+    <li><strong>HMC context:</strong> Hitachi is HMC's largest OEM at $53.1M FY2025 equipment sales (45% of total), up from $28.8M in FY2023</li>
+  </ul>
+  <p class="source">Sources: HCM FY2025 Results, Equipment World, Equipment Finance News (Oct 2025-Mar 2026)</p>
+</div></div>
+
+<div class="modal-overlay" id="modalCNH" onclick="closeModal(this)">
+<div class="modal" onclick="event.stopPropagation()">
+  <button class="close-btn" onclick="closeModal(this.closest('.modal-overlay'))">&times;</button>
+  <h2>CNH Industrial / CASE Construction</h2>
+  <div class="stat-row">
+    <div class="stat-box"><div class="stat-val">~$3B</div><div class="stat-label">FY2025 Construction Sales</div></div>
+    <div class="stat-box"><div class="stat-val">-3%</div><div class="stat-label">YoY Change</div></div>
+    <div class="stat-box"><div class="stat-val">-25%</div><div class="stat-label">Dealer Count Reduction</div></div>
+    <div class="stat-box"><div class="stat-val">Flat</div><div class="stat-label">2026 Demand Outlook</div></div>
+  </div>
+  <ul>
+    <li><strong>Partner search:</strong> CEO Gerrit Marx has "restarted discussions with several players" about partnering for the construction business</li>
+    <li><strong>Dealer network:</strong> 25% reduction in construction dealers in NA/Europe. 100 of 500 global dealers = 75% of revenue</li>
+    <li><strong>2026 outlook:</strong> Demand expected flat -- strong nonresidential offsetting weak residential</li>
+    <li><strong>Portfolio simplification:</strong> Actively reducing SKUs across construction lineup</li>
+    <li><strong>HMC context:</strong> CASE is HMC's #2 OEM at $27.3M FY2025 equipment sales (23%), but declining from $31.9M in FY2023. Only 4.8% GP margin on CASE equipment</li>
+  </ul>
+  <p class="source">Sources: CNH FY2025 Results, Equipment World, ConstructionEquipment.com (Jan-Mar 2026)</p>
+</div></div>
+
+<div class="modal-overlay" id="modalRental" onclick="closeModal(this)">
+<div class="modal" onclick="event.stopPropagation()">
+  <button class="close-btn" onclick="closeModal(this.closest('.modal-overlay'))">&times;</button>
+  <h2>Construction Equipment Rental Market</h2>
+  <div class="stat-row">
+    <div class="stat-box"><div class="stat-val">$36.8B</div><div class="stat-label">NA Market (2025)</div></div>
+    <div class="stat-box"><div class="stat-val">4.2%</div><div class="stat-label">CAGR to 2031</div></div>
+    <div class="stat-box"><div class="stat-val">$16.8-17.3B</div><div class="stat-label">URI 2026 Guidance</div></div>
+    <div class="stat-box"><div class="stat-val">57%</div><div class="stat-label">Sunbelt Utilization</div></div>
+  </div>
+  <ul>
+    <li><strong>United Rentals FY2025:</strong> Gross rental capex $4.2B; fleet productivity +2.2%; FCF $2.2B; returning ~$2B to shareholders in 2026</li>
+    <li><strong>Sunbelt Rentals:</strong> US rental revenue +6% to $2.2B quarterly. Rates strong YoY but utilization down 300bp</li>
+    <li><strong>Market drivers:</strong> IIJA funding, projects >$50M up 42%, contractor shift to asset-light models, data center/renewable demand</li>
+    <li><strong>HMC context:</strong> Rental sales declined to $19.6M in FY2025 from $22.1M in FY2024 (-11%). Raleigh ($3.6M), Greenville SC ($2.6M), Ashland ($2.3M) are top rental locations</li>
+  </ul>
+  <p class="source">Sources: United Rentals FY2025 Results, Sunbelt Rentals, GM Insights, ARA (Jan-Mar 2026)</p>
+</div></div>
+
+<div class="modal-overlay" id="modalDealerMA" onclick="closeModal(this)">
+<div class="modal" onclick="event.stopPropagation()">
+  <button class="close-btn" onclick="closeModal(this.closest('.modal-overlay'))">&times;</button>
+  <h2>Equipment Dealer M&A Trends</h2>
+  <ul>
+    <li><strong>Consolidation accelerating:</strong> PE-backed roll-up strategies are the dominant force in dealer M&A</li>
+    <li><strong>James River Equipment</strong> (Deere dealer) acquired 4 JESCO locations in Maryland</li>
+    <li><strong>Wildcat Equity</strong> invested in Groff Tractor & Equipment (Deere C&F dealer, PA)</li>
+    <li><strong>Brightstar Capital Partners</strong> acquired WW Williams (equipment distribution/repair)</li>
+    <li><strong>Key drivers:</strong> Technology (telematics, AI), geographic scale, full lifecycle management, and rental fleet expansion</li>
+    <li><strong>CNH angle:</strong> With CNH actively searching for a construction business partner and reducing dealer count by 25%, further network restructuring is likely</li>
+  </ul>
+  <p class="source">Sources: CSG Talent, Bain, PwC Global M&A Trends (2025-2026)</p>
+</div></div>
+
+<div class="modal-overlay" id="modalLabor" onclick="closeModal(this)">
+<div class="modal" onclick="event.stopPropagation()">
+  <button class="close-btn" onclick="closeModal(this.closest('.modal-overlay'))">&times;</button>
+  <h2>Construction Labor Market</h2>
+  <div class="stat-row">
+    <div class="stat-box"><div class="stat-val">8.31M</div><div class="stat-label">Construction Jobs (Jan '26)</div></div>
+    <div class="stat-box"><div class="stat-val">$40.55/hr</div><div class="stat-label">Avg Hourly Earnings</div></div>
+    <div class="stat-box"><div class="stat-val">+4.3%</div><div class="stat-label">Wage Growth YoY</div></div>
+    <div class="stat-box"><div class="stat-val">92%</div><div class="stat-label">Firms Can't Find Workers</div></div>
+  </div>
+  <ul>
+    <li>January 2026 added 33,000 construction jobs -- nearly 1 in 4 of all US jobs created that month</li>
+    <li>February 2026 was essentially flat following the January surge</li>
+    <li>82% of firms report difficulty finding hourly craft workers (AGC survey)</li>
+    <li>Large contractors (>$100M revenue) carry highest backlog since 2021; small firms (<$30M) at 4-year lows</li>
+  </ul>
+  <p class="source">Sources: BLS Employment Situation (Feb 2026), AGC Workforce Survey, ABC CBI (Feb 2026)</p>
+</div></div>
+
+<div class="modal-overlay" id="modalOutlook" onclick="closeModal(this)">
+<div class="modal" onclick="event.stopPropagation()">
+  <button class="close-btn" onclick="closeModal(this.closest('.modal-overlay'))">&times;</button>
+  <h2>2026 Construction Industry Outlook</h2>
+  <div class="stat-row">
+    <div class="stat-box"><div class="stat-val">+37%</div><div class="stat-label">Dodge Momentum (2025 FY)</div></div>
+    <div class="stat-box"><div class="stat-val">$25.2B</div><div class="stat-label">Data Center Starts (Jan '26)</div></div>
+    <div class="stat-box"><div class="stat-val">$209B</div><div class="stat-label">Transport Construction Fcst</div></div>
+    <div class="stat-box"><div class="stat-val">250.0</div><div class="stat-label">DMI Feb '26 (down from 297)</div></div>
+  </div>
+  <ul>
+    <li><strong>Positive:</strong> Dodge Momentum Index averaged +37% in 2025 (commercial +35%, institutional +43%)</li>
+    <li><strong>Positive:</strong> Data centers are the dominant force -- $25.2B in starts in January 2026 alone (record)</li>
+    <li><strong>Positive:</strong> ARTBA forecasts record $209B in transportation construction for 2026</li>
+    <li><strong>Caution:</strong> DMI pulled back to 250 in Feb '26 from 297 peak in Dec '25 (-16%)</li>
+    <li><strong>Caution:</strong> Private spending softening; residential remains under pressure from rates</li>
+    <li><strong>Caution:</strong> IIJA expires Sept 30, 2026 -- reauthorization creates 2027 uncertainty</li>
+    <li><strong>Net:</strong> Infrastructure-led growth in 2026, but sustainability depends on rate relief and reauthorization</li>
+  </ul>
+  <p class="source">Sources: Dodge Construction Network, ARTBA, Deloitte 2026 E&C Outlook (Dec 2025-Mar 2026)</p>
+</div></div>
+
+<div style="text-align:center;padding:28px;color:var(--text2);font-size:11px;border-top:1px solid var(--border);margin-top:16px;">
+  Hills Holdco - Confidential | Generated from Operating Model (3.27.2026) & Carveout Model (3.27.2026) | Dashboard auto-generated
+</div>
+
+<script>
+// ===== TAB SWITCHING =====
+function switchTab(tabId) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + tabId).classList.add('active');
+  event.currentTarget.classList.add('active');
+  // Resize charts in the newly visible tab so they render correctly
+  setTimeout(() => {
+    const panel = document.getElementById('tab-' + tabId);
+    panel.querySelectorAll('canvas').forEach(c => {
+      const chart = Chart.getChart(c);
+      if (chart) chart.resize();
+    });
+  }, 50);
+}
+
+// ===== INTERACTIVITY =====
+function toggleSection(el) {
+  el.classList.toggle('collapsed');
+  const content = el.nextElementSibling;
+  if (content && content.classList.contains('section-content')) {
+    content.classList.toggle('hidden');
+  }
+}
+function openModal(id) {
+  document.getElementById(id).classList.add('active');
+  document.body.style.overflow = 'hidden';
+}
+function closeModal(el) {
+  if (el.classList && el.classList.contains('modal-overlay')) el.classList.remove('active');
+  else { const overlay = el.closest('.modal-overlay'); if(overlay) overlay.classList.remove('active'); }
+  document.body.style.overflow = '';
+}
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    document.querySelectorAll('.modal-overlay.active').forEach(m => { m.classList.remove('active'); });
+    document.body.style.overflow = '';
+  }
+});
+
+// ===== DATA =====
+const fy = ['FY2023A','FY2024A','FY2025A','FY2026E','FY2027E','FY2028E'];
+const fyShort = ["'23A","'24A","'25A","'26E","'27E","'28E"];
+
+const D = {
+  total_rev: [195599716, 234837282, 243922558, 278570958, 293006858, 304370341],
+  adj_ebitda: [22537511, 22297898, 14992888, 17610254, 18094328, 20369526],
+  net_income: [7346574, -4557186, -7125636, -4003932, -999406, 935623],
+  total_gm: [null, null, null, null, null, null],
+  total_gm_pct: [0.2652, 0.2498, 0.2229, 0.2211, 0.2259, 0.2290],
+  total_sga: [-31162934, -42641702, -43640776, -47601064, -48791091, -50010868],
+  rev_new: [122991726, 150886929, 156298272, 183200847, 190123726, 194876820],
+  rev_used: [13235900, 10522336, 7535187, 7935558, 8420159, 8630663],
+  rev_parts: [30124327, 34949837, 41034449, 43959551, 47461399, 50783697],
+  rev_service: [14676387, 16397212, 19459330, 21965898, 24250302, 26190326],
+  rev_rental: [14571375, 22080968, 19595321, 21509103, 22751273, 23888837],
+  gm_new: [0.1669, 0.1229, 0.1058, 0.1105, 0.1105, 0.1105],
+  gm_used: [0.1228, 0.1047, 0.0624, 0.0791, 0.0791, 0.0791],
+  gm_parts: [0.2819, 0.2914, 0.2902, 0.2717, 0.2809, 0.2809],
+  gm_service: [0.6164, 0.6105, 0.6176, 0.6267, 0.6320, 0.6320],
+  gm_rental: [0.8832, 0.8693, 0.6965, 0.6979, 0.6979, 0.6979],
+  cash: [4789808, 1392670, 1995535, 0, 0, 0],
+  ar: [13397386, 16515678, 15935433, 18401861, 19092362, 19803158],
+  new_inv: [65616378, 47027693, 54648044, 55024762, 58407226, 63607765],
+  rental_inv: [44933927, 57701393, 51628927, 52770184, 53886057, 55057724],
+  used_inv: [2637898, 2183075, 2413211, 2451443, 2451443, 2451443],
+  parts_inv: [9130628, 11690075, 12566769, 12113784, 12860936, 13654170],
+  fixed_assets: [7757266, 11199648, 9467877, 8115402, 7003454, 6093122],
+  total_assets: [180251931, 181710303, 176362495, 174409671, 177708497, 183158120],
+  ap: [16880531, 6329436, 20284155, 17183687, 19273017, 19632089],
+  pnc_revolver: [54759681, 60873641, 42293033, 46074698, 46259905, 45701812],
+  floorplan: [46126717, 49378651, 60131177, 57221714, 60265932, 64946417],
+  cnh_tl: [1141589, 591589, 0, 0, 0, 0],
+  other_debt: [1493667, 1076152, 271991, 549007, 480607, 412207],
+  seller_note: [3160747, 2717743, 2853630, 2999870, 3153677, 3315370],
+  pnc_capex: [3435837, 4403778, 4032838, 3359749, 2652845, 1902343],
+  total_liabilities: [146003555, 152019114, 153796940, 155848048, 160146280, 164660280],
+  total_equity: [24266239, 22980397, 22565555, 18561623, 17562217, 18497840],
+  total_cash_interest: [3727780, 7344854, 6336347, 6246568, 6458959, 6527911],
+  total_interest: [3883744, 7499408, 6472234, 6392809, 6612766, 6689603],
+  salaries: [-15048747, -20223185, -20240165, -22512953, -23075777, -23652672],
+  payroll_taxes: [-1328184, -2044260, -2075085, -2241035, -2297061, -2354488],
+  ga: [-3351933, -4692530, -4324150, -4883203, -5005283, -5130415],
+  rent_tax_util: [-983013, -1532878, -1838502, -1769543, -1813782, -1859127],
+  selling: [-2875097, -4503139, -4903878, -5449693, -5585935, -5725583],
+  insurance: [-1829932, -2649805, -2679320, -2694642, -2762008, -2831058],
+};
+
+// Monthly data
+const months25_26 = ['Jan 25','Feb 25','Mar 25','Apr 25','May 25','Jun 25','Jul 25','Aug 25','Sep 25','Oct 25','Nov 25','Dec 25',
+  'Jan 26','Feb 26','Mar 26','Apr 26','May 26','Jun 26','Jul 26','Aug 26','Sep 26','Oct 26','Nov 26','Dec 26'];
+const mRev = [15252074,18482643,35697760,19423105,16507842,17536346,17741237,22702548,20688539,18821104,17834149,23235212,
+  11318808,16845920,19019586,24199629,25881714,25034839,24587881,26961631,25855831,26395044,23779225,28690850];
+const mEbitda = [526000,756161,3799914,1213496,1201011,1016601,920912,2031586,1225882,931735,259274,1110316,
+  -1148045,689564,3994789,1525628,1550414,1592747,1598728,1847678,1715503,1677101,1092416,1473731];
+
+// Covenant data
+const covMonths = ['Apr 25','May 25','Jun 25','Jul 25','Aug 25','Sep 25','Oct 25','Nov 25','Dec 25',
+  'Jan 26','Feb 26','Mar 26','Apr 26','May 26','Jun 26','Jul 26','Aug 26','Sep 26','Oct 26','Nov 26','Dec 26'];
+const fccr = [0.90,1.36,1.49,1.57,1.64,1.67,1.51,1.49,1.28,0.85,1.12,0.26,0.37,0.71,0.65,0.70,0.65,0.82,1.09,1.03,1.10];
+const leverage = [5.19,5.06,5.82,6.29,6.74,6.79,7.52,7.53,7.90,9.31,9.13,8.40,8.23,7.92,7.50,7.12,7.18,6.86,6.50,6.20,6.09];
+const covDebt = [102576,100891,102394,104274,108425,111259,114170,112922,109583,114597,113027,108157,110743,108656,109030,109070,108931,108724,109168,109591,110205];
+
+// Location data HMC
+const hmcLocs = {
+  'Raleigh': {rev:25412118, gp:7724321, gp_pct:0.30, sga:-3372193, ebitda:4352170},
+  'Charlotte': {rev:25133579, gp:5822157, gp_pct:0.23, sga:-3119179, ebitda:2703502},
+  'Columbia': {rev:22452600, gp:6608682, gp_pct:0.29, sga:-4393089, ebitda:2170709},
+  'Charleston': {rev:21291312, gp:5237574, gp_pct:0.25, sga:-3239924, ebitda:1997650},
+  'Greenville SC': {rev:19631346, gp:4532684, gp_pct:0.23, sga:-3331583, ebitda:1202121},
+  'Savannah': {rev:9725600, gp:3199069, gp_pct:0.33, sga:-2004503, ebitda:1199464},
+  'Asheville': {rev:14108013, gp:2460374, gp_pct:0.17, sga:-2127756, ebitda:332618},
+  'Wise': {rev:5383652, gp:1912887, gp_pct:0.36, sga:-1020346, ebitda:892540},
+  'Greenville NC': {rev:10746974, gp:2681162, gp_pct:0.25, sga:-1925249, ebitda:755913},
+  'Ashland': {rev:13118252, gp:2639487, gp_pct:0.20, sga:-2255947, ebitda:383540},
+  'Greensboro': {rev:6771416, gp:1466101, gp_pct:0.22, sga:-1818824, ebitda:-352723},
+  'Wilmington': {rev:4504763, gp:1093373, gp_pct:0.24, sga:-1472576, ebitda:-379203},
+  'Norfolk': {rev:2397323, gp:896465, gp_pct:0.37, sga:-1392163, ebitda:-495698},
+  'Corp': {rev:5425804, gp:93085, gp_pct:0.02, sga:-4014814, ebitda:-2713681},
+  'Wilson': {rev:31373, gp:11503, gp_pct:0.37, sga:-241292, ebitda:-229790},
+};
+const rjvLocs = {
+  'Nashville DW': {rev:21775365, gp:5958314, gp_pct:0.27, sga:-3070235, ebitda:3300475},
+  'Knoxville': {rev:20265520, gp:4985809, gp_pct:0.25, sga:-2570503, ebitda:2403329},
+  'Nashville KU': {rev:6662272, gp:1332276, gp_pct:0.20, sga:-1271525, ebitda:63750},
+};
+
+// Monthly working capital
+const mCash = [1287537,1063665,4006893,632069,836162,1950573,2025924,-404294,1871451,1098057,290284,1995535,
+  741112,0,0,0,0,0,0,0,0,0,0,0];
+const mRevolver = [62268,63365,50624,52069,49671,49772,47197,45550,46957,46914,44236,42293,
+  46953,47708,43592,44953,44293,45579,46500,47357,47487,47653,47247,46075];
+const mFloorplan = [47076,44629,43276,42221,43113,44644,49229,55124,56713,59796,61346,60131,
+  60564,58311,57213,58485,57107,56245,55413,54466,54179,54505,55386,57222];
+const mAvail = [17732,16635,29376,27931,30329,30228,32803,34450,33043,33086,35764,37707,
+  33047,32292,36408,35047,35707,34421,33500,32643,32513,32347,32753,33925];
+
+// ===== HELPERS =====
+function fmt(v, dec=0) {
+  if (v === null || v === undefined) return '–';
+  const n = typeof v === 'number' ? v : parseFloat(v);
+  if (isNaN(n)) return '–';
+  return (n / 1000).toLocaleString('en-US', {minimumFractionDigits: dec, maximumFractionDigits: dec});
+}
+function fmtM(v) {
+  if (v === null || v === undefined) return '–';
+  return '$' + (v / 1e6).toFixed(1) + 'M';
+}
+function fmtPct(v) {
+  if (v === null || v === undefined) return '–';
+  return (v * 100).toFixed(1) + '%';
+}
+function fmtX(v) {
+  if (v === null || v === undefined) return '–';
+  return v.toFixed(2) + 'x';
+}
+function cls(v) { return v < 0 ? 'neg' : (v > 0 ? 'pos' : ''); }
+function addRow(tbody, label, vals, isBold=false, isPct=false) {
+  const tr = document.createElement('tr');
+  if (isBold) tr.style.fontWeight = '700';
+  const cells = isPct
+    ? vals.map(v => `<td class="num">${fmtPct(v)}</td>`).join('')
+    : vals.map(v => `<td class="num ${cls(v)}">${fmt(v)}</td>`).join('');
+  tr.innerHTML = `<td>${label}</td>${cells}`;
+  tbody.appendChild(tr);
+}
+
+// ===== POPULATE TABLES =====
+// IS Table
+const isBody = document.getElementById('isTable');
+[
+  ['New Equipment Sales', D.rev_new, false],
+  ['Used Equipment Sales', D.rev_used, false],
+  ['Parts Sales', D.rev_parts, false],
+  ['Service Sales', D.rev_service, false],
+  ['Rental Sales', D.rev_rental, false],
+  ['Total Revenue', D.total_rev, true],
+  ['_spacer'],
+  ['Total Gross Margin %', D.total_gm_pct, false, true],
+  ['Total SG&A', D.total_sga, false],
+  ['Fully Adjusted EBITDA', D.adj_ebitda, true],
+  ['EBITDA Margin %', D.adj_ebitda.map((e,i) => D.total_rev[i] ? e/D.total_rev[i] : null), false, true],
+  ['_spacer'],
+  ['Cash Interest', D.total_cash_interest.map(v => -v), false],
+  ['Total Interest Expense', D.total_interest.map(v => -v), false],
+  ['Net Income', D.net_income, true],
+].forEach(row => {
+  if (row[0] === '_spacer') {
+    const tr = document.createElement('tr'); tr.innerHTML = '<td colspan="7" style="height:8px;border:none;"></td>'; isBody.appendChild(tr);
+  } else addRow(isBody, row[0], row[1], row[2], row[3]);
+});
+
+// BS Table
+const bsBody = document.getElementById('bsTable');
+[
+  ['Cash', D.cash],
+  ['Accounts Receivable', D.ar],
+  ['New Equipment Inventory', D.new_inv],
+  ['Rental Equipment Inventory', D.rental_inv],
+  ['Used Equipment Inventory', D.used_inv],
+  ['Parts Inventory', D.parts_inv],
+  ['Fixed Assets', D.fixed_assets],
+  ['Total Assets', D.total_assets, true],
+  ['_spacer'],
+  ['Accounts Payable', D.ap],
+  ['PNC Revolver', D.pnc_revolver],
+  ['Floorplan', D.floorplan],
+  ['CNH Term Loan', D.cnh_tl],
+  ['Other Debt', D.other_debt],
+  ['Seller Note', D.seller_note],
+  ['PNC Capex Line', D.pnc_capex],
+  ['Total Liabilities', D.total_liabilities, true],
+  ['_spacer'],
+  ['Total Equity', D.total_equity, true],
+].forEach(row => {
+  if (row[0] === '_spacer') {
+    const tr = document.createElement('tr'); tr.innerHTML = '<td colspan="7" style="height:8px;border:none;"></td>'; bsBody.appendChild(tr);
+  } else addRow(bsBody, row[0], row[1], row[2] || false);
+});
+
+// Debt Table
+const debtBody = document.getElementById('debtTable');
+[
+  ['PNC Revolver', D.pnc_revolver],
+  ['Floorplan', D.floorplan],
+  ['CNH Term Loan', D.cnh_tl],
+  ['Other Debt (Eq. Loans)', D.other_debt],
+  ['Seller Note', D.seller_note],
+  ['PNC Capex Line', D.pnc_capex],
+  ['Total Debt', fy.map((_,i) => D.pnc_revolver[i]+D.floorplan[i]+D.cnh_tl[i]+D.other_debt[i]+D.seller_note[i]+D.pnc_capex[i]), true],
+  ['_spacer'],
+  ['Cash Interest', D.total_cash_interest],
+  ['Total Interest Expense', D.total_interest],
+  ['Adj. EBITDA', D.adj_ebitda, true],
+  ['Leverage (Debt/EBITDA)', fy.map((_,i) => {
+    const debt = D.pnc_revolver[i]+D.floorplan[i]+D.cnh_tl[i]+D.other_debt[i]+D.seller_note[i]+D.pnc_capex[i];
+    return D.adj_ebitda[i] ? debt/D.adj_ebitda[i] : null;
+  }), true, true],
+].forEach(row => {
+  if (row[0] === '_spacer') {
+    const tr = document.createElement('tr'); tr.innerHTML = '<td colspan="7" style="height:8px;border:none;"></td>'; debtBody.appendChild(tr);
+  } else if (row[3]) {
+    const tr = document.createElement('tr'); tr.style.fontWeight = '700';
+    tr.innerHTML = `<td>${row[0]}</td>${row[1].map(v => `<td class="num">${v ? v.toFixed(1)+'x' : '–'}</td>`).join('')}`;
+    debtBody.appendChild(tr);
+  } else addRow(debtBody, row[0], row[1], row[2] || false);
+});
+
+// Covenant Table
+const covBody = document.getElementById('covTable');
+const covFCCR = [1.67,1.28,0.26,0.65,0.82,1.10];
+const covLev = [6.79,7.90,8.40,7.50,6.86,6.09];
+const covDebtVals = [111259,109583,108157,109030,108724,110205];
+
+[
+  {label:'FCCR (TTM)', vals: covFCCR, fmt: v => `<td class="num" style="color:${v<1?'#dc2626':v<1.15?'#ca8a04':'#16a34a'};font-weight:700">${v.toFixed(2)}x</td>`},
+  {label:'FCCR Covenant', vals: ['1.00x (Q)','1.00x (Q)','No test','No test','1.10x (Q)','1.10x (Q)'], fmt: v => `<td class="num">${v}</td>`},
+  {label:'Leverage (Debt/EBITDA)', vals: covLev, fmt: v => `<td class="num" style="color:${v>8?'#dc2626':v>7?'#ca8a04':'#374151'};font-weight:600">${v.toFixed(1)}x</td>`},
+  {label:'Total Debt ($M)', vals: covDebtVals, fmt: v => `<td class="num">$${(v/1000).toFixed(1)}M</td>`},
+].forEach(row => {
+  const tr = document.createElement('tr');
+  tr.innerHTML = `<td style="font-weight:600">${row.label}</td>${row.vals.map(row.fmt).join('')}`;
+  covBody.appendChild(tr);
+});
+
+// HMC Location Table
+const hmcBody = document.getElementById('hmcLocTable');
+const sortedHMC = Object.entries(hmcLocs).sort((a,b) => b[1].ebitda - a[1].ebitda);
+let hmcTotals = {rev:0,gp:0,sga:0,ebitda:0};
+sortedHMC.forEach(([name, d]) => {
+  if (name === 'Corp') return;
+  hmcTotals.rev += d.rev; hmcTotals.gp += d.gp; hmcTotals.sga += d.sga; hmcTotals.ebitda += d.ebitda;
+  const ebPct = d.rev ? d.ebitda/d.rev : 0;
+  const tr = document.createElement('tr');
+  tr.innerHTML = `<td>${name}</td><td class="num">${fmt(d.rev)}</td><td class="num">${fmt(d.gp)}</td><td class="num">${fmtPct(d.gp_pct)}</td><td class="num neg">${fmt(d.sga)}</td><td class="num ${cls(d.ebitda)}">${fmt(d.ebitda)}</td><td class="num ${cls(ebPct)}">${fmtPct(ebPct)}</td>`;
+  hmcBody.appendChild(tr);
+});
+const corp = hmcLocs['Corp'];
+hmcTotals.rev += corp.rev; hmcTotals.gp += corp.gp; hmcTotals.sga += corp.sga; hmcTotals.ebitda += corp.ebitda;
+const corpTr = document.createElement('tr');
+corpTr.innerHTML = `<td>Corp</td><td class="num">${fmt(corp.rev)}</td><td class="num">${fmt(corp.gp)}</td><td class="num">${fmtPct(corp.gp_pct)}</td><td class="num neg">${fmt(corp.sga)}</td><td class="num neg">${fmt(corp.ebitda)}</td><td class="num">–</td>`;
+hmcBody.appendChild(corpTr);
+const totTr = document.createElement('tr'); totTr.style.fontWeight = '700'; totTr.style.borderTop = '2px solid #1f1f1f';
+totTr.innerHTML = `<td>HMC Total</td><td class="num">${fmt(hmcTotals.rev)}</td><td class="num">${fmt(hmcTotals.gp)}</td><td class="num">${fmtPct(hmcTotals.gp/hmcTotals.rev)}</td><td class="num neg">${fmt(hmcTotals.sga)}</td><td class="num ${cls(hmcTotals.ebitda)}">${fmt(hmcTotals.ebitda)}</td><td class="num">${fmtPct(hmcTotals.ebitda/hmcTotals.rev)}</td>`;
+hmcBody.appendChild(totTr);
+
+// RJV Location Table
+const rjvBody = document.getElementById('rjvLocTable');
+let rjvTotals = {rev:0,gp:0,sga:0,ebitda:0};
+Object.entries(rjvLocs).sort((a,b) => b[1].ebitda - a[1].ebitda).forEach(([name, d]) => {
+  rjvTotals.rev += d.rev; rjvTotals.gp += d.gp; rjvTotals.sga += d.sga; rjvTotals.ebitda += d.ebitda;
+  const ebPct = d.rev ? d.ebitda/d.rev : 0;
+  const tr = document.createElement('tr');
+  tr.innerHTML = `<td>${name}</td><td class="num">${fmt(d.rev)}</td><td class="num">${fmt(d.gp)}</td><td class="num">${fmtPct(d.gp_pct)}</td><td class="num neg">${fmt(d.sga)}</td><td class="num ${cls(d.ebitda)}">${fmt(d.ebitda)}</td><td class="num ${cls(ebPct)}">${fmtPct(ebPct)}</td>`;
+  rjvBody.appendChild(tr);
+});
+const rjvTotTr = document.createElement('tr'); rjvTotTr.style.fontWeight = '700'; rjvTotTr.style.borderTop = '2px solid #1f1f1f';
+rjvTotTr.innerHTML = `<td>RJV Total</td><td class="num">${fmt(rjvTotals.rev)}</td><td class="num">${fmt(rjvTotals.gp)}</td><td class="num">${fmtPct(rjvTotals.gp/rjvTotals.rev)}</td><td class="num neg">${fmt(rjvTotals.sga)}</td><td class="num ${cls(rjvTotals.ebitda)}">${fmt(rjvTotals.ebitda)}</td><td class="num">${fmtPct(rjvTotals.ebitda/rjvTotals.rev)}</td>`;
+rjvBody.appendChild(rjvTotTr);
+
+// ===== CHARTS =====
+Chart.defaults.color = '#6b7280';
+Chart.defaults.borderColor = 'rgba(0,0,0,0.06)';
+Chart.defaults.font.family = "'Segoe UI', system-ui, sans-serif";
+Chart.defaults.font.size = 11;
+const gridOpts = { grid: { color: 'rgba(0,0,0,0.06)' } };
+const hillsRed = '#dc0505';
+const hillsDark = '#1f1f1f';
+const hillsGray = '#6b7280';
+
+// 1. Revenue & EBITDA
+new Chart(document.getElementById('revEbitdaChart'), {
+  type: 'bar',
+  data: {
+    labels: fyShort,
+    datasets: [
+      { label: 'Revenue', data: D.total_rev.map(v=>v/1e6), backgroundColor: 'rgba(31,31,31,0.75)', borderRadius: 4, yAxisID: 'y' },
+      { label: 'Fully Adj. EBITDA', data: D.adj_ebitda.map(v=>v/1e6), type: 'line', borderColor: hillsRed, backgroundColor: 'rgba(220,5,5,0.08)', pointRadius: 5, pointBackgroundColor: hillsRed, tension: 0.3, yAxisID: 'y1', fill: true },
+    ]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { position: 'top' }, tooltip: { callbacks: { label: ctx => ctx.dataset.label + ': $' + ctx.parsed.y.toFixed(1) + 'M' }}},
+    scales: {
+      y: { ...gridOpts, title: { display: true, text: 'Revenue ($M)' }, ticks: { callback: v => '$'+v+'M' }},
+      y1: { position: 'right', grid: { drawOnChartArea: false }, title: { display: true, text: 'EBITDA ($M)' }, ticks: { callback: v => '$'+v+'M' }},
+    }
+  }
+});
+
+// 2. Revenue Mix Donut
+new Chart(document.getElementById('revMixChart'), {
+  type: 'doughnut',
+  data: {
+    labels: ['New Equipment','Used Equipment','Parts','Service','Rental'],
+    datasets: [{
+      data: [156298, 7535, 41034, 19459, 19595],
+      backgroundColor: ['#dc0505','#1f1f1f','#6b7280','#b91c1c','#9ca3af'],
+      borderWidth: 2, borderColor: '#ffffff',
+    }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { position: 'right', labels: { padding: 12 } },
+      tooltip: { callbacks: { label: ctx => ctx.label + ': $' + (ctx.parsed/1000).toFixed(1) + 'M (' + ((ctx.parsed/243923)*100).toFixed(1) + '%)' }}
+    }
+  }
+});
+
+// 3. GM by Segment
+new Chart(document.getElementById('gmChart'), {
+  type: 'bar',
+  data: {
+    labels: ["'24A","'25A","'26E","'27E","'28E"],
+    datasets: [
+      { label: 'New Equip', data: D.gm_new.slice(1).map(v=>v?v*100:0), backgroundColor: '#dc0505' },
+      { label: 'Used Equip', data: D.gm_used.slice(1).map(v=>v?v*100:0), backgroundColor: '#1f1f1f' },
+      { label: 'Parts', data: D.gm_parts.slice(1).map(v=>v?v*100:0), backgroundColor: '#6b7280' },
+      { label: 'Service', data: D.gm_service.slice(1).map(v=>v?v*100:0), backgroundColor: '#b91c1c' },
+      { label: 'Rental', data: D.gm_rental.slice(1).map(v=>v?v*100:0), backgroundColor: '#9ca3af' },
+    ]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { position: 'top' }, tooltip: { callbacks: { label: ctx => ctx.dataset.label + ': ' + ctx.parsed.y.toFixed(1) + '%' }}},
+    scales: { y: { ...gridOpts, ticks: { callback: v => v+'%' }, max: 100 }, x: gridOpts }
+  }
+});
+
+// 4. SGA Donut
+new Chart(document.getElementById('sgaChart'), {
+  type: 'doughnut',
+  data: {
+    labels: ['Salaries','Payroll Tax','G&A','Rent/Tax/Util','Selling','Insurance','Other'],
+    datasets: [{
+      data: [20240,2075,4324,1839,4904,2679,7580],
+      backgroundColor: ['#dc0505','#b91c1c','#1f1f1f','#4b5563','#6b7280','#9ca3af','#d1d5db'],
+      borderWidth: 2, borderColor: '#ffffff',
+    }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { position: 'right', labels: { padding: 10 } },
+      tooltip: { callbacks: { label: ctx => ctx.label + ': $' + (ctx.parsed/1000).toFixed(1) + 'M' }}
+    }
+  }
+});
+
+// 5. Monthly Revenue
+new Chart(document.getElementById('monthRevChart'), {
+  type: 'bar',
+  data: {
+    labels: months25_26,
+    datasets: [{
+      data: mRev.map(v=>v/1e6),
+      backgroundColor: months25_26.map((_,i) => i < 12 ? 'rgba(31,31,31,0.8)' : 'rgba(31,31,31,0.35)'),
+      borderRadius: 3,
+    }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => '$' + ctx.parsed.y.toFixed(1) + 'M' }}},
+    scales: { y: { ...gridOpts, ticks: { callback: v => '$'+v+'M' } }, x: { ...gridOpts, ticks: { maxRotation: 45 }}}
+  }
+});
+
+// 6. Monthly EBITDA
+new Chart(document.getElementById('monthEbitdaChart'), {
+  type: 'bar',
+  data: {
+    labels: months25_26,
+    datasets: [{
+      data: mEbitda.map(v=>v/1e6),
+      backgroundColor: mEbitda.map(v => v >= 0 ? 'rgba(22,163,74,0.75)' : 'rgba(220,5,5,0.75)'),
+      borderRadius: 3,
+    }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => '$' + ctx.parsed.y.toFixed(2) + 'M' }}},
+    scales: { y: { ...gridOpts, ticks: { callback: v => '$'+v+'M' } }, x: { ...gridOpts, ticks: { maxRotation: 45 }}}
+  }
+});
+
+// 7. Debt Composition
+new Chart(document.getElementById('debtChart'), {
+  type: 'bar',
+  data: {
+    labels: fyShort,
+    datasets: [
+      { label: 'PNC Revolver', data: D.pnc_revolver.map(v=>v/1e6), backgroundColor: '#dc0505' },
+      { label: 'Floorplan', data: D.floorplan.map(v=>v/1e6), backgroundColor: '#1f1f1f' },
+      { label: 'CNH TL', data: D.cnh_tl.map(v=>v/1e6), backgroundColor: '#6b7280' },
+      { label: 'Other/Capex/Seller', data: fy.map((_,i)=>(D.other_debt[i]+D.seller_note[i]+D.pnc_capex[i])/1e6), backgroundColor: '#9ca3af' },
+    ]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { position: 'top' }, tooltip: { callbacks: { label: ctx => ctx.dataset.label + ': $' + ctx.parsed.y.toFixed(1) + 'M' }}},
+    scales: { y: { ...gridOpts, stacked: true, ticks: { callback: v => '$'+v+'M' } }, x: { ...gridOpts, stacked: true }}
+  }
+});
+
+// 8. Availability
+new Chart(document.getElementById('availChart'), {
+  type: 'line',
+  data: {
+    labels: months25_26,
+    datasets: [
+      { label: 'Availability ($M)', data: mAvail.map(v => v ? v/1000 : null), borderColor: '#16a34a', backgroundColor: 'rgba(22,163,74,0.08)', fill: true, pointRadius: 4, pointBackgroundColor: mAvail.map(v => !v ? '#16a34a' : v/1000 < 5 ? '#dc0505' : v/1000 < 10 ? '#ca8a04' : '#16a34a'), tension: 0.3, borderWidth: 2 },
+      { label: 'Revolver Balance ($M)', data: mRevolver.map(v=>v/1000), borderColor: hillsRed, pointRadius: 3, pointBackgroundColor: hillsRed, tension: 0.3, borderDash: [5,3], borderWidth: 2 },
+    ]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { position: 'top' }, tooltip: { callbacks: { label: ctx => ctx.dataset.label + ': $' + ctx.parsed.y.toFixed(1) + 'M' }}},
+    scales: { y: { ...gridOpts, ticks: { callback: v => '$'+v+'M' } }, x: { ...gridOpts, ticks: { maxRotation: 45 }}}
+  }
+});
+
+// 9. FCCR Chart
+new Chart(document.getElementById('fccrChart'), {
+  type: 'line',
+  data: {
+    labels: covMonths,
+    datasets: [
+      { label: 'FCCR', data: fccr, borderColor: hillsDark, backgroundColor: 'rgba(31,31,31,0.06)', fill: true, pointRadius: 5, pointBackgroundColor: fccr.map(v => v >= 1.1 ? '#16a34a' : v >= 1.0 ? '#ca8a04' : '#dc0505'), tension: 0.3, borderWidth: 2.5 },
+      { label: 'Covenant (1.0x)', data: covMonths.map(() => 1.0), borderColor: hillsRed, borderDash: [8,4], pointRadius: 0, borderWidth: 2 },
+    ]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { position: 'top' }, tooltip: { callbacks: { label: ctx => ctx.dataset.label + ': ' + ctx.parsed.y.toFixed(2) + 'x' }}},
+    scales: { y: { ...gridOpts, min: 0, max: 2.0, ticks: { callback: v => v.toFixed(1)+'x' } }, x: { ...gridOpts, ticks: { maxRotation: 45 }}}
+  }
+});
+
+// 10. Leverage Chart
+new Chart(document.getElementById('levChart'), {
+  type: 'line',
+  data: {
+    labels: covMonths,
+    datasets: [
+      { label: 'Leverage', data: leverage, borderColor: hillsRed, backgroundColor: 'rgba(220,5,5,0.06)', fill: true, pointRadius: 5, pointBackgroundColor: leverage.map(v => v <= 6.5 ? '#16a34a' : v <= 7.5 ? '#ca8a04' : '#dc0505'), tension: 0.3, borderWidth: 2.5 },
+    ]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { position: 'top' }, tooltip: { callbacks: { label: ctx => ctx.dataset.label + ': ' + ctx.parsed.y.toFixed(1) + 'x' }}},
+    scales: { y: { ...gridOpts, reverse: false, ticks: { callback: v => v.toFixed(1)+'x' } }, x: { ...gridOpts, ticks: { maxRotation: 45 }}}
+  }
+});
+
+// 11. Location Revenue Bar (horizontal)
+const locNames = sortedHMC.filter(([n]) => n !== 'Corp' && n !== 'Wilson').map(([n]) => n);
+const locRevs = locNames.map(n => hmcLocs[n].rev / 1e6);
+const locEbitdas = locNames.map(n => hmcLocs[n].ebitda / 1e6);
+
+new Chart(document.getElementById('locRevChart'), {
+  type: 'bar',
+  data: {
+    labels: locNames,
+    datasets: [{ data: locRevs, backgroundColor: 'rgba(31,31,31,0.75)', borderRadius: 4 }]
+  },
+  options: {
+    indexAxis: 'y', responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => '$' + ctx.parsed.x.toFixed(1) + 'M' }}},
+    scales: { x: { ...gridOpts, ticks: { callback: v => '$'+v+'M' } }, y: gridOpts }
+  }
+});
+
+new Chart(document.getElementById('locEbitdaChart'), {
+  type: 'bar',
+  data: {
+    labels: locNames,
+    datasets: [{ data: locEbitdas, backgroundColor: locEbitdas.map(v => v >= 0 ? 'rgba(22,163,74,0.7)' : 'rgba(220,5,5,0.7)'), borderRadius: 4 }]
+  },
+  options: {
+    indexAxis: 'y', responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => '$' + ctx.parsed.x.toFixed(2) + 'M' }}},
+    scales: { x: { ...gridOpts, ticks: { callback: v => '$'+v+'M' } }, y: gridOpts }
+  }
+});
+
+// ===== BORROWING BASE ANALYSIS =====
+const bbcLabels = ['Aug 25','Sep 25','Oct 25','Nov 25','Dec 25','Jan 26','Feb 26','Mar 26','Apr 26','May 26','Jun 26','Jul 26','Aug 26','Sep 26','Oct 26','Nov 26','Dec 26'];
+const bbcIdx = [0,1,2,3,4,5,7,10,13,16];
+
+// AR
+const bbc_ar_bal = [19778072,19176090,17209766,15370774,15938568,13743335,17642278,14417429,18353236,17659126,18779045,18456639,18295150,18061247,18482918,17740357,18401861];
+const bbc_ar_inelig = [-4005252,-4083182,-4219733,-4114383,-4271187,-4643782,-4858852,-4518732,-4428357,-4428357,-4428357,-4200000,-4200000,-4200000,-4200000,-4200000,-4200000];
+const bbc_ar_eligible = [15772820,15092907,12990034,11256391,11667381,9099553,12783426,9898697,13924878,13230769,14350688,14256639,14095150,13861247,14282918,13540357,14201861];
+const bbc_ar_collateral = [13406897,12828971,11041529,9567932,9917274,7734620,10865912,8413893,11836147,11246154,12198085,12118143,11980878,11782060,12140480,11509303,12071582];
+
+// New & Used Inventory
+const bbc_inv_bal = [49775287,50660354,57863990,56280187,58585055,61544580,66265448,58926934,58779766,58616093,58462220,58313164,58144175,57985066,57820066,57667584,57476205];
+const bbc_inv_floorplan = [-37211761,-38576946,-45430185,-44722410,-48775267,-52184033,-57132118,-48749473,-49522196,-47643846,-46281498,-44949489,-43502554,-43215653,-43542171,-44422719,-46258471];
+const bbc_inv_slowmov = [-2265499,-2662260,-2675773,-2807257,-2835629,-2347281,-2682829,-2682829,-2682829,-2682829,-2682829,-2900000,-2900000,-2900000,-2900000,-2900000,-2900000];
+const bbc_inv_eligible = [10298027,9421148,9758032,8750521,6974158,7013266,6450501,7494631,6574740,8289418,9497894,10463675,11741621,11869413,11377895,10344865,8317734];
+const bbc_inv_collateral = [10298027,9421148,9758032,8750521,6974158,7013266,6450501,7494631,6574740,8289418,9497894,10463675,11741621,11869413,11377895,10344865,8317734];
+
+// Parts
+const bbc_parts_bal = [12023570,12110964,12064508,12297010,12016383,12172990,12125943,12113784,12113784,12113784,12113784,12113784,12113784,12113784,12113784,12113784,12113784];
+const bbc_parts_inelig_pct = [0.43,0.41,0.42,0.42,0.43,0.42,0.41,0.40,0.40,0.40,0.40,0.45,0.45,0.45,0.45,0.45,0.45];
+const bbc_parts_eligible = [6901884,7091995,7038182,7123724,6812101,7105581,7102159,7272413,7272413,7272413,7272413,6662581,6662581,6662581,6662581,6662581,6662581];
+const bbc_parts_sublimit = [5000000,5000000,5000000,5000000,5000000,5000000,7500000,7500000,7500000,7500000,7500000,7500000,7500000,7500000,7500000,7500000,7500000];
+const bbc_parts_collateral = [5000000,5000000,5000000,5000000,5000000,5000000,6036835,6181551,6181551,6181551,6181551,5663194,5663194,5663194,5663194,5663194,5663194];
+
+// Rental
+const bbc_rental_bal = [54321083,53417440,52286646,52896395,52502271,52697065,51336712,52770184,52770184,52770184,52770184,52770184,52770184,52770184,52770184,52770184,52770184];
+const bbc_rental_floorplan = [-19012256,-19415616,-18629513,-19369505,-19635059,-19916925,-19500405,-19500405,-19500405,-19500405,-19500405,-19500405,-19500405,-19500405,-19500405,-19500405,-19500405];
+const bbc_rental_eligible = [35308827,34001824,33657133,33526890,32867213,32780140,31836307,33269779,33269779,33269779,33269779,33269779,33269779,33269779,33269779,33269779,33269779];
+const bbc_rental_collateral = [34249562,32981770,32815704,32688717,32045532,31960636,31040399,32438034,32438034,32438034,32438034,32438034,32438034,32438034,32438034,32438034,32438034];
+
+// Summary
+const bbc_gross_avail = [59940097,59071251,62954486,60231889,58615265,56007170,53936965,51708522,54393647,54528110,57030472,58155157,60315564,60683047,61823727,61752701,61619603];
+const bbc_facility_limit = [80000000,80000000,80000000,80000000,80000000,80000000,65000000,65000000,65000000,65000000,65000000,65000000,65000000,65000000,65000000,65000000,65000000];
+const bbc_capacity = [59940097,59071251,62954486,60231889,58615265,56007170,53936965,51708522,54393647,54528110,57030472,58155157,60315564,60683047,61823727,61752701,61619603];
+const bbc_loc = [-1000000,-1000000,-1000000,-1000000,-1000000,-1000000,-1000000,-1000000,-1000000,-1000000,-1000000,-1000000,-1000000,-1000000,-1000000,-1000000,-1000000];
+const bbc_reserve = [-198700,-198700,-198700,-198700,-198700,-198700,-198700,-198700,-198700,-198700,-198700,-198700,-198700,-198700,-198700,-198700,-198700];
+const bbc_revolver_bal = [-45549896,-46956770,-46913543,-44235597,-42293033,-46953032,-47707671,-43592109,-44953076,-44293436,-45578736,-46500178,-47357146,-47486558,-47653359,-47246626,-46074698];
+const bbc_net_avail = [13191501,10915781,14842243,14797592,15123532,7855439,5030594,6917713,8241871,9035973,10253036,10456279,11759718,11997789,12971668,13307375,14346206];
+
+// BBC Waterfall Chart
+new Chart(document.getElementById('bbcWaterfallChart'), {
+  type: 'bar',
+  data: {
+    labels: ['AR\nCollateral','New/Used\nInventory','Parts\nCollateral','Rental\nInventory','Gross\nAvail (2mo lag)','Less:\nLOC','Less:\nReserve','Less:\nRevolver Bal','Net\nAvailability'],
+    datasets: [{
+      data: [9.9, 7.0, 5.0, 32.0, 58.6, -1.0, -0.2, -42.3, 15.1],
+      backgroundColor: [
+        'rgba(31,31,31,0.75)','rgba(31,31,31,0.75)','rgba(31,31,31,0.75)','rgba(31,31,31,0.75)',
+        'rgba(22,163,74,0.8)',
+        'rgba(220,5,5,0.7)','rgba(220,5,5,0.7)','rgba(220,5,5,0.7)',
+        'rgba(22,163,74,0.9)'
+      ],
+      borderRadius: 4,
+    }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => '$' + Math.abs(ctx.parsed.y).toFixed(1) + 'M' }}},
+    scales: { y: { ...gridOpts, ticks: { callback: v => '$'+v+'M' } }, x: { ...gridOpts, ticks: { font: { size: 10 }, maxRotation: 0 } }}
+  }
+});
+
+// BBC Availability Trend
+new Chart(document.getElementById('bbcAvailTrendChart'), {
+  type: 'line',
+  data: {
+    labels: bbcLabels,
+    datasets: [
+      { label: 'Net Availability', data: bbc_net_avail.map(v=>v/1e6), borderColor: '#16a34a', backgroundColor: 'rgba(22,163,74,0.08)', fill: true, pointRadius: 4, pointBackgroundColor: bbc_net_avail.map(v => v/1e6 < 5 ? '#dc0505' : v/1e6 < 10 ? '#ca8a04' : '#16a34a'), tension: 0.3, borderWidth: 2.5 },
+      { label: 'Gross Availability', data: bbc_gross_avail.map(v=>v/1e6), borderColor: '#9ca3af', pointRadius: 3, pointBackgroundColor: '#9ca3af', tension: 0.3, borderWidth: 1.5, borderDash: [5,3] },
+      { label: 'Facility Limit', data: bbc_facility_limit.map(v=>v/1e6), borderColor: hillsRed, pointRadius: 0, borderWidth: 2, borderDash: [8,4] },
+      { label: 'Revolver Balance', data: bbc_revolver_bal.map(v=>Math.abs(v)/1e6), borderColor: hillsDark, pointRadius: 3, pointBackgroundColor: hillsDark, tension: 0.3, borderWidth: 2 },
+    ]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { position: 'top', labels: { usePointStyle: true, padding: 12 } }, tooltip: { callbacks: { label: ctx => ctx.dataset.label + ': $' + ctx.parsed.y.toFixed(1) + 'M' }}},
+    scales: { y: { ...gridOpts, ticks: { callback: v => '$'+v+'M' } }, x: { ...gridOpts, ticks: { maxRotation: 45 }}}
+  }
+});
+
+// Collateral by Asset Class
+new Chart(document.getElementById('collateralChart'), {
+  type: 'bar',
+  data: {
+    labels: bbcLabels,
+    datasets: [
+      { label: 'AR Collateral', data: bbc_ar_collateral.map(v=>v/1e6), backgroundColor: '#dc0505' },
+      { label: 'New/Used Inv', data: bbc_inv_collateral.map(v=>v/1e6), backgroundColor: '#1f1f1f' },
+      { label: 'Parts', data: bbc_parts_collateral.map(v=>v/1e6), backgroundColor: '#6b7280' },
+      { label: 'Rental Inv', data: bbc_rental_collateral.map(v=>v/1e6), backgroundColor: '#9ca3af' },
+    ]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { position: 'top' }, tooltip: { callbacks: { label: ctx => ctx.dataset.label + ': $' + ctx.parsed.y.toFixed(1) + 'M' }}},
+    scales: { y: { ...gridOpts, stacked: true, ticks: { callback: v => '$'+v+'M' } }, x: { ...gridOpts, stacked: true, ticks: { maxRotation: 45 }}}
+  }
+});
+
+// Ineligibles % Chart
+const arIneligPct = bbc_ar_inelig.map((v,i) => bbc_ar_bal[i] ? Math.abs(v)/bbc_ar_bal[i]*100 : 0);
+const invIneligPct = bbc_inv_bal.map((v,i) => (Math.abs(bbc_inv_floorplan[i])+Math.abs(bbc_inv_slowmov[i]))/v*100);
+const partsIneligPct = bbc_parts_inelig_pct.map(v=>v*100);
+const rentalIneligPct = bbc_rental_bal.map((v,i) => Math.abs(bbc_rental_floorplan[i])/v*100);
+
+new Chart(document.getElementById('ineligiblePctChart'), {
+  type: 'line',
+  data: {
+    labels: bbcLabels,
+    datasets: [
+      { label: 'AR Ineligible %', data: arIneligPct, borderColor: '#dc0505', pointRadius: 3, pointBackgroundColor: '#dc0505', tension: 0.3, borderWidth: 2 },
+      { label: 'New/Used Inv (FP+Slow) %', data: invIneligPct, borderColor: '#1f1f1f', pointRadius: 3, pointBackgroundColor: '#1f1f1f', tension: 0.3, borderWidth: 2 },
+      { label: 'Parts Ineligible %', data: partsIneligPct, borderColor: '#6b7280', pointRadius: 3, pointBackgroundColor: '#6b7280', tension: 0.3, borderWidth: 2, borderDash: [5,3] },
+      { label: 'Rental Floorplan %', data: rentalIneligPct, borderColor: '#9ca3af', pointRadius: 3, pointBackgroundColor: '#9ca3af', tension: 0.3, borderWidth: 2, borderDash: [5,3] },
+    ]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { position: 'top', labels: { usePointStyle: true, padding: 12 } }, tooltip: { callbacks: { label: ctx => ctx.dataset.label + ': ' + ctx.parsed.y.toFixed(1) + '%' }}},
+    scales: { y: { ...gridOpts, ticks: { callback: v => v+'%' }, min: 0 }, x: { ...gridOpts, ticks: { maxRotation: 45 }}}
+  }
+});
+
+// BBC Detail Table
+const bbcBody = document.getElementById('bbcTable');
+function addBBCRow(tbody, label, arr, bold=false, indent=false) {
+  const tr = document.createElement('tr');
+  if (bold) tr.style.fontWeight = '700';
+  const lbl = indent ? '&nbsp;&nbsp;&nbsp;' + label : label;
+  const cells = bbcIdx.map(i => {
+    const v = arr[i];
+    const formatted = v === null || v === undefined ? '–' : (v/1000).toLocaleString('en-US',{minimumFractionDigits:0,maximumFractionDigits:0});
+    const c = v < 0 ? 'neg' : '';
+    return `<td class="num ${c}">${formatted}</td>`;
+  }).join('');
+  tr.innerHTML = `<td>${lbl}</td>${cells}`;
+  tbody.appendChild(tr);
+}
+function addBBCSpacer(tbody) {
+  const tr = document.createElement('tr'); tr.innerHTML = '<td colspan="11" style="height:6px;border:none;"></td>'; tbody.appendChild(tr);
+}
+function addBBCPctRow(tbody, label, arr) {
+  const tr = document.createElement('tr');
+  const cells = bbcIdx.map(i => {
+    const v = arr[i];
+    return `<td class="num">${v !== null && v !== undefined ? (v*100).toFixed(1)+'%' : '–'}</td>`;
+  }).join('');
+  tr.innerHTML = `<td>&nbsp;&nbsp;&nbsp;${label}</td>${cells}`;
+  tbody.appendChild(tr);
+}
+
+addBBCRow(bbcBody, 'Accounts Receivable', bbc_ar_bal, true);
+addBBCRow(bbcBody, '(-) Ineligible AR', bbc_ar_inelig, false, true);
+addBBCRow(bbcBody, '$ Eligible', bbc_ar_eligible, false, true);
+addBBCPctRow(bbcBody, 'Advance Rate', Array(17).fill(0.85));
+addBBCRow(bbcBody, 'AR Collateral Value', bbc_ar_collateral, true, true);
+addBBCSpacer(bbcBody);
+
+addBBCRow(bbcBody, 'New & Used Inventory', bbc_inv_bal, true);
+addBBCRow(bbcBody, '(-) Floorplan / Priority Lien', bbc_inv_floorplan, false, true);
+addBBCRow(bbcBody, '(-) Slow Moving / Obsolete', bbc_inv_slowmov, false, true);
+addBBCRow(bbcBody, '$ Eligible', bbc_inv_eligible, false, true);
+addBBCRow(bbcBody, 'N/U Inv Collateral Value', bbc_inv_collateral, true, true);
+addBBCSpacer(bbcBody);
+
+addBBCRow(bbcBody, 'Parts Inventory', bbc_parts_bal, true);
+addBBCRow(bbcBody, '$ Eligible', bbc_parts_eligible, false, true);
+addBBCPctRow(bbcBody, 'Advance Rate', Array(17).fill(0.85));
+addBBCRow(bbcBody, 'Sublimit', bbc_parts_sublimit, false, true);
+addBBCRow(bbcBody, 'Parts Collateral Value', bbc_parts_collateral, true, true);
+addBBCSpacer(bbcBody);
+
+addBBCRow(bbcBody, 'Rental Inventory', bbc_rental_bal, true);
+addBBCRow(bbcBody, '(-) Floorplan / Priority Lien', bbc_rental_floorplan, false, true);
+addBBCRow(bbcBody, '$ Eligible', bbc_rental_eligible, false, true);
+addBBCPctRow(bbcBody, 'Advance Rate', Array(17).fill(0.97));
+addBBCRow(bbcBody, 'Rental Collateral Value', bbc_rental_collateral, true, true);
+addBBCSpacer(bbcBody);
+
+addBBCRow(bbcBody, '[A] Gross Availability (2mo prior)', bbc_gross_avail, true);
+addBBCRow(bbcBody, '[B] Facility Limit', bbc_facility_limit, false, true);
+addBBCRow(bbcBody, 'Capacity (lesser of A or B)', bbc_capacity, true, true);
+addBBCRow(bbcBody, 'Less: Letter of Credit', bbc_loc, false, true);
+addBBCRow(bbcBody, 'Less: Master Reserve', bbc_reserve, false, true);
+addBBCRow(bbcBody, 'Less: Revolver Balance', bbc_revolver_bal, false, true);
+addBBCRow(bbcBody, 'Net Availability', bbc_net_avail, true);
+
+// Ineligibles Detail Table
+const inelBody = document.getElementById('ineligTable');
+addBBCRow(inelBody, 'AR Gross Balance', bbc_ar_bal, true);
+addBBCRow(inelBody, '(-) Ineligible AR', bbc_ar_inelig, false, true);
+(function() {
+  const tr = document.createElement('tr');
+  const cells = bbcIdx.map(i => {
+    const pct = bbc_ar_bal[i] ? (Math.abs(bbc_ar_inelig[i])/bbc_ar_bal[i]*100).toFixed(1)+'%' : '–';
+    return `<td class="num">${pct}</td>`;
+  }).join('');
+  tr.innerHTML = `<td>&nbsp;&nbsp;&nbsp;<em>Ineligible % of AR</em></td>${cells}`;
+  inelBody.appendChild(tr);
+})();
+addBBCSpacer(inelBody);
+
+addBBCRow(inelBody, 'N/U Inventory Gross Balance', bbc_inv_bal, true);
+addBBCRow(inelBody, '(-) Floorplan / Priority Lien', bbc_inv_floorplan, false, true);
+addBBCRow(inelBody, '(-) Slow Moving / Obsolete', bbc_inv_slowmov, false, true);
+(function() {
+  const tr = document.createElement('tr');
+  const cells = bbcIdx.map(i => {
+    const tot = Math.abs(bbc_inv_floorplan[i])+Math.abs(bbc_inv_slowmov[i]);
+    const pct = bbc_inv_bal[i] ? (tot/bbc_inv_bal[i]*100).toFixed(1)+'%' : '–';
+    return `<td class="num">${pct}</td>`;
+  }).join('');
+  tr.innerHTML = `<td>&nbsp;&nbsp;&nbsp;<em>Total Inelig % of Inv</em></td>${cells}`;
+  inelBody.appendChild(tr);
+})();
+addBBCSpacer(inelBody);
+
+addBBCRow(inelBody, 'Parts Gross Balance', bbc_parts_bal, true);
+(function() {
+  const tr = document.createElement('tr');
+  const cells = bbcIdx.map(i => {
+    const inel = bbc_parts_bal[i] - bbc_parts_eligible[i];
+    return `<td class="num neg">${(-inel/1000).toLocaleString('en-US',{minimumFractionDigits:0,maximumFractionDigits:0})}</td>`;
+  }).join('');
+  tr.innerHTML = `<td>&nbsp;&nbsp;&nbsp;(-) Ineligible Parts</td>${cells}`;
+  inelBody.appendChild(tr);
+})();
+(function() {
+  const tr = document.createElement('tr');
+  const cells = bbcIdx.map(i => `<td class="num">${(bbc_parts_inelig_pct[i]*100).toFixed(0)}%</td>`).join('');
+  tr.innerHTML = `<td>&nbsp;&nbsp;&nbsp;<em>Ineligible % of Parts</em></td>${cells}`;
+  inelBody.appendChild(tr);
+})();
+addBBCRow(inelBody, 'Parts Sublimit Cap', bbc_parts_sublimit, false, true);
+addBBCSpacer(inelBody);
+
+addBBCRow(inelBody, 'Rental Gross Balance', bbc_rental_bal, true);
+addBBCRow(inelBody, '(-) Floorplan / Priority Lien', bbc_rental_floorplan, false, true);
+(function() {
+  const tr = document.createElement('tr');
+  const cells = bbcIdx.map(i => {
+    const pct = bbc_rental_bal[i] ? (Math.abs(bbc_rental_floorplan[i])/bbc_rental_bal[i]*100).toFixed(1)+'%' : '–';
+    return `<td class="num">${pct}</td>`;
+  }).join('');
+  tr.innerHTML = `<td>&nbsp;&nbsp;&nbsp;<em>Floorplan % of Rental</em></td>${cells}`;
+  inelBody.appendChild(tr);
+})();
+
+// 12. Inventory Composition
+new Chart(document.getElementById('invChart'), {
+  type: 'bar',
+  data: {
+    labels: fyShort,
+    datasets: [
+      { label: 'New Equipment', data: D.new_inv.map(v=>v/1e6), backgroundColor: '#dc0505' },
+      { label: 'Rental Equipment', data: D.rental_inv.map(v=>v/1e6), backgroundColor: '#1f1f1f' },
+      { label: 'Used Equipment', data: D.used_inv.map(v=>v/1e6), backgroundColor: '#6b7280' },
+      { label: 'Parts', data: D.parts_inv.map(v=>v/1e6), backgroundColor: '#9ca3af' },
+    ]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { position: 'top' }, tooltip: { callbacks: { label: ctx => ctx.dataset.label + ': $' + ctx.parsed.y.toFixed(1) + 'M' }}},
+    scales: { y: { ...gridOpts, stacked: true, ticks: { callback: v => '$'+v+'M' } }, x: { ...gridOpts, stacked: true }}
+  }
+});
+
+// 13. Monthly Cash & WC
+new Chart(document.getElementById('wcChart'), {
+  type: 'line',
+  data: {
+    labels: months25_26,
+    datasets: [
+      { label: 'Cash ($M)', data: mCash.map(v=>v/1e6), borderColor: '#16a34a', pointRadius: 3, pointBackgroundColor: '#16a34a', tension: 0.3, borderWidth: 2 },
+      { label: 'Revolver ($M)', data: mRevolver.map(v=>v/1000), borderColor: hillsRed, pointRadius: 3, pointBackgroundColor: hillsRed, tension: 0.3, borderDash: [5,3], borderWidth: 2 },
+      { label: 'Floorplan ($M)', data: mFloorplan.map(v=>v/1000), borderColor: hillsDark, pointRadius: 3, pointBackgroundColor: hillsDark, tension: 0.3, borderDash: [5,3], borderWidth: 2 },
+    ]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { position: 'top' }, tooltip: { callbacks: { label: ctx => ctx.dataset.label + ': $' + ctx.parsed.y.toFixed(1) + 'M' }}},
+    scales: { y: { ...gridOpts, ticks: { callback: v => '$'+v+'M' } }, x: { ...gridOpts, ticks: { maxRotation: 45 }}}
+  }
+});
+
+// ===== CARVEOUT MODEL DATA - OEM & LOCATION ANALYTICS =====
+const oems = ['HITACHI','CASE','ROKBAK','PETERSON','RUBBLE MASTER','ROADTEC','MAULDIN','EDGE','HENKE','SAKAI','EAGLE','DONDI','MORBARK'];
+const oemFY23 = [28813644,31936913,5376847,0,2980490,8426689,1481128,3578682,0,1081289,3603685,0,0];
+const oemFY24 = [62715321,28926054,7245994,1104745,2202350,7865095,1086782,2217085,0,1260880,2243450,0,0];
+const oemFY25 = [53082736,27251818,8907792,8294565,5241850,3190201,2297224,2259871,2178523,1186036,1335000,1091000,705000];
+const oemGP25 = [5238912,1320072,725322,514392,585286,184375,143279,277672,103821,94343,-1397,236279,60385];
+const oemGPpct = [9.87,4.84,8.14,6.20,11.17,5.78,6.24,12.29,4.77,7.95,-0.10,21.66,8.57];
+const oemFY26E = [59886958,0,10049606,9357775,5913758,3599126,2591685,2549545,2457769,1338064,1506122,1230846,795368];
+
+const oemSorted = oems.map((o,i) => ({name:o, val:oemFY25[i]})).sort((a,b)=>b.val-a.val);
+new Chart(document.getElementById('oemSalesChart'), {
+  type: 'bar',
+  data: {
+    labels: oemSorted.map(o=>o.name),
+    datasets: [{ data: oemSorted.map(o=>o.val/1e6), backgroundColor: oemSorted.map(o=> o.name==='HITACHI'?'#dc0505': o.name==='CASE'?'#9ca3af':'rgba(31,31,31,0.7)'), borderRadius: 4 }]
+  },
+  options: {
+    indexAxis: 'y', responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => '$' + ctx.parsed.x.toFixed(1) + 'M' }}},
+    scales: { x: { ...gridOpts, ticks: { callback: v => '$'+v+'M' } }, y: { ...gridOpts, ticks: { font: { size: 10 }}}}
+  }
+});
+
+const oemMarginSorted = oems.map((o,i) => ({name:o, val:oemGPpct[i], gp:oemGP25[i]})).filter(o=>o.val!==0).sort((a,b)=>b.val-a.val);
+new Chart(document.getElementById('oemMarginChart'), {
+  type: 'bar',
+  data: {
+    labels: oemMarginSorted.map(o=>o.name),
+    datasets: [{ data: oemMarginSorted.map(o=>o.val), backgroundColor: oemMarginSorted.map(o=> o.val>=10?'rgba(22,163,74,0.7)': o.val>=5?'rgba(31,31,31,0.7)':'rgba(220,5,5,0.7)'), borderRadius: 4 }]
+  },
+  options: {
+    indexAxis: 'y', responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => ctx.parsed.x.toFixed(1) + '% | GP$: $' + (oemMarginSorted[ctx.dataIndex].gp/1e6).toFixed(2) + 'M' }}},
+    scales: { x: { ...gridOpts, ticks: { callback: v => v+'%' } }, y: { ...gridOpts, ticks: { font: { size: 10 }}}}
+  }
+});
+
+const topOEMs = ['HITACHI','CASE','ROKBAK','PETERSON','RUBBLE MASTER','ROADTEC'];
+const topIdx = topOEMs.map(o => oems.indexOf(o));
+const oemColors = ['#dc0505','#9ca3af','#1f1f1f','#6b7280','#b91c1c','#4b5563'];
+new Chart(document.getElementById('oemTrendChart'), {
+  type: 'bar',
+  data: {
+    labels: ['FY2023','FY2024','FY2025'],
+    datasets: topOEMs.map((o,i) => ({
+      label: o, data: [oemFY23[topIdx[i]]/1e6, oemFY24[topIdx[i]]/1e6, oemFY25[topIdx[i]]/1e6],
+      backgroundColor: oemColors[i], borderRadius: 3
+    }))
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { position: 'top' }, tooltip: { callbacks: { label: ctx => ctx.dataset.label + ': $' + ctx.parsed.y.toFixed(1) + 'M' }}},
+    scales: { y: { ...gridOpts, ticks: { callback: v => '$'+v+'M' } }, x: gridOpts }
+  }
+});
+
+new Chart(document.getElementById('eqBranchChart'), {
+  type: 'bar',
+  data: {
+    labels: ['Charlotte','Columbia','Greenville SC','Wilson','Charleston','Raleigh','Greenville NC','Ashland','Asheville','Greensboro','Wise','Savannah','Norfolk','Wilmington'],
+    datasets: [{ data: [17991,12827,14294,10094,9183,8008,7237,6672,6448,4406,3139,2422,1527,967].map(v=>v/1000), backgroundColor: 'rgba(31,31,31,0.75)', borderRadius: 4 }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => '$' + ctx.parsed.y.toFixed(1) + 'M' }}},
+    scales: { y: { ...gridOpts, ticks: { callback: v => '$'+v+'M' } }, x: { ...gridOpts, ticks: { maxRotation: 45, font: { size: 9 }}}}
+  }
+});
+
+// OEM Detail Table
+const oemBody = document.getElementById('oemTable');
+oems.forEach((o,i) => {
+  const tr = document.createElement('tr');
+  const gpCls = oemGPpct[i]>=10?'pos':oemGPpct[i]<5?'neg':'';
+  tr.innerHTML = `<td style="font-weight:600">${o}</td><td class="num">${fmt(oemFY23[i])}</td><td class="num">${fmt(oemFY24[i])}</td><td class="num">${fmt(oemFY25[i])}</td><td class="num ${oemGP25[i]<0?'neg':''}">${fmt(oemGP25[i])}</td><td class="num ${gpCls}">${oemGPpct[i].toFixed(1)}%</td><td class="num">${fmt(oemFY26E[i])}</td>`;
+  oemBody.appendChild(tr);
+});
+const oemTotTr = document.createElement('tr'); oemTotTr.style.fontWeight = '700'; oemTotTr.style.borderTop = '2px solid #1f1f1f';
+oemTotTr.innerHTML = `<td>Named OEM Total</td><td class="num">${fmt(87279369)}</td><td class="num">${fmt(116867755)}</td><td class="num">${fmt(117021617)}</td><td class="num">${fmt(9482742)}</td><td class="num">8.1%</td><td class="num">${fmt(101276622)}</td>`;
+oemBody.appendChild(oemTotTr);
+const oemAllTr = document.createElement('tr'); oemAllTr.style.fontWeight = '700';
+oemAllTr.innerHTML = `<td>All Equipment (incl Other)</td><td class="num">${fmt(96923352)}</td><td class="num">${fmt(126456761)}</td><td class="num">${fmt(123542120)}</td><td class="num">${fmt(10046762)}</td><td class="num">8.1%</td><td class="num">–</td>`;
+oemBody.appendChild(oemAllTr);
+
+// CASE by Department
+new Chart(document.getElementById('caseDeptChart'), {
+  type: 'bar',
+  data: {
+    labels: ['FY2022','FY2023','FY2024','FY2025'],
+    datasets: [
+      { label: 'Sales', data: [31.4,32.4,29.3,24.7], backgroundColor: '#dc0505' },
+      { label: 'Parts', data: [7.2,8.6,9.2,7.8], backgroundColor: '#1f1f1f' },
+      { label: 'Service', data: [9.6,12.4,11.5,9.0], backgroundColor: '#6b7280' },
+      { label: 'Rental', data: [4.5,5.1,4.8,1.1], backgroundColor: '#9ca3af' },
+    ]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { position: 'top' }, tooltip: { callbacks: { label: ctx => ctx.dataset.label + ': $' + ctx.parsed.y.toFixed(1) + 'M' }}, title: { display: true, text: 'CASE Total: $42.7M (FY25)', font: { size: 11 }, color: '#6b7280' }},
+    scales: { y: { ...gridOpts, stacked: true, ticks: { callback: v => '$'+v+'M' } }, x: { ...gridOpts, stacked: true }}
+  }
+});
+
+// Hitachi by Department
+new Chart(document.getElementById('hitachiDeptChart'), {
+  type: 'bar',
+  data: {
+    labels: ['FY2022','FY2023','FY2024','FY2025'],
+    datasets: [
+      { label: 'Sales', data: [6.7,28.5,62.3,45.9], backgroundColor: '#dc0505' },
+      { label: 'Parts', data: [0.6,1.6,3.1,4.1], backgroundColor: '#1f1f1f' },
+      { label: 'Service', data: [0.5,2.7,5.0,6.8], backgroundColor: '#6b7280' },
+      { label: 'Rental', data: [0.04,2.6,5.2,2.9], backgroundColor: '#9ca3af' },
+    ]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { position: 'top' }, tooltip: { callbacks: { label: ctx => ctx.dataset.label + ': $' + ctx.parsed.y.toFixed(1) + 'M' }}, title: { display: true, text: 'Hitachi Total: $59.7M (FY25)', font: { size: 11 }, color: '#6b7280' }},
+    scales: { y: { ...gridOpts, stacked: true, ticks: { callback: v => '$'+v+'M' } }, x: { ...gridOpts, stacked: true }}
+  }
+});
+
+// Truck by Department
+new Chart(document.getElementById('truckDeptChart'), {
+  type: 'bar',
+  data: {
+    labels: ['FY2022','FY2023','FY2024','FY2025'],
+    datasets: [
+      { label: 'Sales', data: [7.6,7.0,9.8,8.9], backgroundColor: '#dc0505' },
+      { label: 'Parts', data: [0.4,0.6,0.7,1.1], backgroundColor: '#1f1f1f' },
+      { label: 'Service', data: [0.5,0.9,1.0,1.5], backgroundColor: '#6b7280' },
+      { label: 'Rental', data: [1.6,2.0,4.4,4.1], backgroundColor: '#9ca3af' },
+    ]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { position: 'top' }, tooltip: { callbacks: { label: ctx => ctx.dataset.label + ': $' + ctx.parsed.y.toFixed(1) + 'M' }}, title: { display: true, text: 'Trucks Total: $15.6M (FY25)', font: { size: 11 }, color: '#6b7280' }},
+    scales: { y: { ...gridOpts, stacked: true, ticks: { callback: v => '$'+v+'M' } }, x: { ...gridOpts, stacked: true }}
+  }
+});
+
+// Parts by OEM
+const partsOEMs = ['Case','Hitachi','(Other)','Roadtec','Peterson','Eagle','Terex/Volvo','Rubble Master'];
+new Chart(document.getElementById('partsOemChart'), {
+  type: 'bar',
+  data: {
+    labels: partsOEMs,
+    datasets: [
+      { label: 'FY2023', data: [8.6,1.6,3.4,2.9,0,1.4,0.6,0.4], backgroundColor: '#9ca3af' },
+      { label: 'FY2024', data: [9.2,3.1,3.6,4.1,0.3,1.7,0.7,0.6], backgroundColor: '#6b7280' },
+      { label: 'FY2025', data: [7.8,4.1,3.5,3.3,3.5,1.1,1.0,0.6], backgroundColor: '#dc0505' },
+    ]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { position: 'top' }, tooltip: { callbacks: { label: ctx => ctx.dataset.label + ': $' + ctx.parsed.y.toFixed(1) + 'M' }}},
+    scales: { y: { ...gridOpts, ticks: { callback: v => '$'+v+'M' } }, x: { ...gridOpts, ticks: { font: { size: 10 }}}}
+  }
+});
+
+// Service by OEM
+const serviceOEMs = ['Case','Hitachi','Rokbak','Roadtec','Terex','Mauldin','Edge','(Other)'];
+new Chart(document.getElementById('serviceOemChart'), {
+  type: 'bar',
+  data: {
+    labels: serviceOEMs,
+    datasets: [
+      { label: 'FY2023', data: [12.4,2.7,0.3,0.7,0.5,0.3,0.3,2.0], backgroundColor: '#9ca3af' },
+      { label: 'FY2024', data: [11.5,5.0,0.5,1.1,0.5,0.3,0.3,1.5], backgroundColor: '#6b7280' },
+      { label: 'FY2025', data: [9.0,6.8,0.8,0.8,0.4,0.3,0.3,1.4], backgroundColor: '#dc0505' },
+    ]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { position: 'top' }, tooltip: { callbacks: { label: ctx => ctx.dataset.label + ': $' + ctx.parsed.y.toFixed(1) + 'M' }}},
+    scales: { y: { ...gridOpts, ticks: { callback: v => '$'+v+'M' } }, x: { ...gridOpts, ticks: { font: { size: 10 }}}}
+  }
+});
+
+// FY2025 Branch Revenue (all 18 locations)
+const br25 = [
+  {n:'Charlotte',rev:26488,ebitda:2219},{n:'Columbia',rev:23079,ebitda:157},{n:'Greenville SC',rev:22020,ebitda:1931},
+  {n:'Nashville (KU)',rev:19040,ebitda:951},{n:'Knoxville',rev:19428,ebitda:1899},{n:'Nashville (DW)',rev:18649,ebitda:3233},
+  {n:'Raleigh',rev:17379,ebitda:2356},{n:'Charleston',rev:16554,ebitda:1113},{n:'Wilson',rev:13962,ebitda:853},
+  {n:'Ashland',rev:11800,ebitda:924},{n:'Greenville NC',rev:10651,ebitda:366},{n:'Corporate',rev:10907,ebitda:-3775},
+  {n:'Asheville',rev:10631,ebitda:314},{n:'Greensboro',rev:7030,ebitda:-237},{n:'Savannah',rev:6033,ebitda:-226},
+  {n:'Wise',rev:5334,ebitda:257},{n:'Norfolk',rev:3102,ebitda:-125},{n:'Wilmington',rev:1833,ebitda:-543}
+].sort((a,b)=>b.rev-a.rev);
+
+new Chart(document.getElementById('branchRevChart25'), {
+  type: 'bar',
+  data: {
+    labels: br25.map(b=>b.n),
+    datasets: [{ data: br25.map(b=>b.rev/1000), backgroundColor: 'rgba(31,31,31,0.75)', borderRadius: 4 }]
+  },
+  options: {
+    indexAxis: 'y', responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => '$' + ctx.parsed.x.toFixed(1) + 'M' }}},
+    scales: { x: { ...gridOpts, ticks: { callback: v => '$'+v+'M' } }, y: { ...gridOpts, ticks: { font: { size: 9 }}}}
+  }
+});
+
+const br25eb = [...br25].sort((a,b)=>b.ebitda-a.ebitda);
+new Chart(document.getElementById('branchEbitdaChart25'), {
+  type: 'bar',
+  data: {
+    labels: br25eb.map(b=>b.n),
+    datasets: [{ data: br25eb.map(b=>b.ebitda/1000), backgroundColor: br25eb.map(b=>b.ebitda>=0?'rgba(22,163,74,0.7)':'rgba(220,5,5,0.7)'), borderRadius: 4 }]
+  },
+  options: {
+    indexAxis: 'y', responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => '$' + ctx.parsed.x.toFixed(2) + 'M' }}},
+    scales: { x: { ...gridOpts, ticks: { callback: v => '$'+v+'M' } }, y: { ...gridOpts, ticks: { font: { size: 9 }}}}
+  }
+});
+
+// Branch P&L Table (FY2025)
+const brPL = [
+  {n:'Charlotte',rev:26488180,neq:18509549,parts:3502069,svc:2377146,rent:1020624,gm:5081839,sga:-2868646,ebitda:2219263},
+  {n:'Nashville (DW)',rev:18649609,neq:12276480,parts:4840450,svc:1174005,rent:306873,gm:5362699,sga:-2332186,ebitda:3232724},
+  {n:'Columbia',rev:23079405,neq:13866983,parts:5242409,svc:2819052,rent:915436,gm:5036677,sga:-4864894,ebitda:157116},
+  {n:'Raleigh',rev:17378594,neq:8183127,parts:3005161,svc:1931332,rent:3601824,gm:5574132,sga:-3224031,ebitda:2356335},
+  {n:'Greenville SC',rev:22020352,neq:13721371,parts:2794220,svc:1750179,rent:2594387,gm:5256264,sga:-3365312,ebitda:1931372},
+  {n:'Knoxville',rev:19428291,neq:14754336,parts:3123174,svc:715601,rent:515084,gm:4395197,sga:-2528646,ebitda:1898555},
+  {n:'Nashville (KU)',rev:19040068,neq:13791851,parts:2596513,svc:927894,rent:1316110,gm:3810054,sga:-2859477,ebitda:951029},
+  {n:'Charleston',rev:16553982,neq:8448911,parts:3489723,svc:1665131,rent:1881644,gm:4225364,sga:-3112102,ebitda:1113277},
+  {n:'Wilson',rev:13961713,neq:10029721,parts:2129511,svc:832145,rent:735036,gm:2333238,sga:-1473770,ebitda:852968},
+  {n:'Ashland',rev:11800003,neq:6585277,parts:1906834,svc:804069,rent:2299222,gm:2960005,sga:-2036750,ebitda:923551},
+  {n:'Greenville NC',rev:10651109,neq:7041624,parts:1839758,svc:648526,rent:709827,gm:2003911,sga:-1636307,ebitda:365892},
+  {n:'Asheville',rev:10630535,neq:6390259,parts:2581575,svc:1069986,rent:328215,gm:2218955,sga:-1903615,ebitda:313740},
+  {n:'Greensboro',rev:7030439,neq:4650588,parts:1186117,svc:822411,rent:162850,gm:1444212,sga:-1680409,ebitda:-237326},
+  {n:'Savannah',rev:6033220,neq:2487768,parts:872411,svc:765628,rent:1769413,gm:1690567,sga:-1916662,ebitda:-226094},
+  {n:'Wise',rev:5334408,neq:3182663,parts:1038922,svc:520815,rent:484508,gm:1288853,sga:-1031832,ebitda:256940},
+  {n:'Norfolk',rev:3102369,neq:1594192,parts:347041,svc:337802,rent:823335,gm:1090775,sga:-1215010,ebitda:-124977},
+  {n:'Wilmington',rev:1833255,neq:877245,parts:538559,svc:297611,rent:29990,gm:433336,sga:-960377,ebitda:-542887},
+  {n:'Corporate',rev:10907029,neq:9906327,parts:0,svc:0,rent:100942,gm:173798,sga:-4630748,ebitda:-3775227},
+];
+const plBody = document.getElementById('branchPLTable');
+brPL.sort((a,b)=>b.ebitda-a.ebitda).forEach(b => {
+  const gmpct = b.rev ? (b.gm/b.rev*100).toFixed(1) : '–';
+  const ebpct = b.rev ? (b.ebitda/b.rev*100).toFixed(1) : '–';
+  const tr = document.createElement('tr');
+  tr.innerHTML = `<td>${b.n}</td><td class="num">${fmt(b.rev)}</td><td class="num">${fmt(b.neq)}</td><td class="num">${fmt(b.parts)}</td><td class="num">${fmt(b.svc)}</td><td class="num">${fmt(b.rent)}</td><td class="num">${fmt(b.gm)}</td><td class="num">${gmpct}%</td><td class="num neg">${fmt(b.sga)}</td><td class="num ${b.ebitda>=0?'pos':'neg'}">${fmt(b.ebitda)}</td><td class="num ${b.ebitda>=0?'pos':'neg'}">${ebpct}%</td>`;
+  plBody.appendChild(tr);
+});
+const plTotTr = document.createElement('tr'); plTotTr.style.fontWeight='700'; plTotTr.style.borderTop='2px solid #1f1f1f';
+plTotTr.innerHTML = `<td>Total</td><td class="num">${fmt(243922559)}</td><td class="num">${fmt(156298272)}</td><td class="num">${fmt(41034449)}</td><td class="num">${fmt(19459331)}</td><td class="num">${fmt(19595321)}</td><td class="num">${fmt(54379878)}</td><td class="num">22.3%</td><td class="num neg">${fmt(-43640776)}</td><td class="num">${fmt(11666249)}</td><td class="num">4.8%</td>`;
+plBody.appendChild(plTotTr);
+
+// Rental by Location (FY2025)
+const rentalBranches = brPL.filter(b=>b.rent>50000 && b.n!=='Corporate').sort((a,b)=>b.rent-a.rent);
+new Chart(document.getElementById('rentalLocChart'), {
+  type: 'bar',
+  data: {
+    labels: rentalBranches.map(b=>b.n),
+    datasets: [{ data: rentalBranches.map(b=>b.rent/1e6), backgroundColor: 'rgba(31,31,31,0.75)', borderRadius: 4 }]
+  },
+  options: {
+    indexAxis: 'y', responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => '$' + ctx.parsed.x.toFixed(2) + 'M' }}},
+    scales: { x: { ...gridOpts, ticks: { callback: v => '$'+v+'M' } }, y: { ...gridOpts, ticks: { font: { size: 9 }}}}
+  }
+});
+
+// CASE vs All OEM by Location
+const caseLocNames = ['Columbia','Charleston','Charlotte','Greenville NC','Raleigh','Greensboro','Greenville SC','Asheville','Wilmington','Ashland','Savannah','Wise','Norfolk','Wilson'];
+const caseFY25 = [7375,3912,3153,3236,5039,2830,5293,1487,432,386,256,244,64,142];
+const allFY25 = [23410,16733,26589,10863,17453,7083,22195,10719,1843,11743,6120,5344,3116,14028];
+new Chart(document.getElementById('caseVsAllChart'), {
+  type: 'bar',
+  data: {
+    labels: caseLocNames,
+    datasets: [
+      { label: 'CASE', data: caseFY25.map(v=>v/1000), backgroundColor: '#9ca3af', borderRadius: 3 },
+      { label: 'All Other OEMs', data: allFY25.map((v,i)=>(v-caseFY25[i])/1000), backgroundColor: '#dc0505', borderRadius: 3 },
+    ]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { position: 'top' }, tooltip: { callbacks: { label: ctx => ctx.dataset.label + ': $' + ctx.parsed.y.toFixed(1) + 'M' }}},
+    scales: { y: { ...gridOpts, stacked: true, ticks: { callback: v => '$'+v+'M' } }, x: { ...gridOpts, stacked: true, ticks: { maxRotation: 45, font: { size: 9 }}}}
+  }
+});
+</script>
+
+</div><!-- /dashboard-content -->
+
+<script>
+// Password gate using SHA-256 hash comparison
+// Hash of the password - not stored in plaintext
+const PASS_HASH = '39406933ca878524caa4ac2bc8d09a99c1ee4b61f77b3c41b41305d1480e2b5b';
+
+async function sha256(str) {
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
+async function handleAuth(e) {
+  e.preventDefault();
+  const input = document.getElementById('auth-input');
+  const hash = await sha256(input.value);
+  if (hash === PASS_HASH) {
+    document.getElementById('auth-gate').classList.add('hidden');
+    document.getElementById('dashboard-content').classList.add('visible');
+    sessionStorage.setItem('hh_auth', hash);
+    // Trigger chart resize since they were hidden
+    setTimeout(() => {
+      const activePanel = document.querySelector('.tab-panel.active');
+      if (activePanel) {
+        activePanel.querySelectorAll('canvas').forEach(c => {
+          const chart = Chart.getChart(c);
+          if (chart) chart.resize();
+        });
+      }
+    }, 100);
+  } else {
+    input.classList.add('error');
+    document.getElementById('auth-error').textContent = 'Incorrect password';
+    setTimeout(() => input.classList.remove('error'), 400);
+    input.value = '';
+    input.focus();
+  }
+  return false;
+}
+
+// Check if already authenticated this session
+(async function() {
+  const stored = sessionStorage.getItem('hh_auth');
+  if (stored === PASS_HASH) {
+    document.getElementById('auth-gate').classList.add('hidden');
+    document.getElementById('dashboard-content').classList.add('visible');
+  }
+})();
+</script>
+</body>
+</html>
