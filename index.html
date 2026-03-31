@@ -492,6 +492,65 @@
 </div>
 </div>
 
+<!-- CASH FLOW FORECAST -->
+<div class="section-title" onclick="toggleSection(this)">Cash Flow Forecast <span class="badge badge-info">as of 3/30/2026</span></div>
+<div class="section-content">
+<div class="grid-4">
+  <div class="card kpi">
+    <div class="label">Current Availability (3/27)</div>
+    <div class="value" style="color:var(--yellow)">$6.5M</div>
+    <div class="delta warn">Below $8.0M target</div>
+  </div>
+  <div class="card kpi">
+    <div class="label">Low Point (Actual)</div>
+    <div class="value" style="color:var(--red)">$4.5M</div>
+    <div class="delta down">Feb 27 -- trough of cycle</div>
+  </div>
+  <div class="card kpi">
+    <div class="label">Apr End (w/ BBC Adj)</div>
+    <div class="value" style="color:var(--yellow)">$7.7M</div>
+    <div class="delta warn">+$1.7M BBC collateral increase</div>
+  </div>
+  <div class="card kpi">
+    <div class="label">May End (w/ BBC Adj)</div>
+    <div class="value" style="color:var(--yellow)">$7.0M</div>
+    <div class="delta warn">Trending toward target</div>
+  </div>
+</div>
+<div class="grid-2">
+  <div class="card">
+    <div class="card-header">Weekly Availability Trend (Dec '25 - Apr '26)</div>
+    <div class="chart-container" style="height:340px;"><canvas id="cashFlowWeeklyChart"></canvas></div>
+  </div>
+  <div class="card">
+    <div class="card-header">Monthly Cash Receipts vs Disbursements ($M)</div>
+    <div class="chart-container" style="height:340px;"><canvas id="cashFlowMonthlyChart"></canvas></div>
+  </div>
+</div>
+<div class="card" style="margin-bottom:24px;">
+  <div class="card-header">Monthly Cash Flow Summary ($000s) <span style="font-weight:400;text-transform:none;letter-spacing:0;font-size:11px;color:#6b7280;">Source: Rick Hewitt Cash Flow Forecast (3/30/2026)</span></div>
+  <div class="scroll-x">
+  <table>
+    <thead>
+      <tr><th>Metric</th><th class="num">Dec '25A</th><th class="num">Jan '26A</th><th class="num">Feb '26A</th><th class="num">Mar '26F</th><th class="num">Apr '26F</th><th class="num">May '26F</th></tr>
+    </thead>
+    <tbody id="cashFlowTable"></tbody>
+  </table>
+  </div>
+</div>
+<div class="card" style="margin-bottom:24px;">
+  <div class="card-header">Key Assumptions & Potential Upside</div>
+  <div style="font-size:12.5px;line-height:1.8;color:#374151;">
+    <ul style="padding-left:18px;">
+      <li><strong>BBC collateral increase ($1.67M):</strong> Expected to go into effect week of April 6 from February BBC</li>
+      <li><strong>Parts cap increase ($5M to $7.5M):</strong> Expected ~$1M pickup, reflected in revised scenario but not yet in base forecast</li>
+      <li><strong>Minimum availability covenant:</strong> $6.5M floor; target: $8.0M -- currently operating below target</li>
+      <li><strong>Seasonality:</strong> March-May collections ramp with spring construction season (equipment sales $12M+ monthly)</li>
+    </ul>
+  </div>
+</div>
+</div>
+
 <!-- BORROWING BASE ANALYSIS -->
 <div class="section-title" onclick="toggleSection(this)">Borrowing Base & Availability Analysis</div>
 <div class="section-content">
@@ -850,7 +909,7 @@
 </div></div>
 
 <div style="text-align:center;padding:28px;color:var(--text2);font-size:11px;border-top:1px solid var(--border);margin-top:16px;">
-  Hills Holdco - Confidential | Generated from Operating Model (3.27.2026) & Carveout Model (3.27.2026) | Dashboard auto-generated
+  Hills Holdco - Confidential | Generated from Operating Model (3.27.2026), Carveout Model (3.27.2026) & Cash Flow Forecast (3.30.2026) | Dashboard auto-generated (3.31.2026)
 </div>
 
 <script>
@@ -1376,6 +1435,88 @@ new Chart(document.getElementById('locEbitdaChart'), {
     plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => '$' + ctx.parsed.x.toFixed(2) + 'M' }}},
     scales: { x: { ...gridOpts, ticks: { callback: v => '$'+v+'M' } }, y: gridOpts }
   }
+});
+
+// ===== CASH FLOW FORECAST =====
+const cfWeekLabels = ['12/05','12/12','12/19','12/26','01/02','01/09','01/16','01/23','01/30','02/06','02/13','02/20','02/27','03/06','03/13','03/20','03/27','04/03','04/10'];
+const cfWeekEnd = [9.87,12.14,11.76,11.57,13.94,11.35,9.26,7.85,7.62,7.91,5.75,5.54,4.47,6.69,5.84,5.54,6.47,6.34,6.21];
+const cfWeekNet = [9.87,12.14,11.76,11.57,12.56,11.35,9.26,7.85,6.23,6.52,5.75,5.54,4.47,6.69,5.84,5.54,6.47,6.34,7.88];
+const cfWeekActual = [true,true,true,true,true,true,true,true,true,true,true,true,true,true,true,true,true,true,true];
+const cfTarget = cfWeekLabels.map(()=>8.0);
+const cfFloor = cfWeekLabels.map(()=>6.5);
+
+new Chart(document.getElementById('cashFlowWeeklyChart'), {
+  type: 'line',
+  data: {
+    labels: cfWeekLabels,
+    datasets: [
+      { label: 'Ending Balance ($M)', data: cfWeekEnd, borderColor: '#1f1f1f', backgroundColor: 'rgba(31,31,31,0.05)', fill: true, pointRadius: 4, pointBackgroundColor: cfWeekEnd.map(v => v < 6.5 ? '#dc0505' : v < 8 ? '#ca8a04' : '#16a34a'), tension: 0.3, borderWidth: 2.5 },
+      { label: 'Net (w/ BBC Adj)', data: cfWeekNet, borderColor: '#7c3aed', pointRadius: 3, pointBackgroundColor: '#7c3aed', tension: 0.3, borderWidth: 2, borderDash: [5,3] },
+      { label: 'Target ($8M)', data: cfTarget, borderColor: '#ca8a04', pointRadius: 0, borderWidth: 2, borderDash: [8,4] },
+      { label: 'Covenant Floor ($6.5M)', data: cfFloor, borderColor: '#dc0505', pointRadius: 0, borderWidth: 2, borderDash: [10,5] },
+    ]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { position: 'top', labels: { usePointStyle: true, padding: 12 } }, tooltip: { callbacks: { label: ctx => ctx.dataset.label + ': $' + ctx.parsed.y.toFixed(1) + 'M' }}},
+    scales: { y: { ...gridOpts, min: 0, max: 16, ticks: { callback: v => '$'+v+'M' } }, x: { ...gridOpts, ticks: { maxRotation: 45 }}}
+  }
+});
+
+// Monthly receipts vs disbursements
+const cfMonthLabels = ['Dec 25','Jan 26','Feb 26','Mar 26F','Apr 26F','May 26F'];
+const cfReceipts = [22.0,13.1,8.5,19.1,20.0,21.7];
+const cfDisbursements = [19.5,17.9,10.1,14.1,20.2,22.1];
+const cfNetExcess = [2.5,-4.8,-1.6,5.0,-0.2,-0.3];
+
+new Chart(document.getElementById('cashFlowMonthlyChart'), {
+  type: 'bar',
+  data: {
+    labels: cfMonthLabels,
+    datasets: [
+      { label: 'Receipts', data: cfReceipts, backgroundColor: 'rgba(22,163,74,0.7)', borderRadius: 4 },
+      { label: 'Disbursements', data: cfDisbursements, backgroundColor: 'rgba(220,5,5,0.6)', borderRadius: 4 },
+      { label: 'Net Excess/(Shortfall)', data: cfNetExcess, type: 'line', borderColor: '#1f1f1f', backgroundColor: 'transparent', pointRadius: 5, pointBackgroundColor: cfNetExcess.map(v => v >= 0 ? '#16a34a' : '#dc0505'), borderWidth: 2.5, tension: 0.3, yAxisID: 'y' },
+    ]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { position: 'top' }, tooltip: { callbacks: { label: ctx => ctx.dataset.label + ': $' + ctx.parsed.y.toFixed(1) + 'M' }}},
+    scales: { y: { ...gridOpts, ticks: { callback: v => '$'+v+'M' } }, x: gridOpts }
+  }
+});
+
+// Cash Flow Summary Table
+const cfTableData = [
+  { label: 'Beginning Balance', data: [12663,15135,7622,4471,6578,6019], bold: false },
+  { label: 'Total Cash Receipts', data: [22045,13092,8497,19122,20004,21739], bold: false },
+  { label: 'Total Cash Disbursements', data: [-19521,-17942,-10140,-14111,-20167,-22072], bold: false },
+  { label: 'Operating Excess / (Shortfall)', data: [2524,-4850,-1642,5011,-162,-334], bold: true },
+  { label: 'Capital & Financing', data: [0,0,0,-41,-396,-396], bold: false },
+  { label: 'Ending Balance', data: [15135,7622,4471,6578,6019,5289], bold: true },
+  { label: 'BBC Adjustment', data: [0,-1389,0,0,1671,1671], bold: false },
+  { label: 'Net Ending (w/ BBC Adj)', data: [15135,6233,4471,6578,7690,6960], bold: true },
+  { label: '', data: [null,null,null,null,null,null], bold: false },
+  { label: 'Target Minimum', data: [8000,8000,8000,8000,8000,8000], bold: false, style: 'warn' },
+  { label: 'Covenant Floor', data: [6500,6500,6500,6500,6500,6500], bold: false, style: 'neg' },
+];
+const cfBody = document.getElementById('cashFlowTable');
+cfTableData.forEach(row => {
+  const tr = document.createElement('tr');
+  if (row.bold) tr.style.fontWeight = '700';
+  if (!row.label) { tr.innerHTML = '<td colspan="7" style="height:4px;border:none;"></td>'; cfBody.appendChild(tr); return; }
+  const cells = row.data.map(v => {
+    if (v === null) return '<td class="num">–</td>';
+    const formatted = v.toLocaleString('en-US');
+    let cls = 'num';
+    if (row.style === 'warn') cls += '';
+    else if (row.style === 'neg') cls += '';
+    else if (v < 0) cls += ' neg';
+    else if (row.label === 'Net Ending (w/ BBC Adj)' && v < 8000) cls += ' neg';
+    return `<td class="${cls}">${formatted}</td>`;
+  }).join('');
+  tr.innerHTML = `<td>${row.label}</td>${cells}`;
+  cfBody.appendChild(tr);
 });
 
 // ===== BORROWING BASE ANALYSIS =====
