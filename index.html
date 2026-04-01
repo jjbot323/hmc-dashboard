@@ -137,7 +137,7 @@
 <div class="header">
   <div class="accent-bar"></div>
   <h1>Hills Holdco - Operating Model Dashboard</h1>
-  <p>Confidential | Data through January 2026 (Actuals) | Model as of March 27, 2026</p>
+  <p>Confidential | Data through February 2026 (Actuals) | Model as of April 1, 2026</p>
 </div>
 
 <div class="tab-nav">
@@ -187,7 +187,7 @@
   <div class="card kpi">
     <div class="label">PNC Availability (Dec '25)</div>
     <div class="value" style="color:var(--green)">$37.7M</div>
-    <div class="delta warn">Jan '26: $33.0M</div>
+    <div class="delta warn">Feb '26: $31.7M</div>
   </div>
   <div class="card kpi">
     <div class="label">FCCR (Dec '25 TTM)</div>
@@ -220,7 +220,7 @@
   <div class="scroll-x">
   <table>
     <thead>
-      <tr><th>Line Item</th><th class="num">FY2023A</th><th class="num">FY2024A</th><th class="num">FY2025A</th><th class="num">FY2026E</th><th class="num">FY2027E</th><th class="num">FY2028E</th></tr>
+      <tr><th>Line Item</th><th class="num">FY2023A</th><th class="num">FY2024A</th><th class="num">FY2025A</th><th class="num">FY2026E</th></tr>
     </thead>
     <tbody id="isTable"></tbody>
   </table>
@@ -288,7 +288,7 @@
   <div class="scroll-x">
   <table>
     <thead>
-      <tr><th>Line Item</th><th class="num">FY2023A</th><th class="num">FY2024A</th><th class="num">FY2025A</th><th class="num">FY2026E</th><th class="num">FY2027E</th><th class="num">FY2028E</th></tr>
+      <tr><th>Line Item</th><th class="num">FY2023A</th><th class="num">FY2024A</th><th class="num">FY2025A</th><th class="num">FY2026E</th></tr>
     </thead>
     <tbody id="bsTable"></tbody>
   </table>
@@ -484,7 +484,7 @@
   <div class="scroll-x">
   <table>
     <thead>
-      <tr><th>Debt Facility</th><th class="num">FY2023A</th><th class="num">FY2024A</th><th class="num">FY2025A</th><th class="num">FY2026E</th><th class="num">FY2027E</th><th class="num">FY2028E</th></tr>
+      <tr><th>Debt Facility</th><th class="num">FY2023A</th><th class="num">FY2024A</th><th class="num">FY2025A</th><th class="num">FY2026E</th></tr>
     </thead>
     <tbody id="debtTable"></tbody>
   </table>
@@ -493,7 +493,7 @@
 </div>
 
 <!-- CASH FLOW FORECAST -->
-<div class="section-title" onclick="toggleSection(this)">Cash Flow Forecast <span class="badge badge-info">as of 3/30/2026</span></div>
+<div class="section-title" onclick="toggleSection(this)">Cash Flow Forecast <span class="badge badge-info">as of 4/1/2026</span></div>
 <div class="section-content">
 <div class="grid-4">
   <div class="card kpi">
@@ -909,7 +909,7 @@
 </div></div>
 
 <div style="text-align:center;padding:28px;color:var(--text2);font-size:11px;border-top:1px solid var(--border);margin-top:16px;">
-  Hills Holdco - Confidential | Generated from Operating Model (3.27.2026), Carveout Model (3.27.2026) & Cash Flow Forecast (3.30.2026) | Dashboard auto-generated (3.31.2026)
+  Hills Holdco - Confidential | Generated from Operating Model (4.1.2026), Carveout Model (4.1.2026) & Cash Flow Forecast (4.1.2026) | Dashboard auto-generated (4.1.2026)
 </div>
 
 <script>
@@ -954,67 +954,67 @@ document.addEventListener('keydown', e => {
 });
 
 // ===== DATA =====
-const fy = ['FY2023A','FY2024A','FY2025A','FY2026E','FY2027E','FY2028E'];
-const fyShort = ["'23A","'24A","'25A","'26E","'27E","'28E"];
+const fy = ['FY2023A','FY2024A','FY2025A','FY2026E'];
+const fyShort = ["'23A","'24A","'25A","'26E"];
 
 const D = {
-  total_rev: [195599716, 234837282, 243922558, 278570958, 293006858, 304370341],
-  adj_ebitda: [22537511, 22297898, 14992888, 17610254, 18094328, 20369526],
-  net_income: [7346574, -4557186, -7125636, -4003932, -999406, 935623],
-  total_gm: [null, null, null, null, null, null],
-  total_gm_pct: [0.2652, 0.2498, 0.2229, 0.2211, 0.2259, 0.2290],
-  total_sga: [-31162934, -42641702, -43640776, -47601064, -48791091, -50010868],
-  rev_new: [122991726, 150886929, 156298272, 183200847, 190123726, 194876820],
-  rev_used: [13235900, 10522336, 7535187, 7935558, 8420159, 8630663],
-  rev_parts: [30124327, 34949837, 41034449, 43959551, 47461399, 50783697],
-  rev_service: [14676387, 16397212, 19459330, 21965898, 24250302, 26190326],
-  rev_rental: [14571375, 22080968, 19595321, 21509103, 22751273, 23888837],
-  gm_new: [0.1669, 0.1229, 0.1058, 0.1105, 0.1105, 0.1105],
-  gm_used: [0.1228, 0.1047, 0.0624, 0.0791, 0.0791, 0.0791],
-  gm_parts: [0.2819, 0.2914, 0.2902, 0.2717, 0.2809, 0.2809],
-  gm_service: [0.6164, 0.6105, 0.6176, 0.6267, 0.6320, 0.6320],
-  gm_rental: [0.8832, 0.8693, 0.6965, 0.6979, 0.6979, 0.6979],
-  cash: [4789808, 1392670, 1995535, 0, 0, 0],
-  ar: [13397386, 16515678, 15935433, 18401861, 19092362, 19803158],
-  new_inv: [65616378, 47027693, 54648044, 55024762, 58407226, 63607765],
-  rental_inv: [44933927, 57701393, 51628927, 52770184, 53886057, 55057724],
-  used_inv: [2637898, 2183075, 2413211, 2451443, 2451443, 2451443],
-  parts_inv: [9130628, 11690075, 12566769, 12113784, 12860936, 13654170],
-  fixed_assets: [7757266, 11199648, 9467877, 8115402, 7003454, 6093122],
-  total_assets: [180251931, 181710303, 176362495, 174409671, 177708497, 183158120],
-  ap: [16880531, 6329436, 20284155, 17183687, 19273017, 19632089],
-  pnc_revolver: [54759681, 60873641, 42293033, 46074698, 46259905, 45701812],
-  floorplan: [46126717, 49378651, 60131177, 57221714, 60265932, 64946417],
-  cnh_tl: [1141589, 591589, 0, 0, 0, 0],
-  other_debt: [1493667, 1076152, 271991, 549007, 480607, 412207],
-  seller_note: [3160747, 2717743, 2853630, 2999870, 3153677, 3315370],
-  pnc_capex: [3435837, 4403778, 4032838, 3359749, 2652845, 1902343],
-  total_liabilities: [146003555, 152019114, 153796940, 155848048, 160146280, 164660280],
-  total_equity: [24266239, 22980397, 22565555, 18561623, 17562217, 18497840],
-  total_cash_interest: [3727780, 7344854, 6336347, 6246568, 6458959, 6527911],
-  total_interest: [3883744, 7499408, 6472234, 6392809, 6612766, 6689603],
-  salaries: [-15048747, -20223185, -20240165, -22512953, -23075777, -23652672],
-  payroll_taxes: [-1328184, -2044260, -2075085, -2241035, -2297061, -2354488],
-  ga: [-3351933, -4692530, -4324150, -4883203, -5005283, -5130415],
-  rent_tax_util: [-983013, -1532878, -1838502, -1769543, -1813782, -1859127],
-  selling: [-2875097, -4503139, -4903878, -5449693, -5585935, -5725583],
-  insurance: [-1829932, -2649805, -2679320, -2694642, -2762008, -2831058],
+  total_rev: [195599716, 234837282, 243922558, 276838514],
+  adj_ebitda: [22537511, 22297898, 14992888, 13745955],
+  net_income: [7346574, -4557186, -7125636, -5808255],
+  total_gm: [null, null, null, null],
+  total_gm_pct: [0.2652, 0.2498, 0.2229, 0.2207],
+  total_sga: [-31162934, -42641702, -43640776, -48004803],
+  rev_new: [122991726, 150886929, 156298272, 181468360],
+  rev_used: [13235900, 10522336, 7535187, 7935558],
+  rev_parts: [30124327, 34949837, 41034449, 43959594],
+  rev_service: [14676387, 16397212, 19459330, 21965898],
+  rev_rental: [14571375, 22080968, 19595321, 21509103],
+  gm_new: [0.1669, 0.1229, 0.1058, 0.1109],
+  gm_used: [0.1228, 0.1047, 0.0624, 0.0770],
+  gm_parts: [0.2819, 0.2914, 0.2902, 0.2713],
+  gm_service: [0.6164, 0.6105, 0.6176, 0.6270],
+  gm_rental: [0.8832, 0.8693, 0.6965, 0.6851],
+  cash: [4789808, 1392670, 1995535, 0],
+  ar: [13397386, 16515678, 15935433, 18401861],
+  new_inv: [65616378, 47027693, 54648044, 59478905],
+  rental_inv: [44933927, 57701393, 51628927, 52105279],
+  used_inv: [2637898, 2183075, 2413211, 2202887],
+  parts_inv: [9130628, 11690075, 12566769, 12410029],
+  fixed_assets: [7757266, 11199648, 9467877, 8574522],
+  total_assets: [180251931, 181710303, 176362495, 178622333],
+  ap: [16880531, 6329436, 20284155, 19162330],
+  pnc_revolver: [54759681, 60873641, 42293033, 44262921],
+  floorplan: [46126717, 49378651, 60131177, 62212504],
+  cnh_tl: [1141589, 591589, 0, 0],
+  other_debt: [1493667, 1076152, 271991, 1140882],
+  seller_note: [3160747, 2717743, 2853630, 2998599],
+  pnc_capex: [3435837, 4403778, 4032838, 3351930],
+  total_liabilities: [146003555, 152019114, 153796940, 161865033],
+  total_equity: [24266239, 22980397, 22565555, 16757300],
+  total_cash_interest: [3727780, 7344854, 6336347, 6164187],
+  total_interest: [3883744, 7499408, 6472234, 6310428],
+  salaries: [-15048747, -20223185, -20240165, -22512953],
+  payroll_taxes: [-1328184, -2044260, -2075085, -2241035],
+  ga: [-3351933, -4692530, -4324150, -4883203],
+  rent_tax_util: [-983013, -1532878, -1838502, -1769543],
+  selling: [-2875097, -4503139, -4903878, -5449693],
+  insurance: [-1829932, -2649805, -2679320, -2694642],
 };
 
 // Monthly data
 const months25_26 = ['Jan 25','Feb 25','Mar 25','Apr 25','May 25','Jun 25','Jul 25','Aug 25','Sep 25','Oct 25','Nov 25','Dec 25',
   'Jan 26','Feb 26','Mar 26','Apr 26','May 26','Jun 26','Jul 26','Aug 26','Sep 26','Oct 26','Nov 26','Dec 26'];
 const mRev = [15252074,18482643,35697760,19423105,16507842,17536346,17741237,22702548,20688539,18821104,17834149,23235212,
-  11318808,16845920,19019586,24199629,25881714,25034839,24587881,26961631,25855831,26395044,23779225,28690850];
+  11318808,16825302,17307760,24199629,25881714,25034839,24587881,26961631,25855831,26395044,23779225,28690850];
 const mEbitda = [526000,756161,3799914,1213496,1201011,1016601,920912,2031586,1225882,931735,259274,1110316,
-  -1148045,689564,3994789,1525628,1550414,1592747,1598728,1847678,1715503,1677101,1092416,1473731];
+  -1148045,-174736,3994789,1525628,1550414,1592747,1598728,1847678,1715503,1677101,1092416,1473731];
 
 // Covenant data
 const covMonths = ['Apr 25','May 25','Jun 25','Jul 25','Aug 25','Sep 25','Oct 25','Nov 25','Dec 25',
-  'Jan 26','Feb 26','Mar 26','Apr 26','May 26','Jun 26','Jul 26','Aug 26','Sep 26','Oct 26','Nov 26','Dec 26'];
-const fccr = [0.90,1.36,1.49,1.57,1.64,1.67,1.51,1.49,1.28,0.85,1.12,0.26,0.37,0.71,0.65,0.70,0.65,0.82,1.09,1.03,1.10];
-const leverage = [5.19,5.06,5.82,6.29,6.74,6.79,7.52,7.53,7.90,9.31,9.13,8.40,8.23,7.92,7.50,7.12,7.18,6.86,6.50,6.20,6.09];
-const covDebt = [102576,100891,102394,104274,108425,111259,114170,112922,109583,114597,113027,108157,110743,108656,109030,109070,108931,108724,109168,109591,110205];
+  'Jan 26','Feb 26','Mar 26','Apr 26','May 26','Jun 26','Jul 26','Aug 26','Sep 26'];
+const fccr = [0.90,1.36,1.49,1.57,1.64,1.67,1.51,1.49,1.28,0.85,1.17,0.23,0.34,0.69,0.62,0.65,0.59,0.76];
+const leverage = [5.19,5.06,5.82,6.29,6.74,6.79,7.52,7.53,7.90,9.31,10.36,9.33,9.11,8.78,8.28,7.85,7.93,7.55];
+const covDebt = [102576,100891,102394,104274,108425,111259,114170,112922,109583,114597,118978,111087,113692,111865,112363,112481,112421,112291];
 
 // Location data HMC
 const hmcLocs = {
@@ -1042,13 +1042,13 @@ const rjvLocs = {
 
 // Monthly working capital
 const mCash = [1287537,1063665,4006893,632069,836162,1950573,2025924,-404294,1871451,1098057,290284,1995535,
-  741112,0,0,0,0,0,0,0,0,0,0,0];
+  741112,823570,0,0,0,0,0,0,0,0,0,0];
 const mRevolver = [62268,63365,50624,52069,49671,49772,47197,45550,46957,46914,44236,42293,
-  46953,47708,43592,44953,44293,45579,46500,47357,47487,47653,47247,46075];
+  46953,48270,40947,42329,41929,43338,44337,45274,45480,45719,45373,44263];
 const mFloorplan = [47076,44629,43276,42221,43113,44644,49229,55124,56713,59796,61346,60131,
-  60564,58311,57213,58485,57107,56245,55413,54466,54179,54505,55386,57222];
+  60564,63117,62204,63476,62098,61236,60404,59457,59170,59496,60377,62213];
 const mAvail = [17732,16635,29376,27931,30329,30228,32803,34450,33043,33086,35764,37707,
-  33047,32292,36408,35047,35707,34421,33500,32643,32513,32347,32753,33925];
+  33047,31730,39053,37671,38071,36662,35663,34726,34520,34281,34627,35737];
 
 // ===== HELPERS =====
 function fmt(v, dec=0) {
@@ -1101,7 +1101,7 @@ const isBody = document.getElementById('isTable');
   ['Net Income', D.net_income, true],
 ].forEach(row => {
   if (row[0] === '_spacer') {
-    const tr = document.createElement('tr'); tr.innerHTML = '<td colspan="7" style="height:8px;border:none;"></td>'; isBody.appendChild(tr);
+    const tr = document.createElement('tr'); tr.innerHTML = '<td colspan="5" style="height:8px;border:none;"></td>'; isBody.appendChild(tr);
   } else addRow(isBody, row[0], row[1], row[2], row[3]);
 });
 
@@ -1129,7 +1129,7 @@ const bsBody = document.getElementById('bsTable');
   ['Total Equity', D.total_equity, true],
 ].forEach(row => {
   if (row[0] === '_spacer') {
-    const tr = document.createElement('tr'); tr.innerHTML = '<td colspan="7" style="height:8px;border:none;"></td>'; bsBody.appendChild(tr);
+    const tr = document.createElement('tr'); tr.innerHTML = '<td colspan="5" style="height:8px;border:none;"></td>'; bsBody.appendChild(tr);
   } else addRow(bsBody, row[0], row[1], row[2] || false);
 });
 
@@ -1153,7 +1153,7 @@ const debtBody = document.getElementById('debtTable');
   }), true, true],
 ].forEach(row => {
   if (row[0] === '_spacer') {
-    const tr = document.createElement('tr'); tr.innerHTML = '<td colspan="7" style="height:8px;border:none;"></td>'; debtBody.appendChild(tr);
+    const tr = document.createElement('tr'); tr.innerHTML = '<td colspan="5" style="height:8px;border:none;"></td>'; debtBody.appendChild(tr);
   } else if (row[3]) {
     const tr = document.createElement('tr'); tr.style.fontWeight = '700';
     tr.innerHTML = `<td>${row[0]}</td>${row[1].map(v => `<td class="num">${v ? v.toFixed(1)+'x' : '–'}</td>`).join('')}`;
@@ -1266,7 +1266,7 @@ new Chart(document.getElementById('revMixChart'), {
 new Chart(document.getElementById('gmChart'), {
   type: 'bar',
   data: {
-    labels: ["'24A","'25A","'26E","'27E","'28E"],
+    labels: ["'24A","'25A","'26E"],
     datasets: [
       { label: 'New Equip', data: D.gm_new.slice(1).map(v=>v?v*100:0), backgroundColor: '#dc0505' },
       { label: 'Used Equip', data: D.gm_used.slice(1).map(v=>v?v*100:0), backgroundColor: '#1f1f1f' },
