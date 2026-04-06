@@ -98,6 +98,38 @@
   @media (max-width: 1200px) { .grid-4, .market-kpi { grid-template-columns: repeat(2, 1fr); } .tab-nav { padding: 12px 16px 0; } .tab-btn { padding: 8px 14px; font-size: 11px; } }
   @media (max-width: 768px) { .grid-4, .grid-3, .grid-2, .grid-2-1, .market-kpi { grid-template-columns: 1fr; } }
 
+  /* Entity filter */
+  .entity-filter { display: flex; gap: 0; margin-bottom: 24px; background: #f0f1f3; border-radius: 8px; padding: 4px; width: fit-content; }
+  .entity-btn { padding: 8px 24px; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text2); background: transparent; border: none; border-radius: 6px; cursor: pointer; font-family: inherit; transition: all 0.2s; position: relative; }
+  .entity-btn.active { background: var(--charcoal); color: #ffffff; box-shadow: 0 2px 4px rgba(0,0,0,0.15); }
+  .entity-btn:not(.active):hover { color: var(--charcoal); background: rgba(0,0,0,0.05); }
+  .entity-btn.disabled { opacity: 0.5; cursor: default; }
+  .entity-btn .coming-soon { position: absolute; top: -6px; right: -4px; font-size: 7px; background: var(--accent); color: white; padding: 1px 4px; border-radius: 3px; letter-spacing: 0; text-transform: none; font-weight: 600; }
+  .kpi .plan-line, .kpi .py-line { font-size: 12px; margin-top: 4px; display: flex; justify-content: space-between; align-items: center; }
+  .kpi .plan-line .lbl, .kpi .py-line .lbl { color: var(--text2); font-weight: 600; }
+  .kpi .plan-line .val, .kpi .py-line .val { font-weight: 700; }
+
+  /* Sales Flash Banner */
+  .flash-banner { background: linear-gradient(135deg, #1f1f1f 0%, #2d2d2d 100%); border-radius: 12px; padding: 24px 28px; margin-bottom: 24px; color: #fff; border: 1px solid #404040; }
+  .flash-banner .flash-header { display: flex; align-items: center; gap: 12px; margin-bottom: 18px; }
+  .flash-banner .flash-header h3 { font-size: 14px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.8px; color: #fff; margin: 0; }
+  .flash-banner .flash-tag { display: inline-block; padding: 3px 10px; border-radius: 4px; font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; background: var(--accent); color: #fff; }
+  .flash-banner .flash-grid { display: grid; grid-template-columns: 3fr 2fr; gap: 20px; }
+  .flash-banner .flash-card { background: rgba(255,255,255,0.08); border-radius: 10px; padding: 18px 20px; border: 1px solid rgba(255,255,255,0.1); }
+  .flash-banner .flash-card-header { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; color: #a1a1aa; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid rgba(255,255,255,0.1); }
+  .flash-banner .flash-kpis { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+  .flash-banner .flash-kpi { text-align: center; }
+  .flash-banner .flash-kpi .fk-value { font-size: 24px; font-weight: 800; color: #fff; }
+  .flash-banner .flash-kpi .fk-label { font-size: 9px; color: #a1a1aa; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; margin-top: 2px; }
+  .flash-banner .flash-kpi .fk-delta { font-size: 11px; font-weight: 600; margin-top: 4px; }
+  .flash-banner .flash-kpi .fk-sub { font-size: 10px; color: #a1a1aa; margin-top: 2px; }
+  .flash-banner .flash-plan-card { display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; }
+  .flash-banner .flash-plan-card .fp-month { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; color: #a1a1aa; margin-bottom: 6px; }
+  .flash-banner .flash-plan-card .fp-value { font-size: 32px; font-weight: 800; color: #fff; }
+  .flash-banner .flash-plan-card .fp-label { font-size: 10px; color: #a1a1aa; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 4px; }
+  .flash-banner .flash-plan-card .fp-detail { font-size: 11px; color: #a1a1aa; margin-top: 8px; }
+  @media (max-width: 768px) { .flash-banner .flash-grid { grid-template-columns: 1fr; } .flash-banner .flash-kpis { grid-template-columns: 1fr; } }
+
   /* Password Gate */
   #auth-gate { position: fixed; inset: 0; z-index: 9999; background: var(--charcoal); display: flex; align-items: center; justify-content: center; }
   #auth-gate.hidden { display: none; }
@@ -137,7 +169,7 @@
 <div class="header">
   <div class="accent-bar"></div>
   <h1>Hills Holdco - Operating Model Dashboard</h1>
-  <p>Confidential | Data through February 2026 (Actuals) | Model as of April 1, 2026</p>
+  <p>Confidential | Data through February 2026 (Actuals) | March 2026 Sales Flash | Model as of April 2, 2026</p>
 </div>
 
 <div class="tab-nav">
@@ -153,61 +185,51 @@
 <div class="tab-panel active" id="tab-financial">
 <div class="container">
 
-<!-- KPI CARDS -->
-<div class="section-title" onclick="toggleSection(this)">Key Performance Indicators <span class="badge badge-info">FY 2025 Actual</span></div>
-<div class="section-content">
-<div class="grid-4">
-  <div class="card kpi">
-    <div class="label">Total Revenue</div>
-    <div class="value">$243.9M</div>
-    <div class="delta up">+3.9% vs FY2024 ($234.8M)</div>
-  </div>
-  <div class="card kpi">
-    <div class="label">Fully Adjusted EBITDA</div>
-    <div class="value" style="color:var(--orange)">$15.0M</div>
-    <div class="delta down">-32.7% vs FY2024 ($22.3M)</div>
-  </div>
-  <div class="card kpi">
-    <div class="label">EBITDA Margin</div>
-    <div class="value">6.1%</div>
-    <div class="delta down">vs 9.5% FY2024</div>
-  </div>
-  <div class="card kpi">
-    <div class="label">Net Income</div>
-    <div class="value" style="color:var(--red)">($7.1M)</div>
-    <div class="delta down">vs ($4.6M) FY2024</div>
-  </div>
+<!-- ENTITY FILTER -->
+<div class="entity-filter" id="entityFilter">
+  <button class="entity-btn active" onclick="setEntity('consolidated')">Consolidated</button>
+  <button class="entity-btn" onclick="setEntity('hmc')">HMC</button>
+  <button class="entity-btn" onclick="setEntity('rjv')">RJV</button>
 </div>
-<div class="grid-4">
-  <div class="card kpi">
-    <div class="label">Total Debt (Dec '25)</div>
-    <div class="value">$109.6M</div>
-    <div class="delta warn">Leverage: 7.3x Fully Adj. EBITDA</div>
-  </div>
-  <div class="card kpi">
-    <div class="label">PNC Availability (Dec '25)</div>
-    <div class="value" style="color:var(--green)">$37.7M</div>
-    <div class="delta warn">Feb '26: $31.7M</div>
-  </div>
-  <div class="card kpi">
-    <div class="label">FCCR (Dec '25 TTM)</div>
-    <div class="value" style="color:var(--orange)">1.28x</div>
-    <div class="delta up">Covenant: 1.00x - PASS</div>
-  </div>
-  <div class="card kpi">
-    <div class="label">Total Assets</div>
-    <div class="value">$176.4M</div>
-    <div class="delta down">-2.9% vs FY2024</div>
-  </div>
-</div>
+<div id="entityNotice" style="display:none;background:#fef3cd;border:1px solid #ffc107;border-radius:8px;padding:12px 18px;margin-bottom:18px;font-size:12px;color:#856404;font-weight:600;">
 </div>
 
-<!-- INCOME STATEMENT -->
-<div class="section-title" onclick="toggleSection(this)">Income Statement - Annual Summary</div>
+<!-- SALES FLASH BANNER -->
+<div class="flash-banner" id="salesFlashBanner">
+  <div class="flash-header">
+    <h3>Sales Flash & Current Month Target</h3>
+    <span class="flash-tag">Preliminary</span>
+  </div>
+  <div class="flash-grid">
+    <div class="flash-card">
+      <div class="flash-card-header" id="flashLastMonthHeader">Last Month — Mar '26 (Sales Only, Books Not Yet Closed)</div>
+      <div class="flash-kpis" id="flashLastMonthKPIs"></div>
+      <div id="flashPYNote" style="margin-top:10px;font-size:10px;color:#a1a1aa;font-style:italic;line-height:1.5;"></div>
+    </div>
+    <div class="flash-card flash-plan-card" id="flashCurrentMonthCard">
+      <div class="fp-month" id="flashCurMonthLabel">April 2026 Plan</div>
+      <div class="fp-value" id="flashCurMonthValue"></div>
+      <div class="fp-label">Revenue Target</div>
+      <div class="fp-detail" id="flashCurMonthDetail"></div>
+    </div>
+  </div>
+</div>
+
+<!-- PERFORMANCE SNAPSHOT -->
+<div class="section-title" onclick="toggleSection(this)">Performance Snapshot <span class="badge badge-info">Through Feb 2026</span></div>
+<div class="section-content">
+<div style="font-size:11px;color:var(--text2);margin-bottom:14px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;">Prior Month (Feb '26)</div>
+<div style="display:grid;grid-template-columns:repeat(6,1fr);gap:18px;margin-bottom:24px;" id="kpiMTD"></div>
+<div style="font-size:11px;color:var(--text2);margin-bottom:14px;margin-top:8px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;">Year to Date (Jan - Feb '26)</div>
+<div style="display:grid;grid-template-columns:repeat(6,1fr);gap:18px;margin-bottom:24px;" id="kpiYTD"></div>
+</div>
+
+<!-- MONTHLY SCORECARD -->
+<div class="section-title" onclick="toggleSection(this)">Monthly Performance Scorecard</div>
 <div class="section-content">
 <div class="grid-2-1">
   <div class="card">
-    <div class="card-header">Revenue & EBITDA Trend</div>
+    <div class="card-header">Monthly Revenue: Actual vs Plan vs Prior Year</div>
     <div class="chart-container"><canvas id="revEbitdaChart"></canvas></div>
   </div>
   <div class="card">
@@ -215,6 +237,22 @@
     <div class="chart-container"><canvas id="revMixChart"></canvas></div>
   </div>
 </div>
+<div class="card" style="margin-bottom:24px;">
+  <div class="card-header">Monthly Performance Scorecard ($000s)</div>
+  <div class="scroll-x">
+  <table>
+    <thead>
+      <tr><th>Metric</th><th class="num">Feb '26</th><th class="num">Feb Plan</th><th class="num">Feb PY</th><th class="num">YTD '26</th><th class="num">YTD Plan</th><th class="num">YTD PY</th><th class="num">vs Plan</th><th class="num">vs PY</th></tr>
+    </thead>
+    <tbody id="scorecardTable"></tbody>
+  </table>
+  </div>
+</div>
+</div>
+
+<!-- ANNUAL SUMMARY (REFERENCE) -->
+<div class="section-title" onclick="toggleSection(this)">Annual Summary (Reference)</div>
+<div class="section-content">
 <div class="card" style="margin-bottom:24px;">
   <div class="card-header">P&L Summary ($000s)</div>
   <div class="scroll-x">
@@ -229,7 +267,7 @@
 </div>
 
 <!-- MARGIN ANALYSIS -->
-<div class="section-title" onclick="toggleSection(this)">Gross Margin Analysis</div>
+<div class="section-title" onclick="toggleSection(this)">Gross Margin Analysis (FY2025 Reference)</div>
 <div class="section-content">
 <div class="grid-2">
   <div class="card">
@@ -244,15 +282,15 @@
 </div>
 
 <!-- MONTHLY TRENDS -->
-<div class="section-title" onclick="toggleSection(this)">Monthly Trends (Jan 2025 - Dec 2026E)</div>
+<div class="section-title" onclick="toggleSection(this)">Monthly Trends with Prior Year Comparison</div>
 <div class="section-content">
 <div class="grid-2">
   <div class="card">
-    <div class="card-header">Monthly Revenue</div>
+    <div class="card-header">Monthly Revenue: FY2026 vs FY2025</div>
     <div class="chart-container"><canvas id="monthRevChart"></canvas></div>
   </div>
   <div class="card">
-    <div class="card-header">Monthly Fully Adjusted EBITDA</div>
+    <div class="card-header">Monthly Adj. EBITDA: FY2026 vs FY2025</div>
     <div class="chart-container"><canvas id="monthEbitdaChart"></canvas></div>
   </div>
 </div>
@@ -909,7 +947,7 @@
 </div></div>
 
 <div style="text-align:center;padding:28px;color:var(--text2);font-size:11px;border-top:1px solid var(--border);margin-top:16px;">
-  Hills Holdco - Confidential | Generated from Operating Model (4.1.2026), Carveout Model (4.1.2026) & Cash Flow Forecast (4.1.2026) | Dashboard auto-generated (4.1.2026)
+  Hills Holdco - Confidential | Generated from Operating Model (4.2.2026), Carveout Model (4.1.2026) & Cash Flow Forecast (4.1.2026) | Dashboard auto-generated (4.2.2026)
 </div>
 
 <script>
@@ -1005,9 +1043,99 @@ const D = {
 const months25_26 = ['Jan 25','Feb 25','Mar 25','Apr 25','May 25','Jun 25','Jul 25','Aug 25','Sep 25','Oct 25','Nov 25','Dec 25',
   'Jan 26','Feb 26','Mar 26','Apr 26','May 26','Jun 26','Jul 26','Aug 26','Sep 26','Oct 26','Nov 26','Dec 26'];
 const mRev = [15252074,18482643,35697760,19423105,16507842,17536346,17741237,22702548,20688539,18821104,17834149,23235212,
-  11318808,16825302,17307760,24199629,25881714,25034839,24587881,26961631,25855831,26395044,23779225,28690850];
-const mEbitda = [526000,756161,3799914,1213496,1201011,1016601,920912,2031586,1225882,931735,259274,1110316,
-  -1148045,-174736,3994789,1525628,1550414,1592747,1598728,1847678,1715503,1677101,1092416,1473731];
+  11318808,16825302,17025917,24199629,25881714,25034839,24587881,26961631,25855831,26395044,23779225,28690850]; // Mar'26 updated from Targit 4/6/26
+const mEbitda = [96884,494787,2548004,924353,947439,787490,854331,1995969,965473,767147,232049,1052322,
+  -1148045,-174736,240517,1525628,1550414,1592747,1598728,1847678,1715503,1677101,1092416,1473731];
+
+// Additional monthly data from Model sheet (4.2.2026) — 24 months: Jan25-Dec26
+const mGM = [3682247,3692833,5813494,4285348,4600404,4006777,4671552,5362699,5057723,4610422,3775429,4820951,
+  3027138,3476045,4144001,5407097,5556939,5542729,5540856,5897015,5716341,5700603,4968729,5690785]; // Mar'26 GM updated from Targit 4/6/26
+const mSGA = [-3724234,-3227602,-3306824,-3607879,-3696340,-3304766,-3863258,-3437510,-4096741,-3943649,-3614232,-3817740,
+  -4178445,-3744626,-3623292,-3938279,-4063335,-4006792,-3998939,-4106147,-4057648,-4080312,-3933123,-4273864];
+const mAdjEbitda = [96884,494787,2548004,924353,947439,787490,854331,1995969,965473,767147,232049,1052322,
+  -1148045,-174736,240517,1525628,1550414,1592747,1598728,1847678,1715503,1677101,1092416,1473731];
+const mNetIncome = [-1682771,-912807,1034524,-597306,-755680,-620527,-772584,471961,-661013,-928748,-1285842,-414842,
+  -2535354,-1581281,-1246113,-120107,-166902,-136613,-165647,53343,-45475,-31375,-497055,-111137];
+
+// FY2026E budget totals (from Model sheet col 163, 4.2.2026)
+const fy26Budget = {
+  rev: 276557273,
+  ebitda: 12991682,
+  gm: 60331274,
+  sga: -48004803
+};
+
+// Monthly Plan from PNC 2026 SENT tab (Jan 2026 - Dec 2026)
+const mPlanRev = [12800429,15369241,19241957,24199629,25881714,25034839,24587880,26961631,25855831,26395044,23779225,28690850];
+const mPlanGM = [3505273,4048627,4717520,5407097,5556939,5542729,5540856,5897015,5716341,5700603,4968729,5690785];
+const mPlanSGA = [-3216178,-3340888,-3623292,-3938279,-4063335,-4006792,-3998939,-4106147,-4057648,-4080312,-3933123,-4273864];
+const mPlanEbitda = [345906,764549,1151038,1525628,1550414,1592747,1598728,1847678,1715503,1677101,1092416,1473731];
+
+// ===== ENTITY-LEVEL DATA (from TARGIT exports) =====
+const entityData = {
+  consolidated: {
+    // Monthly actuals: 24 months Jan25–Feb26 (indices 0-13, only 0-13 have actuals for 2025-2026)
+    mRev: mRev, mGM: mGM, mSGA: mSGA, mAdjEbitda: mAdjEbitda, mNetIncome: mNetIncome,
+    mPlanRev: mPlanRev, mPlanGM: mPlanGM, mPlanSGA: mPlanSGA, mPlanEbitda: mPlanEbitda,
+    label: 'Consolidated'
+  },
+  hmc: {
+    // HMC monthly: Jan25-Dec25 (12mo) + Jan26,Feb26 = 14 values
+    mRev: [10506942,14190013,29990009,14270661,12164620,13154711,13656162,16544560,15539327,14216809,15221366,17349412,
+      8689401,11836577],
+    mGM: [2598791,2690270,4530379,3105064,3299710,2868093,3481614,4267843,3821268,3401685,2694684,3764296,
+      2298077,2552362],
+    mSGA: [-2995190,-2596466,-2788561,-2815269,-2817842,-2606114,-2983663,-2325140,-3048638,-3097111,-2508665,-2758017,
+      -3444956,-3063688],
+    mAdjEbitda: [-396413,93804,1741818,289795,481868,261979,497951,1942703,-227401,304538,186019,407281,
+      -1146879,-511326],
+    mNetIncome: [-1474505,-665098,823093,-534764,-502543,-442547,-490499,682200,-773270,-643279,-989893,-525800,
+      -2264645,-1586548],
+    // Plan: Jan-Dec 2026 (from HMC 2026 tab)
+    mPlanRev: [9957753,11682377,14965043,18645327,20244578,19496792,19022254,21097271,20025523,20409785,17872773,22571942],
+    mPlanGM: [2779505,3112704,3638192,4185543,4273779,4260263,4272216,4551735,4423049,4398767,3834319,4472034],
+    mPlanSGA: [-2614162,-2723606,-2796698,-3035925,-3136621,-3082756,-3075433,-3161847,-3126948,-3143512,-3019375,-3267454],
+    mPlanEbitda: [222153,445909,898304,1206428,1193968,1234317,1253593,1446698,1352911,1312065,871754,1261392],
+    // Annual IS: 2022, 2023, 2024, 2025
+    annualRev: [106547321,143710040,186134125,186804592],
+    annualGM: [30423057,38629643,46378922,40811928],
+    annualEbitda: [12723639,14847348,11819133,5583941],
+    annualNI: [5203727,3266292,-6173259,-9536904],
+    // Annual BS: 2022, 2023, 2024, 2025
+    annualAssets: [90349589,180251931,138109489,135163809],
+    annualDebt: [42591621,106957492,98849857,92961403],
+    annualEquity: [18522076,34248376,15108280,5571376],
+    label: 'Hills Machinery'
+  },
+  rjv: {
+    // RJV monthly: Jan25-Dec25 + Jan26,Feb26
+    mRev: [4745132,4292630,5707751,5152444,4343222,4381635,4085075,6157988,5149211,4604296,2612782,5885800,
+      2629407,4988725],
+    mGM: [1083456,1002563,1283115,1180284,1300694,1138684,1189938,1094856,1236455,1208737,1080745,1056592,
+      729061,923684],
+    mSGA: [-729044,-631136,-518263,-792610,-878498,-698652,-879595,-1112370,-1048103,-846538,-1105567,-1059720,
+      -733489,-680938],
+    mAdjEbitda: [493297,400983,806186,634558,465571,525511,356380,840447,405694,462609,46030,645042,
+      -1165,336590],
+    mNetIncome: [-208266,-247709,211431,-62542,-253137,-177980,-282085,-210239,112257,-285469,-295949,110976,
+      -270710,5268],
+    // Plan: Jan-Dec 2026 (from RJV 2026 tab)
+    mPlanRev: [2842676,3686864,4276914,5554302,5637136,5538047,5565626,5864360,5830308,5985259,5906452,6118109],
+    mPlanGM: [725768,935923,1079328,1221554,1283160,1282466,1268640,1345280,1293292,1301836,1134410,1218749],
+    mPlanSGA: [-602015,-617283,-826594,-902354,-926714,-924036,-923506,-944300,-930700,-936800,-913748,-1006410],
+    mPlanEbitda: [123753,318640,252734,319200,356446,358430,345134,400978,362592,365036,220662,212321],
+    // Annual IS: 2022, 2023, 2024, 2025
+    annualRev: [47797027,51889676,48703157,57117967],
+    annualGM: [12520198,13249622,12276399,13567950],
+    annualEbitda: [8622917,7690163,5767554,6082308],
+    annualNI: [3652888,4080282,1616073,2411268],
+    // Annual BS: 2022, 2023, 2024, 2025
+    annualAssets: [26773187,29483669,43600814,41198686],
+    annualDebt: [11662811,10790811,17473953,13767636],
+    annualEquity: [9083725,12966837,14582910,16994178],
+    label: 'RJV Equipment'
+  }
+};
 
 // Covenant data
 const covMonths = ['Apr 25','May 25','Jun 25','Jul 25','Aug 25','Sep 25','Oct 25','Nov 25','Dec 25',
@@ -1079,6 +1207,406 @@ function addRow(tbody, label, vals, isBold=false, isPct=false) {
   tr.innerHTML = `<td>${label}</td>${cells}`;
   tbody.appendChild(tr);
 }
+
+// ===== ENTITY FILTER =====
+let currentEntity = 'consolidated';
+function setEntity(entity) {
+  document.getElementById('entityNotice').style.display = 'none';
+  currentEntity = entity;
+  document.querySelectorAll('.entity-btn').forEach(b => b.classList.remove('active'));
+  event.currentTarget.classList.add('active');
+  // Flash banner: only show for consolidated (entity-level March data not available)
+  const flashBanner = document.getElementById('salesFlashBanner');
+  if (flashBanner) {
+    flashBanner.style.display = entity === 'consolidated' ? '' : 'none';
+  }
+  renderEntityKPIs(entity);
+}
+
+function renderEntityKPIs(entity) {
+  const ed = entityData[entity];
+  if (!ed) return;
+  const mtd = document.getElementById('kpiMTD');
+  const ytd = document.getElementById('kpiYTD');
+
+  // For consolidated, indices: jan25=0, feb25=1, ..., jan26=12, feb26=13
+  // For HMC/RJV, indices: jan25=0..dec25=11, jan26=12, feb26=13
+  const feb26 = entity === 'consolidated' ? 13 : 13;
+  const jan26 = entity === 'consolidated' ? 12 : 12;
+  const feb25 = entity === 'consolidated' ? 1 : 1;
+  const jan25 = entity === 'consolidated' ? 0 : 0;
+
+  const r = ed.mRev, g = ed.mGM, s = ed.mSGA, eb = ed.mAdjEbitda;
+  const pr = ed.mPlanRev, pg = ed.mPlanGM, ps = ed.mPlanSGA, pe = ed.mPlanEbitda;
+
+  // MTD (Feb '26)
+  const revFeb = r[feb26], revPlanFeb = pr[1], revPYFeb = r[feb25];
+  const gmFeb = g[feb26], gmPlanFeb = pg[1], gmPYFeb = g[feb25];
+  const gmPctFeb = gmFeb/revFeb, gmPctPlanFeb = gmPlanFeb/revPlanFeb, gmPctPYFeb = gmPYFeb/r[feb25];
+  const ebFeb = eb[feb26], ebPlanFeb = pe[1], ebPYFeb = eb[feb25];
+  const ebPctFeb = ebFeb/revFeb, ebPctPlanFeb = ebPlanFeb/revPlanFeb, ebPctPYFeb = ebPYFeb/r[feb25];
+
+  function kpiCard(label, actual, plan, py, isPct, higherIsGood) {
+    const valStr = isPct ? (actual*100).toFixed(1)+'%' : fmtNeg(actual);
+    const planStr = isPct ? (plan*100).toFixed(1)+'%' : fmtNeg(plan);
+    const pyStr = isPct ? (py*100).toFixed(1)+'%' : fmtNeg(py);
+    let vsPlan, vsPY;
+    if (isPct) {
+      const bpsPlan = ((actual - plan) * 10000).toFixed(0);
+      const bpsPY = ((actual - py) * 10000).toFixed(0);
+      vsPlan = (bpsPlan >= 0 ? '+' : '') + bpsPlan + ' bps';
+      vsPY = (bpsPY >= 0 ? '+' : '') + bpsPY + ' bps';
+    } else {
+      vsPlan = fmtDelta(actual, plan);
+      vsPY = fmtDelta(actual, py);
+    }
+    const planCls = deltaClass(actual, plan, higherIsGood);
+    const pyCls = deltaClass(actual, py, higherIsGood);
+    const valColor = !isPct && actual < 0 ? 'color:var(--red)' : '';
+    return `<div class="card kpi">
+      <div class="label">${label}</div>
+      <div class="value" style="${valColor}">${valStr}</div>
+      <div class="plan-line"><span class="lbl">vs Plan:</span> <span class="val ${planCls}">${planStr} (${vsPlan})</span></div>
+      <div class="py-line"><span class="lbl">vs PY:</span> <span class="val ${pyCls}">${pyStr} (${vsPY})</span></div>
+    </div>`;
+  }
+
+  const sgaFeb = s ? s[feb26] : null, sgaPlanFeb = ps ? ps[1] : null, sgaPYFeb = s ? s[feb25] : null;
+
+  mtd.innerHTML = kpiCard('Revenue', revFeb, revPlanFeb, revPYFeb, false, true);
+  mtd.innerHTML += kpiCard('Gross Margin $', gmFeb, gmPlanFeb, gmPYFeb, false, true);
+  mtd.innerHTML += kpiCard('GM %', gmPctFeb, gmPctPlanFeb, gmPctPYFeb, true, true);
+  if (s) mtd.innerHTML += kpiCard('Total SG&A', -sgaFeb, -sgaPlanFeb, -sgaPYFeb, false, false);
+  mtd.innerHTML += kpiCard('Adj. EBITDA', ebFeb, ebPlanFeb, ebPYFeb, false, true);
+  mtd.innerHTML += kpiCard('EBITDA %', ebPctFeb, ebPctPlanFeb, ebPctPYFeb, true, true);
+
+  // YTD (Jan + Feb '26)
+  const ytdRev = r[jan26]+r[feb26], ytdRevPlan = pr[0]+pr[1], ytdRevPY = r[jan25]+r[feb25];
+  const ytdGM = g[jan26]+g[feb26], ytdGMPlan = pg[0]+pg[1], ytdGMPY = g[jan25]+g[feb25];
+  const ytdGMPct = ytdGM/ytdRev, ytdGMPctPlan = ytdGMPlan/ytdRevPlan, ytdGMPctPY = ytdGMPY/ytdRevPY;
+  const ytdSGA = s ? -(s[jan26]+s[feb26]) : null, ytdSGAPlan = ps ? -(ps[0]+ps[1]) : null, ytdSGAPY = s ? -(s[jan25]+s[feb25]) : null;
+  const ytdEb = eb[jan26]+eb[feb26], ytdEbPlan = pe[0]+pe[1], ytdEbPY = eb[jan25]+eb[feb25];
+  const ytdEbPct = ytdEb/ytdRev, ytdEbPctPlan = ytdEbPlan/ytdRevPlan, ytdEbPctPY = ytdEbPY/ytdRevPY;
+
+  ytd.innerHTML = kpiCard('Revenue', ytdRev, ytdRevPlan, ytdRevPY, false, true);
+  ytd.innerHTML += kpiCard('Gross Margin $', ytdGM, ytdGMPlan, ytdGMPY, false, true);
+  ytd.innerHTML += kpiCard('GM %', ytdGMPct, ytdGMPctPlan, ytdGMPctPY, true, true);
+  if (s) ytd.innerHTML += kpiCard('Total SG&A', ytdSGA, ytdSGAPlan, ytdSGAPY, false, false);
+  ytd.innerHTML += kpiCard('Adj. EBITDA', ytdEb, ytdEbPlan, ytdEbPY, false, true);
+  ytd.innerHTML += kpiCard('EBITDA %', ytdEbPct, ytdEbPctPlan, ytdEbPctPY, true, true);
+
+  // Re-render scorecard table
+  renderEntityScorecard(ed);
+
+  // Re-render revenue chart
+  renderEntityRevChart(ed);
+}
+
+function renderEntityScorecard(ed) {
+  const scBody = document.getElementById('scorecardTable');
+  if (!scBody) return;
+  scBody.innerHTML = '';
+  const r = ed.mRev, g = ed.mGM, s = ed.mSGA || null, eb = ed.mAdjEbitda;
+  const pr = ed.mPlanRev, pg = ed.mPlanGM, ps = ed.mPlanSGA || null, pe = ed.mPlanEbitda;
+  const feb26=13, jan26=12, feb25=1, jan25=0;
+
+  function addSCRow(label, arrOrFn, isBold, isPct, budgetArr) {
+    let feb26v, jan26v, feb25v, jan25v, planFeb, planJan;
+    if (typeof arrOrFn === 'function') {
+      feb26v = arrOrFn(feb26); jan26v = arrOrFn(jan26); feb25v = arrOrFn(feb25); jan25v = arrOrFn(jan25);
+    } else {
+      feb26v = arrOrFn[feb26]; jan26v = arrOrFn[jan26]; feb25v = arrOrFn[feb25]; jan25v = arrOrFn[jan25];
+    }
+    if (budgetArr && typeof budgetArr !== 'function') {
+      planFeb = budgetArr[1]; planJan = budgetArr[0];
+    }
+    const ytd26 = feb26v + jan26v;
+    const ytd25 = feb25v + jan25v;
+    const ytdPlan = planFeb !== undefined ? planJan + planFeb : null;
+    const vsPlan = ytdPlan ? ytd26 - ytdPlan : null;
+    const vsPY = ytd26 - ytd25;
+    const tr = document.createElement('tr');
+    if (isBold) tr.style.fontWeight = '700';
+    if (isPct) {
+      const fP = v => (v*100).toFixed(1)+'%';
+      let planFebPct = '–', planYtdPct = '–';
+      if (budgetArr && typeof budgetArr === 'function') {
+        planFebPct = fP(budgetArr(1));
+        planYtdPct = fP((budgetArr(0)+budgetArr(1))/2);
+      }
+      tr.innerHTML = `<td>${label}</td>
+        <td class="num">${fP(feb26v)}</td><td class="num">${planFebPct}</td><td class="num">${fP(feb25v)}</td>
+        <td class="num">${fP((feb26v+jan26v)/2)}</td><td class="num">${planYtdPct}</td><td class="num">${fP((feb25v+jan25v)/2)}</td>
+        <td class="num">–</td><td class="num">–</td>`;
+    } else {
+      const c = v => v < 0 ? 'neg' : '';
+      const fmtPctDelta = (a,b) => b && b!==0 ? ((a-b)/Math.abs(b)*100).toFixed(1)+'%' : '–';
+      tr.innerHTML = `<td>${label}</td>
+        <td class="num ${c(feb26v)}">${fmt(feb26v)}</td>
+        <td class="num">${planFeb !== undefined ? fmt(planFeb) : '–'}</td>
+        <td class="num ${c(feb25v)}">${fmt(feb25v)}</td>
+        <td class="num ${c(ytd26)}">${fmt(ytd26)}</td>
+        <td class="num">${ytdPlan !== null ? fmt(ytdPlan) : '–'}</td>
+        <td class="num ${c(ytd25)}">${fmt(ytd25)}</td>
+        <td class="num ${vsPlan&&vsPlan<0?'neg':'pos'}">${vsPlan !== null ? fmtPctDelta(ytd26,ytdPlan) : '–'}</td>
+        <td class="num ${vsPY<0?'neg':'pos'}">${fmtPctDelta(ytd26,ytd25)}</td>`;
+    }
+    scBody.appendChild(tr);
+  }
+
+  addSCRow('Total Revenue', r, true, false, pr);
+  addSCRow('Gross Margin $', g, false, false, pg);
+  addSCRow('Gross Margin %', i => g[i]/r[i], false, true, i => pg[i]/pr[i]);
+  if (s) addSCRow('Total SG&A', s, false, false, ps);
+  addSCRow('Adj. EBITDA', eb, true, false, pe);
+  addSCRow('EBITDA Margin %', i => eb[i]/r[i], false, true, i => pe[i]/pr[i]);
+}
+
+let revChartInstance = null;
+function renderEntityRevChart(ed) {
+  const canvas = document.getElementById('revEbitdaChart');
+  if (!canvas) return;
+  const r = ed.mRev, pr = ed.mPlanRev;
+  const r25 = r.slice(0, 12).map(v=>v/1e6);
+  const r26 = r.slice(12, 24).map(v=>(v||0)/1e6);
+  const rPlan = pr.map(v=>v/1e6);
+  // Pad r26 to 12 months if needed (entity data may only have 14 values = 2 months of 2026)
+  while (r26.length < 12) r26.push(0);
+  const actualMonths = r.length - 12; // number of 2026 months with actual data
+  const monthLabels12 = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+  if (revChartInstance) revChartInstance.destroy();
+  revChartInstance = new Chart(canvas, {
+    type: 'bar',
+    data: {
+      labels: monthLabels12,
+      datasets: [
+        { label: 'FY2026 Actual/Fcst', data: r26, backgroundColor: monthLabels12.map((_,i) => i < actualMonths ? 'rgba(220,5,5,0.85)' : 'rgba(220,5,5,0.35)'), borderRadius: 4 },
+        { label: 'FY2025 Actual', data: r25, backgroundColor: 'rgba(31,31,31,0.25)', borderRadius: 4 },
+        { label: 'FY2026 Plan', data: rPlan, type: 'line', borderColor: '#ca8a04', backgroundColor: 'transparent', pointRadius: 3, pointBackgroundColor: '#ca8a04', tension: 0.3, borderWidth: 2, borderDash: [6,3] },
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { position: 'top' }, tooltip: { callbacks: { label: ctx => ctx.dataset.label + ': $' + ctx.parsed.y.toFixed(1) + 'M' }}},
+      scales: {
+        y: { ...gridOpts, ticks: { callback: v => '$'+v+'M' }},
+        x: gridOpts
+      }
+    }
+  });
+}
+
+// ===== MONTHLY PLAN (from PNC 2026 SENT tab) =====
+// mPlan arrays are 12 months (Jan-Dec 2026), index 0=Jan, 1=Feb, etc.
+const mBudgetRev = mPlanRev;
+const mBudgetGM = mPlanGM;
+const mBudgetSGA = mPlanSGA;
+const mBudgetEbitda = mPlanEbitda;
+
+function fmtNeg(v) { return v >= 0 ? '$'+(v/1e6).toFixed(1)+'M' : '($'+(Math.abs(v)/1e6).toFixed(1)+'M)'; }
+function fmtDelta(actual, comp) {
+  if (!comp || comp === 0) return '–';
+  const pct = ((actual - comp) / Math.abs(comp) * 100).toFixed(1);
+  return (pct >= 0 ? '+' : '') + pct + '%';
+}
+function deltaClass(actual, comp, higherIsGood) {
+  if (!comp) return '';
+  return higherIsGood ? (actual >= comp ? 'up' : 'down') : (actual <= comp ? 'up' : 'down');
+}
+
+// ===== SALES FLASH BANNER =====
+// Flash data: Mar '26 revenue & GM from Targit actuals (4/6/26); SGA/EBITDA still model forecast
+// Mar '26 actual sales = mRev index 14; Mar '25 PY = mRev index 2
+// Apr '26 plan = mPlanRev index 3
+(function renderSalesFlash() {
+  const flashKPIs = document.getElementById('flashLastMonthKPIs');
+  const curVal = document.getElementById('flashCurMonthValue');
+  const curDetail = document.getElementById('flashCurMonthDetail');
+  if (!flashKPIs) return;
+
+  // Last month (Mar '26) — consolidated only
+  const mar26Rev = mRev[14];          // 17,026,519
+  const mar26Plan = mPlanRev[2];      // 19,241,957
+  const mar25Rev = mRev[2];           // 35,697,760 (PY)
+
+  const vsPlanPct = ((mar26Rev - mar26Plan) / Math.abs(mar26Plan) * 100).toFixed(1);
+  const vsPYPct = ((mar26Rev - mar25Rev) / Math.abs(mar25Rev) * 100).toFixed(1);
+
+  // YTD through Mar (Jan+Feb+Mar)
+  const ytdRev = mRev[12] + mRev[13] + mRev[14];
+  const ytdPlan = mPlanRev[0] + mPlanRev[1] + mPlanRev[2];
+  const ytdPY = mRev[0] + mRev[1] + mRev[2];
+  const ytdVsPlanPct = ((ytdRev - ytdPlan) / Math.abs(ytdPlan) * 100).toFixed(1);
+  const ytdVsPYPct = ((ytdRev - ytdPY) / Math.abs(ytdPY) * 100).toFixed(1);
+
+  const fmtFlash = v => '$' + (v / 1e6).toFixed(1) + 'M';
+  const deltaColor = v => parseFloat(v) >= 0 ? '#4ade80' : '#f87171';
+  const deltaSign = v => parseFloat(v) >= 0 ? '+' : '';
+
+  flashKPIs.innerHTML = `
+    <div class="flash-kpi">
+      <div class="fk-label">Revenue</div>
+      <div class="fk-value">${fmtFlash(mar26Rev)}</div>
+      <div class="fk-delta" style="color:${deltaColor(vsPlanPct)}">vs Plan: ${deltaSign(vsPlanPct)}${vsPlanPct}%</div>
+      <div class="fk-sub">Plan: ${fmtFlash(mar26Plan)}</div>
+    </div>
+    <div class="flash-kpi">
+      <div class="fk-label">vs Prior Year</div>
+      <div class="fk-value" style="color:${deltaColor(vsPYPct)}">${deltaSign(vsPYPct)}${vsPYPct}%</div>
+      <div class="fk-delta" style="color:#a1a1aa">PY: ${fmtFlash(mar25Rev)}</div>
+      <div class="fk-sub">Mar '25</div>
+    </div>
+    <div class="flash-kpi">
+      <div class="fk-label">YTD Rev (Jan-Mar)</div>
+      <div class="fk-value">${fmtFlash(ytdRev)}</div>
+      <div class="fk-delta" style="color:${deltaColor(ytdVsPlanPct)}">vs Plan: ${deltaSign(ytdVsPlanPct)}${ytdVsPlanPct}%</div>
+      <div class="fk-sub">Plan: ${fmtFlash(ytdPlan)} | PY: ${fmtFlash(ytdPY)}</div>
+    </div>
+  `;
+
+  // PY context note (block trade)
+  const pyNote = document.getElementById('flashPYNote');
+  if (pyNote) {
+    const adjPY = mar25Rev - 9400000; // Mar '25 ex-block trade
+    const adjVsPYPct = ((mar26Rev - adjPY) / Math.abs(adjPY) * 100).toFixed(1);
+    pyNote.innerHTML = `Note: Mar '25 included a $9.4M block trade (ACME). Excluding that trade, PY adj. revenue was ${fmtFlash(adjPY)} and YoY change would be <span style="color:${deltaColor(adjVsPYPct)}">${deltaSign(adjVsPYPct)}${adjVsPYPct}%</span>.`;
+  }
+
+  // Current month (Apr '26) plan
+  const apr26Plan = mPlanRev[3]; // 24,199,629
+  curVal.textContent = fmtFlash(apr26Plan);
+
+  // Daily run rate needed
+  const daysInApr = 30;
+  const dailyTarget = apr26Plan / daysInApr;
+  curDetail.innerHTML = `Daily target: ${fmtFlash(dailyTarget).replace('M','K').replace('$'+(apr26Plan/1e6).toFixed(1)+'K', '$'+(dailyTarget/1e3).toFixed(0)+'K')}`;
+  curDetail.innerHTML = `~$${(dailyTarget/1e3).toFixed(0)}K/day &bull; Plan GM: ${fmtFlash(mPlanGM[3])} &bull; Plan EBITDA: ${fmtFlash(mPlanEbitda[3])}`;
+})();
+
+// ===== PERFORMANCE SNAPSHOT KPI CARDS =====
+(function() {
+  const feb26 = 13, jan26 = 12, feb25 = 1, jan25 = 0;
+  const mtd = document.getElementById('kpiMTD');
+  const ytd = document.getElementById('kpiYTD');
+
+  function kpiCard(label, actual, plan, py, isPct, higherIsGood) {
+    const valStr = isPct ? (actual*100).toFixed(1)+'%' : fmtNeg(actual);
+    const planStr = isPct ? (plan*100).toFixed(1)+'%' : fmtNeg(plan);
+    const pyStr = isPct ? (py*100).toFixed(1)+'%' : fmtNeg(py);
+    let vsPlan, vsPY;
+    if (isPct) {
+      const bpsPlan = ((actual - plan) * 10000).toFixed(0);
+      const bpsPY = ((actual - py) * 10000).toFixed(0);
+      vsPlan = (bpsPlan >= 0 ? '+' : '') + bpsPlan + ' bps';
+      vsPY = (bpsPY >= 0 ? '+' : '') + bpsPY + ' bps';
+    } else {
+      vsPlan = fmtDelta(actual, plan);
+      vsPY = fmtDelta(actual, py);
+    }
+    const planCls = deltaClass(actual, plan, higherIsGood);
+    const pyCls = deltaClass(actual, py, higherIsGood);
+    const valColor = !isPct && actual < 0 ? 'color:var(--red)' : '';
+    return `<div class="card kpi">
+      <div class="label">${label}</div>
+      <div class="value" style="${valColor}">${valStr}</div>
+      <div class="plan-line"><span class="lbl">vs Plan:</span> <span class="val ${planCls}">${planStr} (${vsPlan})</span></div>
+      <div class="py-line"><span class="lbl">vs PY:</span> <span class="val ${pyCls}">${pyStr} (${vsPY})</span></div>
+    </div>`;
+  }
+
+  // MTD Cards (Feb '26)
+  const revFeb26 = mRev[feb26], revPlanFeb = mBudgetRev[1], revPYFeb = mRev[feb25];
+  const gmFeb26 = mGM[feb26], gmPlanFeb = mBudgetGM[1], gmPYFeb = mGM[feb25];
+  const gmPctFeb26 = gmFeb26/revFeb26, gmPctPlanFeb = gmPlanFeb/revPlanFeb, gmPctPYFeb = gmPYFeb/mRev[feb25];
+  const ebFeb26 = mAdjEbitda[feb26], ebPlanFeb = mBudgetEbitda[1], ebPYFeb = mAdjEbitda[feb25];
+  const ebPctFeb26 = ebFeb26/revFeb26, ebPctPlanFeb = ebPlanFeb/revPlanFeb, ebPctPYFeb = ebPYFeb/mRev[feb25];
+
+  const sgaFeb26 = -mSGA[feb26], sgaPlanFeb = -mBudgetSGA[1], sgaPYFeb = -mSGA[feb25];
+
+  mtd.innerHTML = kpiCard('Revenue', revFeb26, revPlanFeb, revPYFeb, false, true);
+  mtd.innerHTML += kpiCard('Gross Margin $', gmFeb26, gmPlanFeb, gmPYFeb, false, true);
+  mtd.innerHTML += kpiCard('GM %', gmPctFeb26, gmPctPlanFeb, gmPctPYFeb, true, true);
+  mtd.innerHTML += kpiCard('Total SG&A', sgaFeb26, sgaPlanFeb, sgaPYFeb, false, false);
+  mtd.innerHTML += kpiCard('Adj. EBITDA', ebFeb26, ebPlanFeb, ebPYFeb, false, true);
+  mtd.innerHTML += kpiCard('EBITDA %', ebPctFeb26, ebPctPlanFeb, ebPctPYFeb, true, true);
+
+  // YTD Cards (Jan + Feb '26)
+  const ytdRev26 = mRev[jan26]+mRev[feb26], ytdRevPlan = mBudgetRev[0]+mBudgetRev[1], ytdRevPY = mRev[jan25]+mRev[feb25];
+  const ytdGM26 = mGM[jan26]+mGM[feb26], ytdGMPlan = mBudgetGM[0]+mBudgetGM[1], ytdGMPY = mGM[jan25]+mGM[feb25];
+  const ytdGMPct26 = ytdGM26/ytdRev26, ytdGMPctPlan = ytdGMPlan/ytdRevPlan, ytdGMPctPY = ytdGMPY/ytdRevPY;
+  const ytdSGA26 = -(mSGA[jan26]+mSGA[feb26]), ytdSGAPlan = -(mBudgetSGA[0]+mBudgetSGA[1]), ytdSGAPY = -(mSGA[jan25]+mSGA[feb25]);
+  const ytdEb26 = mAdjEbitda[jan26]+mAdjEbitda[feb26], ytdEbPlan = mBudgetEbitda[0]+mBudgetEbitda[1], ytdEbPY = mAdjEbitda[jan25]+mAdjEbitda[feb25];
+  const ytdEbPct26 = ytdEb26/ytdRev26, ytdEbPctPlan = ytdEbPlan/ytdRevPlan, ytdEbPctPY = ytdEbPY/ytdRevPY;
+
+  ytd.innerHTML = kpiCard('Revenue', ytdRev26, ytdRevPlan, ytdRevPY, false, true);
+  ytd.innerHTML += kpiCard('Gross Margin $', ytdGM26, ytdGMPlan, ytdGMPY, false, true);
+  ytd.innerHTML += kpiCard('GM %', ytdGMPct26, ytdGMPctPlan, ytdGMPctPY, true, true);
+  ytd.innerHTML += kpiCard('Total SG&A', ytdSGA26, ytdSGAPlan, ytdSGAPY, false, false);
+  ytd.innerHTML += kpiCard('Adj. EBITDA', ytdEb26, ytdEbPlan, ytdEbPY, false, true);
+  ytd.innerHTML += kpiCard('EBITDA %', ytdEbPct26, ytdEbPctPlan, ytdEbPctPY, true, true);
+})();
+
+// ===== MONTHLY SCORECARD TABLE =====
+(function() {
+  const scBody = document.getElementById('scorecardTable');
+  const feb26=13, jan26=12, feb25=1, jan25=0;
+
+  function addSCRow(label, arrOrFn, isBold, isPct, budgetArr) {
+    let feb26v, jan26v, feb25v, jan25v, planFeb, planJan;
+    if (typeof arrOrFn === 'function') {
+      feb26v = arrOrFn(feb26); jan26v = arrOrFn(jan26); feb25v = arrOrFn(feb25); jan25v = arrOrFn(jan25);
+    } else {
+      feb26v = arrOrFn[feb26]; jan26v = arrOrFn[jan26]; feb25v = arrOrFn[feb25]; jan25v = arrOrFn[jan25];
+    }
+    if (budgetArr && typeof budgetArr !== 'function') {
+      planFeb = budgetArr[1]; planJan = budgetArr[0];
+    }
+
+    const ytd26 = feb26v + jan26v;
+    const ytd25 = feb25v + jan25v;
+    const ytdPlan = planFeb !== undefined ? planJan + planFeb : null;
+    const vsPlan = ytdPlan ? ytd26 - ytdPlan : null;
+    const vsPY = ytd26 - ytd25;
+
+    const tr = document.createElement('tr');
+    if (isBold) tr.style.fontWeight = '700';
+
+    if (isPct) {
+      const fP = v => (v*100).toFixed(1)+'%';
+      // For pct rows, plan = budget GM% or EBITDA margin%
+      let planFebPct = '–', planYtdPct = '–';
+      if (budgetArr && typeof budgetArr === 'function') {
+        planFebPct = fP(budgetArr(1));
+        planYtdPct = fP((budgetArr(0)+budgetArr(1))/2);
+      }
+      tr.innerHTML = `<td>${label}</td>
+        <td class="num">${fP(feb26v)}</td><td class="num">${planFebPct}</td><td class="num">${fP(feb25v)}</td>
+        <td class="num">${fP((feb26v+jan26v)/2)}</td><td class="num">${planYtdPct}</td><td class="num">${fP((feb25v+jan25v)/2)}</td>
+        <td class="num">–</td><td class="num">–</td>`;
+    } else {
+      const c = v => v < 0 ? 'neg' : '';
+      const fmtPctDelta = (a,b) => b && b!==0 ? ((a-b)/Math.abs(b)*100).toFixed(1)+'%' : '–';
+      tr.innerHTML = `<td>${label}</td>
+        <td class="num ${c(feb26v)}">${fmt(feb26v)}</td>
+        <td class="num">${planFeb !== undefined ? fmt(planFeb) : '–'}</td>
+        <td class="num ${c(feb25v)}">${fmt(feb25v)}</td>
+        <td class="num ${c(ytd26)}">${fmt(ytd26)}</td>
+        <td class="num">${ytdPlan !== null ? fmt(ytdPlan) : '–'}</td>
+        <td class="num ${c(ytd25)}">${fmt(ytd25)}</td>
+        <td class="num ${vsPlan&&vsPlan<0?'neg':'pos'}">${vsPlan !== null ? fmtPctDelta(ytd26,ytdPlan) : '–'}</td>
+        <td class="num ${vsPY<0?'neg':'pos'}">${fmtPctDelta(ytd26,ytd25)}</td>`;
+    }
+    scBody.appendChild(tr);
+  }
+
+  addSCRow('Total Revenue', mRev, true, false, mBudgetRev);
+  addSCRow('Gross Margin $', mGM, false, false, mBudgetGM);
+  addSCRow('Gross Margin %', i => mGM[i]/mRev[i], false, true, i => mBudgetGM[i]/mBudgetRev[i]);
+  addSCRow('Total SG&A', mSGA, false, false, mBudgetSGA);
+  addSCRow('Adj. EBITDA', mAdjEbitda, true, false, mBudgetEbitda);
+  addSCRow('EBITDA Margin %', i => mAdjEbitda[i]/mRev[i], false, true, i => mBudgetEbitda[i]/mBudgetRev[i]);
+})();
 
 // ===== POPULATE TABLES =====
 // IS Table
@@ -1223,22 +1751,27 @@ const hillsRed = '#dc0505';
 const hillsDark = '#1f1f1f';
 const hillsGray = '#6b7280';
 
-// 1. Revenue & EBITDA
-new Chart(document.getElementById('revEbitdaChart'), {
+// 1. Monthly Revenue: FY2026 Actual vs Plan vs PY
+const monthLabels12 = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const rev25 = mRev.slice(0, 12).map(v=>v/1e6);
+const rev26 = mRev.slice(12, 24).map(v=>v/1e6);
+const revPlan = mBudgetRev.map(v=>v/1e6);
+revChartInstance = new Chart(document.getElementById('revEbitdaChart'), {
   type: 'bar',
   data: {
-    labels: fyShort,
+    labels: monthLabels12,
     datasets: [
-      { label: 'Revenue', data: D.total_rev.map(v=>v/1e6), backgroundColor: 'rgba(31,31,31,0.75)', borderRadius: 4, yAxisID: 'y' },
-      { label: 'Fully Adj. EBITDA', data: D.adj_ebitda.map(v=>v/1e6), type: 'line', borderColor: hillsRed, backgroundColor: 'rgba(220,5,5,0.08)', pointRadius: 5, pointBackgroundColor: hillsRed, tension: 0.3, yAxisID: 'y1', fill: true },
+      { label: 'FY2026 Actual/Fcst', data: rev26, backgroundColor: monthLabels12.map((_,i) => i < 2 ? 'rgba(220,5,5,0.85)' : 'rgba(220,5,5,0.35)'), borderRadius: 4 },
+      { label: 'FY2025 Actual', data: rev25, backgroundColor: 'rgba(31,31,31,0.25)', borderRadius: 4 },
+      { label: 'FY2026 Plan', data: revPlan, type: 'line', borderColor: '#ca8a04', backgroundColor: 'transparent', pointRadius: 3, pointBackgroundColor: '#ca8a04', tension: 0.3, borderWidth: 2, borderDash: [6,3] },
     ]
   },
   options: {
     responsive: true, maintainAspectRatio: false,
     plugins: { legend: { position: 'top' }, tooltip: { callbacks: { label: ctx => ctx.dataset.label + ': $' + ctx.parsed.y.toFixed(1) + 'M' }}},
     scales: {
-      y: { ...gridOpts, title: { display: true, text: 'Revenue ($M)' }, ticks: { callback: v => '$'+v+'M' }},
-      y1: { position: 'right', grid: { drawOnChartArea: false }, title: { display: true, text: 'EBITDA ($M)' }, ticks: { callback: v => '$'+v+'M' }},
+      y: { ...gridOpts, ticks: { callback: v => '$'+v+'M' }},
+      x: gridOpts
     }
   }
 });
@@ -1301,39 +1834,40 @@ new Chart(document.getElementById('sgaChart'), {
   }
 });
 
-// 5. Monthly Revenue
+// 5. Monthly Revenue with PY overlay + Plan
 new Chart(document.getElementById('monthRevChart'), {
   type: 'bar',
   data: {
-    labels: months25_26,
-    datasets: [{
-      data: mRev.map(v=>v/1e6),
-      backgroundColor: months25_26.map((_,i) => i < 12 ? 'rgba(31,31,31,0.8)' : 'rgba(31,31,31,0.35)'),
-      borderRadius: 3,
-    }]
+    labels: monthLabels12,
+    datasets: [
+      { label: 'FY2026', data: mRev.slice(12,24).map(v=>v/1e6), backgroundColor: monthLabels12.map((_,i) => i < 2 ? 'rgba(220,5,5,0.85)' : 'rgba(220,5,5,0.35)'), borderRadius: 3 },
+      { label: 'FY2025', data: mRev.slice(0,12).map(v=>v/1e6), type: 'line', borderColor: 'rgba(31,31,31,0.6)', backgroundColor: 'transparent', pointRadius: 4, pointBackgroundColor: '#1f1f1f', tension: 0.3, borderWidth: 2, borderDash: [5,3] },
+      { label: 'Plan', data: mBudgetRev.map(v=>v/1e6), type: 'line', borderColor: '#ca8a04', backgroundColor: 'transparent', pointRadius: 3, pointBackgroundColor: '#ca8a04', tension: 0.3, borderWidth: 2, borderDash: [6,3] },
+    ]
   },
   options: {
     responsive: true, maintainAspectRatio: false,
-    plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => '$' + ctx.parsed.y.toFixed(1) + 'M' }}},
-    scales: { y: { ...gridOpts, ticks: { callback: v => '$'+v+'M' } }, x: { ...gridOpts, ticks: { maxRotation: 45 }}}
+    plugins: { legend: { position: 'top' }, tooltip: { callbacks: { label: ctx => ctx.dataset.label + ': $' + ctx.parsed.y.toFixed(1) + 'M' }}},
+    scales: { y: { ...gridOpts, ticks: { callback: v => '$'+v+'M' } }, x: gridOpts }
   }
 });
 
-// 6. Monthly EBITDA
+// 6. Monthly EBITDA with PY overlay + Plan
+const eb26arr = mAdjEbitda.slice(12,24).map(v=>v/1e6);
 new Chart(document.getElementById('monthEbitdaChart'), {
   type: 'bar',
   data: {
-    labels: months25_26,
-    datasets: [{
-      data: mEbitda.map(v=>v/1e6),
-      backgroundColor: mEbitda.map(v => v >= 0 ? 'rgba(22,163,74,0.75)' : 'rgba(220,5,5,0.75)'),
-      borderRadius: 3,
-    }]
+    labels: monthLabels12,
+    datasets: [
+      { label: 'FY2026', data: eb26arr, backgroundColor: eb26arr.map(v => v >= 0 ? 'rgba(22,163,74,0.75)' : 'rgba(220,5,5,0.75)'), borderRadius: 3 },
+      { label: 'FY2025', data: mAdjEbitda.slice(0,12).map(v=>v/1e6), type: 'line', borderColor: 'rgba(31,31,31,0.6)', backgroundColor: 'transparent', pointRadius: 4, pointBackgroundColor: '#1f1f1f', tension: 0.3, borderWidth: 2, borderDash: [5,3] },
+      { label: 'Plan', data: mBudgetEbitda.map(v=>v/1e6), type: 'line', borderColor: '#ca8a04', backgroundColor: 'transparent', pointRadius: 3, pointBackgroundColor: '#ca8a04', tension: 0.3, borderWidth: 2, borderDash: [6,3] },
+    ]
   },
   options: {
     responsive: true, maintainAspectRatio: false,
-    plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => '$' + ctx.parsed.y.toFixed(2) + 'M' }}},
-    scales: { y: { ...gridOpts, ticks: { callback: v => '$'+v+'M' } }, x: { ...gridOpts, ticks: { maxRotation: 45 }}}
+    plugins: { legend: { position: 'top' }, tooltip: { callbacks: { label: ctx => ctx.dataset.label + ': $' + ctx.parsed.y.toFixed(2) + 'M' }}},
+    scales: { y: { ...gridOpts, ticks: { callback: v => '$'+v+'M' } }, x: gridOpts }
   }
 });
 
