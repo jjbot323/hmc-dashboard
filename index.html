@@ -137,8 +137,13 @@
   .flash-banner .seg-table td:first-child { text-align: left; font-weight: 600; padding-left: 0; }
   .flash-banner .seg-table tr:hover td { background: transparent; }
   .flash-banner .seg-table tr.seg-total-row td { border-top: 2px solid rgba(255,255,255,0.2); border-bottom: none; font-weight: 800; font-size: 14px; color: #fff; padding-top: 6px; }
-  @media (max-width: 1024px) { .flash-banner .flash-kpis { grid-template-columns: 1fr 1fr; } .flash-banner .flash-kpi:first-child { grid-column: 1 / -1; } }
-  @media (max-width: 768px) { .flash-banner { padding: 18px 16px; } .flash-banner .flash-grid { grid-template-columns: 1fr; } .flash-banner .flash-kpis { grid-template-columns: 1fr; } .flash-banner .flash-kpi:first-child { grid-column: auto; } .flash-banner .flash-kpi .fk-value { font-size: 20px; } .flash-banner .flash-plan-card .fp-value { font-size: 26px; }
+  .mtd-progress { width: 100%; height: 8px; background: rgba(255,255,255,0.1); border-radius: 4px; overflow: hidden; margin: 8px 0; }
+  .mtd-progress-bar { height: 100%; border-radius: 4px; transition: width 0.5s ease; }
+  .mtd-stat { display: flex; justify-content: space-between; align-items: baseline; margin: 3px 0; }
+  .mtd-stat .mtd-lbl { font-size: 10px; color: #a1a1aa; text-transform: uppercase; letter-spacing: 0.3px; }
+  .mtd-stat .mtd-val { font-size: 12px; font-weight: 700; color: #d1d5db; font-variant-numeric: tabular-nums; }
+  @media (max-width: 1024px) { .flash-banner .flash-kpis { grid-template-columns: 1fr 1fr; } .flash-banner .flash-kpi:first-child { grid-column: 1 / -1; } #flashGridMain { grid-template-columns: 1fr 1fr !important; } #flashGridMain > :last-child { grid-column: 1 / -1; } }
+  @media (max-width: 768px) { .flash-banner { padding: 18px 16px; } .flash-banner .flash-grid { grid-template-columns: 1fr; } #flashGridMain { grid-template-columns: 1fr !important; } .flash-banner .flash-kpis { grid-template-columns: 1fr; } .flash-banner .flash-kpi:first-child { grid-column: auto; } .flash-banner .flash-kpi .fk-value { font-size: 20px; } .flash-banner .flash-plan-card .fp-value { font-size: 26px; }
     .container { padding: 16px 12px; }
     .grid-4, .grid-3, .grid-2, .grid-2-1 { gap: 12px; }
     .scroll-x { -webkit-overflow-scrolling: touch; overflow-x: auto; }
@@ -218,8 +223,9 @@
     <h3>Sales Flash & Current Month Target</h3>
     <span class="flash-tag">Preliminary</span>
   </div>
-  <!-- Row 1: Total revenue KPIs + April plan -->
-  <div class="flash-grid">
+  <!-- Row: April MTD Tracker + March Recap + April Plan -->
+  <div style="display:grid;grid-template-columns:2fr 2fr 1fr;gap:20px;" id="flashGridMain">
+    <div class="flash-card" id="flashMTDCard"></div>
     <div class="flash-card">
       <div class="flash-card-header" id="flashLastMonthHeader">Last Month — Mar '26 (Sales Only, Books Not Yet Closed)</div>
       <div class="flash-kpis" id="flashLastMonthKPIs"></div>
@@ -1462,7 +1468,19 @@ const flashData = {
       { name: 'Parts',     plan: 3848274 },
       { name: 'Service',   plan: 1941904 },
       { name: 'Rental',    plan: 1838803 },
-    ]
+    ],
+    // MTD Sales Flash — consolidated HMC+RJV (update these values when new flash arrives)
+    mtd: {
+      asOfDate: '2026-04-03',    // report date from Sales Flash PDF
+      bizDaysElapsed: 3,          // business days completed in month
+      bizDaysTotal: 22,           // total business days in April 2026
+      segments: [
+        { name: 'Equipment', mtd: 8088+453453,     goal: 12043849+4526798, py: 9183788+3756819 },
+        { name: 'Parts',     mtd: 395009+46734,    goal: 2839668+1008606,  py: 2536416+955437 },
+        { name: 'Service',   mtd: 117413+8078,     goal: 1673344+268560,   py: 1195279+243878 },
+        { name: 'Rental',    mtd: 143555+15000,    goal: 1645000+193803,   py: 1203874+189706 },
+      ]
+    }
   },
   hmc: {
     mar26Rev: entityData.hmc.mPlanRev[2],
@@ -1488,7 +1506,19 @@ const flashData = {
       { name: 'Parts',     plan: 2839668 },
       { name: 'Service',   plan: 1673344 },
       { name: 'Rental',    plan: 1645000 },
-    ]
+    ],
+    // MTD Sales Flash — HMC only (from TARGIT Sales Flash report)
+    mtd: {
+      asOfDate: '2026-04-03',
+      bizDaysElapsed: 3,
+      bizDaysTotal: 22,
+      segments: [
+        { name: 'Equipment', mtd: 8088,   goal: 12043849, py: 9183788 },
+        { name: 'Parts',     mtd: 395009, goal: 2839668,  py: 2536416 },
+        { name: 'Service',   mtd: 117413, goal: 1673344,  py: 1195279 },
+        { name: 'Rental',    mtd: 143555, goal: 1645000,  py: 1203874 },
+      ]
+    }
   },
   rjv: {
     mar26Rev: entityData.rjv.mPlanRev[2],
@@ -1514,7 +1544,19 @@ const flashData = {
       { name: 'Parts',     plan: 1008606 },
       { name: 'Service',   plan: 268560 },
       { name: 'Rental',    plan: 193803 },
-    ]
+    ],
+    // MTD Sales Flash — RJV (from TARGIT Sales Flash report)
+    mtd: {
+      asOfDate: '2026-04-03',
+      bizDaysElapsed: 3,
+      bizDaysTotal: 22,
+      segments: [
+        { name: 'Equipment', mtd: 453453, goal: 4526798, py: 3756819 },
+        { name: 'Parts',     mtd: 46734,  goal: 1008606, py: 955437 },
+        { name: 'Service',   mtd: 8078,   goal: 268560,  py: 243878 },
+        { name: 'Rental',    mtd: 15000,  goal: 193803,  py: 189706 },
+      ]
+    }
   }
 };
 
@@ -1618,6 +1660,75 @@ function renderSalesFlash(entity) {
       ${aprSegs ? aprSegHtml : '<div class="fp-value">' + f(fd.apr26Plan) + '</div><div class="fp-label">Revenue Target</div>'}
       <div class="fp-detail" style="margin-top:8px;">~$${(dailyTarget/1e3).toFixed(0)}K/day &bull; Plan GM: ${f(fd.apr26PlanGM)} &bull; Plan EBITDA: ${f(fd.apr26PlanEbitda)}</div>
     `;
+  }
+
+  // === MTD SALES FLASH CARD ===
+  const mtdCard = document.getElementById('flashMTDCard');
+  if (mtdCard && fd.mtd) {
+    const m = fd.mtd;
+    const totalMTD = m.segments.reduce((a,s) => a + s.mtd, 0);
+    const totalGoal = m.segments.reduce((a,s) => a + s.goal, 0);
+    const totalPY = m.segments.reduce((a,s) => a + s.py, 0);
+    const pctComplete = (totalMTD / totalGoal * 100);
+    const pctMonth = (m.bizDaysElapsed / m.bizDaysTotal * 100);
+    const daysRemaining = m.bizDaysTotal - m.bizDaysElapsed;
+    const pace = m.bizDaysElapsed > 0 ? (totalMTD / m.bizDaysElapsed) * m.bizDaysTotal : 0;
+    const paceVsGoal = ((pace - totalGoal) / totalGoal * 100).toFixed(1);
+
+    // Prorated comparison: MTD vs (elapsed/total * goal)
+    const proratedGoal = totalGoal * (m.bizDaysElapsed / m.bizDaysTotal);
+    const proratedPY = totalPY * (m.bizDaysElapsed / m.bizDaysTotal);
+    const vsProrated = ((totalMTD - proratedGoal) / proratedGoal * 100).toFixed(1);
+    const vsProratedPY = ((totalMTD - proratedPY) / proratedPY * 100).toFixed(1);
+
+    const fk = v => v >= 1e6 ? '$' + (v/1e6).toFixed(1) + 'M' : '$' + (v/1e3).toFixed(0) + 'K';
+    const paceColor = parseFloat(vsProrated) >= 0 ? '#4ade80' : '#f87171';
+    const barColor = parseFloat(vsProrated) >= 0 ? '#4ade80' : '#f87171';
+    const remaining = totalGoal - totalMTD;
+    const dailyNeeded = daysRemaining > 0 ? remaining / daysRemaining : 0;
+
+    // Parse date for display
+    const dtParts = m.asOfDate.split('-');
+    const reportDate = new Date(dtParts[0], dtParts[1]-1, dtParts[2]);
+    const dateStr = reportDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+
+    // Segment rows
+    let segRows = '';
+    m.segments.forEach(s => {
+      const sPct = s.goal > 0 ? (s.mtd / s.goal * 100).toFixed(1) : '0.0';
+      segRows += `<tr><td>${s.name}</td><td>${fk(s.mtd)}</td><td>${fk(s.goal)}</td><td>${sPct}%</td></tr>`;
+    });
+
+    mtdCard.innerHTML = `
+      <div class="flash-card-header">April MTD Sales Flash <span style="float:right;font-weight:400;font-style:italic;text-transform:none;letter-spacing:0;">as of ${dateStr} (Day ${m.bizDaysElapsed} of ${m.bizDaysTotal})</span></div>
+      <div style="display:flex;align-items:baseline;gap:12px;margin-bottom:4px;">
+        <span style="font-size:28px;font-weight:800;color:#fff;">${fk(totalMTD)}</span>
+        <span style="font-size:12px;color:#a1a1aa;">of ${fk(totalGoal)} goal</span>
+        <span style="font-size:12px;font-weight:700;color:${paceColor}">${parseFloat(vsProrated)>=0?'+':''}${vsProrated}% vs pace</span>
+      </div>
+      <div class="mtd-progress">
+        <div class="mtd-progress-bar" style="width:${Math.min(pctComplete,100).toFixed(1)}%;background:${barColor};"></div>
+      </div>
+      <div style="display:flex;justify-content:space-between;font-size:10px;color:#71717a;margin-bottom:10px;">
+        <span>${pctComplete.toFixed(1)}% of goal</span>
+        <span>${daysRemaining} biz days left</span>
+      </div>
+      <table class="seg-table">
+        <thead><tr><th></th><th>MTD</th><th>Goal</th><th>% Hit</th></tr></thead>
+        <tbody>
+          ${segRows}
+          <tr class="seg-total-row"><td>Total</td><td>${fk(totalMTD)}</td><td>${fk(totalGoal)}</td><td>${pctComplete.toFixed(1)}%</td></tr>
+        </tbody>
+      </table>
+      <div style="margin-top:10px;display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+        <div class="mtd-stat"><span class="mtd-lbl">Pace to finish</span><span class="mtd-val" style="color:${paceColor}">${fk(pace)}</span></div>
+        <div class="mtd-stat"><span class="mtd-lbl">Need/day</span><span class="mtd-val">${fk(dailyNeeded)}</span></div>
+        <div class="mtd-stat"><span class="mtd-lbl">vs PY pace</span><span class="mtd-val" style="color:${parseFloat(vsProratedPY)>=0?'#4ade80':'#f87171'}">${parseFloat(vsProratedPY)>=0?'+':''}${vsProratedPY}%</span></div>
+        <div class="mtd-stat"><span class="mtd-lbl">Remaining</span><span class="mtd-val">${fk(remaining)}</span></div>
+      </div>
+    `;
+  } else if (mtdCard) {
+    mtdCard.innerHTML = '<div class="flash-card-header">April MTD Sales Flash</div><div style="color:#71717a;font-size:12px;padding:20px 0;text-align:center;">No MTD data available for this entity</div>';
   }
 }
 // Initial render for consolidated
