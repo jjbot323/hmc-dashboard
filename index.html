@@ -1476,14 +1476,19 @@ const flashData = {
     apr26PlanEbitda: entityData.hmc.mPlanEbitda[3],
     isActual: false,
     showBlockTrade: true,
-    // HMC: annual budget by segment (no monthly breakdown avail); PY from Targit export
+    // HMC: monthly budget from HMC 2026 tab; PY from Targit export
     segments: [
-      { name: 'Equipment', rev: null, plan: null, py: 22218524+1813247 },
-      { name: 'Parts',     rev: null, plan: null, py: 3000135 },
-      { name: 'Service',   rev: null, plan: null, py: 1531032 },
-      { name: 'Rental',    rev: null, plan: null, py: 1427071 },
+      { name: 'Equipment', rev: null, plan: 8739884+387188, py: 22218524+1813247 },
+      { name: 'Parts',     rev: null, plan: 2807444,        py: 3000135 },
+      { name: 'Service',   rev: null, plan: 1655829,        py: 1531032 },
+      { name: 'Rental',    rev: null, plan: 1535000,        py: 1427071 },
     ],
-    aprSegments: null
+    aprSegments: [
+      { name: 'Equipment', plan: 11466661+577188 },
+      { name: 'Parts',     plan: 2839668 },
+      { name: 'Service',   plan: 1673344 },
+      { name: 'Rental',    plan: 1645000 },
+    ]
   },
   rjv: {
     mar26Rev: entityData.rjv.mPlanRev[2],
@@ -1497,13 +1502,19 @@ const flashData = {
     apr26PlanEbitda: entityData.rjv.mPlanEbitda[3],
     isActual: false,
     showBlockTrade: false,
+    // RJV: monthly budget from RJV 2026 tab; PY from Targit export
     segments: [
-      { name: 'Equipment', rev: null, plan: null, py: 4325320+1250 },
-      { name: 'Parts',     rev: null, plan: null, py: 929971 },
-      { name: 'Service',   rev: null, plan: null, py: 255992 },
-      { name: 'Rental',    rev: null, plan: null, py: 195219 },
+      { name: 'Equipment', rev: null, plan: 2672288+21703, py: 4325320+1250 },
+      { name: 'Parts',     rev: null, plan: 963736,        py: 929971 },
+      { name: 'Service',   rev: null, plan: 271514,        py: 255992 },
+      { name: 'Rental',    rev: null, plan: 187371,        py: 195219 },
     ],
-    aprSegments: null
+    aprSegments: [
+      { name: 'Equipment', plan: 4480660+46138 },
+      { name: 'Parts',     plan: 1008606 },
+      { name: 'Service',   plan: 268560 },
+      { name: 'Rental',    plan: 193803 },
+    ]
   }
 };
 
