@@ -128,13 +128,12 @@
   .flash-banner .flash-plan-card .fp-value { font-size: 32px; font-weight: 800; color: #fff; }
   .flash-banner .flash-plan-card .fp-label { font-size: 10px; color: #a1a1aa; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 4px; }
   .flash-banner .flash-plan-card .fp-detail { font-size: 11px; color: #a1a1aa; margin-top: 8px; }
-  .flash-banner .seg-card { text-align: center; background: rgba(255,255,255,0.05); border-radius: 8px; padding: 14px 10px; border: 1px solid rgba(255,255,255,0.08); }
-  .flash-banner .seg-card .seg-name { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.6px; color: #a1a1aa; margin-bottom: 6px; }
-  .flash-banner .seg-card .seg-rev { font-size: 20px; font-weight: 800; color: #fff; }
-  .flash-banner .seg-card .seg-gm { font-size: 11px; font-weight: 600; margin-top: 4px; }
-  .flash-banner .seg-card .seg-share { font-size: 10px; color: #a1a1aa; margin-top: 2px; }
-  .flash-banner .seg-card .seg-py { font-size: 10px; color: #a1a1aa; margin-top: 4px; }
-  @media (max-width: 768px) { .flash-banner .flash-grid { grid-template-columns: 1fr; } .flash-banner .flash-kpis { grid-template-columns: 1fr; } #flashSegmentGrid { grid-template-columns: repeat(2, 1fr) !important; } }
+  .flash-banner .seg-lines { margin-bottom: 8px; }
+  .flash-banner .seg-line { display: flex; justify-content: space-between; align-items: center; padding: 3px 0; font-size: 13px; color: #d1d5db; border-bottom: 1px solid rgba(255,255,255,0.06); }
+  .flash-banner .seg-line .sl-name { font-weight: 600; }
+  .flash-banner .seg-line .sl-val { font-weight: 700; font-variant-numeric: tabular-nums; }
+  .flash-banner .seg-total { display: flex; justify-content: space-between; align-items: center; padding: 6px 0 0; font-size: 15px; font-weight: 800; color: #fff; border-top: 2px solid rgba(255,255,255,0.2); margin-top: 2px; }
+  @media (max-width: 768px) { .flash-banner .flash-grid { grid-template-columns: 1fr; } .flash-banner .flash-kpis { grid-template-columns: 1fr; } }
 
   /* Password Gate */
   #auth-gate { position: fixed; inset: 0; z-index: 9999; background: var(--charcoal); display: flex; align-items: center; justify-content: center; }
@@ -219,11 +218,6 @@
       <div class="fp-label">Revenue Target</div>
       <div class="fp-detail" id="flashCurMonthDetail"></div>
     </div>
-  </div>
-  <!-- Row 2: Segment breakdown -->
-  <div class="flash-card" style="margin-top:16px;">
-    <div class="flash-card-header">Mar '26 Revenue by Segment (from Targit)</div>
-    <div id="flashSegmentGrid" style="display:grid;grid-template-columns:repeat(5,1fr);gap:14px;"></div>
   </div>
 </div>
 
@@ -1498,20 +1492,17 @@ function renderSalesFlash(entity) {
   const curDetail = document.getElementById('flashCurMonthDetail');
   const header = document.getElementById('flashLastMonthHeader');
   const pyNote = document.getElementById('flashPYNote');
-  const segGrid = document.getElementById('flashSegmentGrid');
-  const segHeader = segGrid ? segGrid.previousElementSibling : null;
   if (!flashKPIs) return;
 
   const fmtFlash = v => '$' + (v / 1e6).toFixed(1) + 'M';
   const deltaColor = v => parseFloat(v) >= 0 ? '#4ade80' : '#f87171';
   const deltaSign = v => parseFloat(v) >= 0 ? '+' : '';
-  const pctChg = (a,b) => ((a - b) / Math.abs(b) * 100).toFixed(1);
+  const pctChg = (a,b) => b ? ((a - b) / Math.abs(b) * 100).toFixed(1) : '–';
 
   // Update header
   const actualLabel = fd.isActual ? 'Targit Actuals' : 'Plan/Forecast';
   header.textContent = `Last Month — Mar '26 (${actualLabel}, Books Not Yet Closed)`;
 
-  // Total KPIs
   const vsPlanPct = pctChg(fd.mar26Rev, fd.mar26Plan);
   const vsPYPct = pctChg(fd.mar26Rev, fd.mar25Rev);
   const ytdRev = fd.ytd26.reduce((a,b)=>a+b,0);
@@ -1519,11 +1510,41 @@ function renderSalesFlash(entity) {
   const ytdPY = fd.ytdPY.reduce((a,b)=>a+b,0);
   const ytdVsPlanPct = pctChg(ytdRev, ytdPlan);
 
+  // Build segment lines for the Revenue KPI card
+  const segs = fd.segments;
+  const hasActualSegs = segs.some(s => s.rev !== null);
+  // Combine New+Used into "Equipment"
+  let segLines = '';
+  if (hasActualSegs) {
+    const equipRev = (segs[0].rev||0) + (segs[1].rev||0);
+    const combined = [
+      { name: 'Equipment', rev: equipRev },
+      { name: 'Parts', rev: segs[2].rev },
+      { name: 'Service', rev: segs[3].rev },
+      { name: 'Rental', rev: segs[4].rev },
+    ];
+    segLines = '<div class="seg-lines">' + combined.map(s =>
+      `<div class="seg-line"><span class="sl-name">${s.name}</span><span class="sl-val">${fmtFlash(s.rev)}</span></div>`
+    ).join('') + '</div>';
+  } else {
+    // Use PY for line items when no actuals
+    const equipPY = (segs[0].pyRev||0) + (segs[1].pyRev||0);
+    const combined = [
+      { name: 'Equipment', rev: equipPY },
+      { name: 'Parts', rev: segs[2].pyRev },
+      { name: 'Service', rev: segs[3].pyRev },
+      { name: 'Rental', rev: segs[4].pyRev },
+    ];
+    // For non-actual entities, segment lines shown under PY card instead
+    segLines = '';
+  }
+
   flashKPIs.innerHTML = `
     <div class="flash-kpi">
       <div class="fk-label">Revenue</div>
-      <div class="fk-value">${fmtFlash(fd.mar26Rev)}</div>
-      <div class="fk-delta" style="color:${fd.isActual ? deltaColor(vsPlanPct) : '#a1a1aa'}">${fd.isActual ? 'vs Plan: '+deltaSign(vsPlanPct)+vsPlanPct+'%' : 'Plan (actuals pending)'}</div>
+      ${segLines}
+      <div class="seg-total"><span>Total</span><span>${fmtFlash(fd.mar26Rev)}</span></div>
+      <div class="fk-delta" style="color:${fd.isActual ? deltaColor(vsPlanPct) : '#a1a1aa'};margin-top:6px;">${fd.isActual ? 'vs Plan: '+deltaSign(vsPlanPct)+vsPlanPct+'%' : 'Plan (actuals pending)'}</div>
       <div class="fk-sub">${fd.isActual ? 'Plan: '+fmtFlash(fd.mar26Plan) : ''}</div>
     </div>
     <div class="flash-kpi">
@@ -1556,45 +1577,6 @@ function renderSalesFlash(entity) {
   curVal.textContent = fmtFlash(fd.apr26Plan);
   const dailyTarget = fd.apr26Plan / 30;
   curDetail.innerHTML = `~$${(dailyTarget/1e3).toFixed(0)}K/day &bull; Plan GM: ${fmtFlash(fd.apr26PlanGM)} &bull; Plan EBITDA: ${fmtFlash(fd.apr26PlanEbitda)}`;
-
-  // Segment breakdown
-  if (segGrid) {
-    const segs = fd.segments;
-    const hasActualSegs = segs.some(s => s.rev !== null);
-    if (hasActualSegs) {
-      if (segHeader) segHeader.textContent = "Mar '26 Revenue by Segment (from Targit)";
-      const totalRev = segs.reduce((s,x) => s+x.rev, 0);
-      segGrid.innerHTML = segs.map(seg => {
-        const gmPct = (seg.gm / seg.rev * 100).toFixed(1);
-        const share = (seg.rev / totalRev * 100).toFixed(0);
-        const gmColor = parseFloat(gmPct) >= 25 ? '#4ade80' : (parseFloat(gmPct) >= 10 ? '#facc15' : '#f87171');
-        const pyChg = pctChg(seg.rev, seg.pyRev);
-        const pyColor = parseFloat(pyChg) >= 0 ? '#4ade80' : '#f87171';
-        return `<div class="seg-card">
-          <div class="seg-name">${seg.name}</div>
-          <div class="seg-rev">${fmtFlash(seg.rev)}</div>
-          <div class="seg-gm" style="color:${gmColor}">GM: ${gmPct}%</div>
-          <div class="seg-share">${share}% of total</div>
-          <div class="seg-py" style="color:${pyColor}">vs PY: ${deltaSign(pyChg)}${pyChg}%</div>
-        </div>`;
-      }).join('');
-      segGrid.parentElement.style.display = '';
-    } else {
-      // No actual segments — show PY breakdown instead
-      if (segHeader) segHeader.textContent = "Mar '25 Prior Year Revenue by Segment (from Targit)";
-      const totalPY = segs.reduce((s,x) => s+x.pyRev, 0);
-      segGrid.innerHTML = segs.map(seg => {
-        const share = (seg.pyRev / totalPY * 100).toFixed(0);
-        return `<div class="seg-card">
-          <div class="seg-name">${seg.name}</div>
-          <div class="seg-rev">${fmtFlash(seg.pyRev)}</div>
-          <div class="seg-share">${share}% of total</div>
-          <div class="seg-py" style="color:#a1a1aa">Mar '25 Actual</div>
-        </div>`;
-      }).join('');
-      segGrid.parentElement.style.display = '';
-    }
-  }
 }
 // Initial render for consolidated
 renderSalesFlash('consolidated');
