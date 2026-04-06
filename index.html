@@ -129,13 +129,22 @@
   .flash-banner .flash-plan-card .fp-value { font-size: 32px; font-weight: 800; color: #fff; }
   .flash-banner .flash-plan-card .fp-label { font-size: 10px; color: #a1a1aa; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 4px; }
   .flash-banner .flash-plan-card .fp-detail { font-size: 11px; color: #a1a1aa; margin-top: 8px; }
-  .flash-banner .seg-lines { margin-bottom: 8px; }
-  .flash-banner .seg-line { display: flex; justify-content: space-between; align-items: center; padding: 3px 0; font-size: 13px; color: #d1d5db; border-bottom: 1px solid rgba(255,255,255,0.06); }
-  .flash-banner .seg-line .sl-name { font-weight: 600; }
-  .flash-banner .seg-line .sl-val { font-weight: 700; font-variant-numeric: tabular-nums; }
-  .flash-banner .seg-total { display: flex; justify-content: space-between; align-items: center; padding: 6px 0 0; font-size: 15px; font-weight: 800; color: #fff; border-top: 2px solid rgba(255,255,255,0.2); margin-top: 2px; }
+  .flash-banner .seg-table { width: 100%; border-collapse: collapse; font-size: 12px; margin-bottom: 4px; }
+  .flash-banner .seg-table th { text-align: right; font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: #71717a; padding: 0 0 6px 8px; }
+  .flash-banner .seg-table th:first-child { text-align: left; padding-left: 0; }
+  .flash-banner .seg-table td { padding: 4px 0 4px 8px; text-align: right; font-variant-numeric: tabular-nums; color: #d1d5db; border-bottom: 1px solid rgba(255,255,255,0.06); }
+  .flash-banner .seg-table td:first-child { text-align: left; font-weight: 600; padding-left: 0; }
+  .flash-banner .seg-table tr.seg-total-row td { border-top: 2px solid rgba(255,255,255,0.2); border-bottom: none; font-weight: 800; font-size: 14px; color: #fff; padding-top: 6px; }
   @media (max-width: 1024px) { .flash-banner .flash-kpis { grid-template-columns: 1fr 1fr; } .flash-banner .flash-kpi:first-child { grid-column: 1 / -1; } }
-  @media (max-width: 768px) { .flash-banner { padding: 18px 16px; } .flash-banner .flash-grid { grid-template-columns: 1fr; } .flash-banner .flash-kpis { grid-template-columns: 1fr; } .flash-banner .flash-kpi:first-child { grid-column: auto; } .flash-banner .flash-kpi .fk-value { font-size: 20px; } .flash-banner .flash-plan-card .fp-value { font-size: 26px; } }
+  @media (max-width: 768px) { .flash-banner { padding: 18px 16px; } .flash-banner .flash-grid { grid-template-columns: 1fr; } .flash-banner .flash-kpis { grid-template-columns: 1fr; } .flash-banner .flash-kpi:first-child { grid-column: auto; } .flash-banner .flash-kpi .fk-value { font-size: 20px; } .flash-banner .flash-plan-card .fp-value { font-size: 26px; }
+    .container { padding: 16px 12px; }
+    .grid-4, .grid-3, .grid-2, .grid-2-1 { gap: 12px; }
+    .scroll-x { -webkit-overflow-scrolling: touch; overflow-x: auto; }
+    .section-content .grid-4 { grid-template-columns: repeat(2, 1fr); }
+    #kpiMTD, #kpiYTD { grid-template-columns: repeat(2, 1fr) !important; gap: 12px !important; }
+    .kpi .value { font-size: 22px; }
+    .kpi .plan-line, .kpi .py-line { font-size: 10px; flex-wrap: wrap; }
+  }
 
   /* Password Gate */
   #auth-gate { position: fixed; inset: 0; z-index: 9999; background: var(--charcoal); display: flex; align-items: center; justify-content: center; }
@@ -1423,9 +1432,11 @@ function deltaClass(actual, comp, higherIsGood) {
 // ===== SALES FLASH BANNER =====
 // Flash data by entity. Mar '26 consolidated from Targit cloud (4/6/26).
 // Mar '25 PY from Targit export. Entity-level Mar '26 = model forecast (plan).
+// Segment data: actual from Targit, plan from PNC 2026 SENT, PY from Targit export
+// Combined = New+Used Equipment into "Equipment"
 const flashData = {
   consolidated: {
-    mar26Rev: 17025917, // Targit actual
+    mar26Rev: 17025917,
     mar26Plan: mPlanRev[2],
     mar25Rev: 35697760,
     ytd26: [mRev[12], mRev[13], 17025917],
@@ -1435,17 +1446,24 @@ const flashData = {
     apr26PlanGM: mPlanGM[3],
     apr26PlanEbitda: mPlanEbitda[3],
     isActual: true,
-    showBlockTrade: true, // $9.4M ACME block trade in Mar '25
+    showBlockTrade: true,
+    // segments: { name, rev (actual), plan, py } — Equipment = New+Used combined
     segments: [
-      { name: 'New Equipment', rev: 8936662, gm: 1127133, pyRev: 26543844 },
-      { name: 'Used Equipment', rev: 1014356, gm: 105881, pyRev: 1814497 },
-      { name: 'Parts', rev: 3819000, gm: 1076421, pyRev: 3930105 },
-      { name: 'Service', rev: 1818607, gm: 1140046, pyRev: 1787023 },
-      { name: 'Rental', rev: 1437292, gm: 685049, pyRev: 1622290 },
+      { name: 'Equipment', rev: 8936662+1014356, plan: 11412172+408891, py: 26543844+1814497 },
+      { name: 'Parts',     rev: 3819000,         plan: 3771180,         py: 3930106 },
+      { name: 'Service',   rev: 1818607,         plan: 1927343,         py: 1787024 },
+      { name: 'Rental',    rev: 1437292,         plan: 1722371,         py: 1622290 },
+    ],
+    // April plan by segment (from PNC 2026 SENT col 19)
+    aprSegments: [
+      { name: 'Equipment', plan: 15947321+623326 },
+      { name: 'Parts',     plan: 3848274 },
+      { name: 'Service',   plan: 1941904 },
+      { name: 'Rental',    plan: 1838803 },
     ]
   },
   hmc: {
-    mar26Rev: entityData.hmc.mPlanRev[2], // plan/forecast — actuals not yet available
+    mar26Rev: entityData.hmc.mPlanRev[2],
     mar26Plan: entityData.hmc.mPlanRev[2],
     mar25Rev: 29990009,
     ytd26: [entityData.hmc.mRev[12], entityData.hmc.mRev[13], entityData.hmc.mPlanRev[2]],
@@ -1456,16 +1474,17 @@ const flashData = {
     apr26PlanEbitda: entityData.hmc.mPlanEbitda[3],
     isActual: false,
     showBlockTrade: true,
+    // HMC: annual budget by segment (no monthly breakdown avail); PY from Targit export
     segments: [
-      { name: 'New Equipment', rev: null, gm: null, pyRev: 22218524 },
-      { name: 'Used Equipment', rev: null, gm: null, pyRev: 1813247 },
-      { name: 'Parts', rev: null, gm: null, pyRev: 3000135 },
-      { name: 'Service', rev: null, gm: null, pyRev: 1531032 },
-      { name: 'Rental', rev: null, gm: null, pyRev: 1427071 },
-    ]
+      { name: 'Equipment', rev: null, plan: null, py: 22218524+1813247 },
+      { name: 'Parts',     rev: null, plan: null, py: 3000135 },
+      { name: 'Service',   rev: null, plan: null, py: 1531032 },
+      { name: 'Rental',    rev: null, plan: null, py: 1427071 },
+    ],
+    aprSegments: null
   },
   rjv: {
-    mar26Rev: entityData.rjv.mPlanRev[2], // plan/forecast
+    mar26Rev: entityData.rjv.mPlanRev[2],
     mar26Plan: entityData.rjv.mPlanRev[2],
     mar25Rev: 5707751,
     ytd26: [entityData.rjv.mRev[12], entityData.rjv.mRev[13], entityData.rjv.mPlanRev[2]],
@@ -1477,12 +1496,12 @@ const flashData = {
     isActual: false,
     showBlockTrade: false,
     segments: [
-      { name: 'New Equipment', rev: null, gm: null, pyRev: 4325320 },
-      { name: 'Used Equipment', rev: null, gm: null, pyRev: 1250 },
-      { name: 'Parts', rev: null, gm: null, pyRev: 929971 },
-      { name: 'Service', rev: null, gm: null, pyRev: 255992 },
-      { name: 'Rental', rev: null, gm: null, pyRev: 195219 },
-    ]
+      { name: 'Equipment', rev: null, plan: null, py: 4325320+1250 },
+      { name: 'Parts',     rev: null, plan: null, py: 929971 },
+      { name: 'Service',   rev: null, plan: null, py: 255992 },
+      { name: 'Rental',    rev: null, plan: null, py: 195219 },
+    ],
+    aprSegments: null
   }
 };
 
@@ -1490,18 +1509,16 @@ function renderSalesFlash(entity) {
   const fd = flashData[entity];
   if (!fd) return;
   const flashKPIs = document.getElementById('flashLastMonthKPIs');
-  const curVal = document.getElementById('flashCurMonthValue');
-  const curDetail = document.getElementById('flashCurMonthDetail');
+  const curMonthCard = document.getElementById('flashCurrentMonthCard');
   const header = document.getElementById('flashLastMonthHeader');
   const pyNote = document.getElementById('flashPYNote');
   if (!flashKPIs) return;
 
-  const fmtFlash = v => '$' + (v / 1e6).toFixed(1) + 'M';
+  const f = v => v != null ? '$' + (v / 1e6).toFixed(1) + 'M' : '–';
   const deltaColor = v => parseFloat(v) >= 0 ? '#4ade80' : '#f87171';
   const deltaSign = v => parseFloat(v) >= 0 ? '+' : '';
   const pctChg = (a,b) => b ? ((a - b) / Math.abs(b) * 100).toFixed(1) : '–';
 
-  // Update header
   const actualLabel = fd.isActual ? 'Targit Actuals' : 'Plan/Forecast';
   header.textContent = `Last Month — Mar '26 (${actualLabel}, Books Not Yet Closed)`;
 
@@ -1512,73 +1529,83 @@ function renderSalesFlash(entity) {
   const ytdPY = fd.ytdPY.reduce((a,b)=>a+b,0);
   const ytdVsPlanPct = pctChg(ytdRev, ytdPlan);
 
-  // Build segment lines for the Revenue KPI card
+  // Build segment mini-table with Actual / Plan / PY columns
   const segs = fd.segments;
-  const hasActualSegs = segs.some(s => s.rev !== null);
-  // Combine New+Used into "Equipment"
-  let segLines = '';
-  if (hasActualSegs) {
-    const equipRev = (segs[0].rev||0) + (segs[1].rev||0);
-    const combined = [
-      { name: 'Equipment', rev: equipRev },
-      { name: 'Parts', rev: segs[2].rev },
-      { name: 'Service', rev: segs[3].rev },
-      { name: 'Rental', rev: segs[4].rev },
-    ];
-    segLines = '<div class="seg-lines">' + combined.map(s =>
-      `<div class="seg-line"><span class="sl-name">${s.name}</span><span class="sl-val">${fmtFlash(s.rev)}</span></div>`
-    ).join('') + '</div>';
-  } else {
-    // Use PY for line items when no actuals
-    const equipPY = (segs[0].pyRev||0) + (segs[1].pyRev||0);
-    const combined = [
-      { name: 'Equipment', rev: equipPY },
-      { name: 'Parts', rev: segs[2].pyRev },
-      { name: 'Service', rev: segs[3].pyRev },
-      { name: 'Rental', rev: segs[4].pyRev },
-    ];
-    // For non-actual entities, segment lines shown under PY card instead
-    segLines = '';
-  }
+  const hasActual = segs.some(s => s.rev !== null);
+  const hasPlan = segs.some(s => s.plan !== null);
+
+  let segTable = '<table class="seg-table"><thead><tr><th></th>';
+  if (hasActual) segTable += '<th>Actual</th>';
+  if (hasPlan) segTable += '<th>Plan</th>';
+  segTable += '<th>PY</th></tr></thead><tbody>';
+  segs.forEach(s => {
+    segTable += '<tr>';
+    segTable += `<td>${s.name}</td>`;
+    if (hasActual) segTable += `<td>${f(s.rev)}</td>`;
+    if (hasPlan) segTable += `<td>${f(s.plan)}</td>`;
+    segTable += `<td>${f(s.py)}</td>`;
+    segTable += '</tr>';
+  });
+  // Total row
+  const totActual = hasActual ? segs.reduce((a,s)=>a+(s.rev||0),0) : null;
+  const totPlan = hasPlan ? segs.reduce((a,s)=>a+(s.plan||0),0) : null;
+  const totPY = segs.reduce((a,s)=>a+(s.py||0),0);
+  segTable += '<tr class="seg-total-row">';
+  segTable += '<td>Total</td>';
+  if (hasActual) segTable += `<td>${f(totActual)}</td>`;
+  if (hasPlan) segTable += `<td>${f(totPlan)}</td>`;
+  segTable += `<td>${f(totPY)}</td>`;
+  segTable += '</tr></tbody></table>';
 
   flashKPIs.innerHTML = `
     <div class="flash-kpi">
-      <div class="fk-label">Revenue</div>
-      ${segLines}
-      <div class="seg-total"><span>Total</span><span>${fmtFlash(fd.mar26Rev)}</span></div>
+      <div class="fk-label">Revenue — Mar '26 vs Plan vs PY</div>
+      ${segTable}
       <div class="fk-delta" style="color:${fd.isActual ? deltaColor(vsPlanPct) : '#a1a1aa'};margin-top:6px;">${fd.isActual ? 'vs Plan: '+deltaSign(vsPlanPct)+vsPlanPct+'%' : 'Plan (actuals pending)'}</div>
-      <div class="fk-sub">${fd.isActual ? 'Plan: '+fmtFlash(fd.mar26Plan) : ''}</div>
     </div>
     <div class="flash-kpi">
       <div class="fk-label">vs Prior Year</div>
       <div class="fk-value" style="color:${deltaColor(vsPYPct)}">${deltaSign(vsPYPct)}${vsPYPct}%</div>
-      <div class="fk-delta" style="color:#a1a1aa">PY: ${fmtFlash(fd.mar25Rev)}</div>
+      <div class="fk-delta" style="color:#a1a1aa">PY: ${f(fd.mar25Rev)}</div>
       <div class="fk-sub">Mar '25</div>
     </div>
     <div class="flash-kpi">
       <div class="fk-label">YTD Rev (Jan-Mar)</div>
-      <div class="fk-value">${fmtFlash(ytdRev)}</div>
+      <div class="fk-value">${f(ytdRev)}</div>
       <div class="fk-delta" style="color:${deltaColor(ytdVsPlanPct)}">vs Plan: ${deltaSign(ytdVsPlanPct)}${ytdVsPlanPct}%</div>
-      <div class="fk-sub">Plan: ${fmtFlash(ytdPlan)} | PY: ${fmtFlash(ytdPY)}</div>
+      <div class="fk-sub">Plan: ${f(ytdPlan)} | PY: ${f(ytdPY)}</div>
     </div>
   `;
 
-  // Block trade note (HMC and consolidated only)
+  // Block trade note
   if (pyNote) {
     if (fd.showBlockTrade) {
       const adjPY = fd.mar25Rev - 9400000;
       const adjVsPYPct = pctChg(fd.mar26Rev, adjPY);
-      pyNote.innerHTML = `Note: Mar '25 included a $9.4M block trade (ACME). Excluding that trade, PY adj. revenue was ${fmtFlash(adjPY)} and YoY would be <span style="color:${deltaColor(adjVsPYPct)}">${deltaSign(adjVsPYPct)}${adjVsPYPct}%</span>.`;
+      pyNote.innerHTML = `Note: Mar '25 included a $9.4M block trade (ACME). Excluding that trade, PY adj. revenue was ${f(adjPY)} and YoY would be <span style="color:${deltaColor(adjVsPYPct)}">${deltaSign(adjVsPYPct)}${adjVsPYPct}%</span>.`;
       pyNote.style.display = '';
     } else {
       pyNote.style.display = 'none';
     }
   }
 
-  // Current month plan
-  curVal.textContent = fmtFlash(fd.apr26Plan);
-  const dailyTarget = fd.apr26Plan / 30;
-  curDetail.innerHTML = `~$${(dailyTarget/1e3).toFixed(0)}K/day &bull; Plan GM: ${fmtFlash(fd.apr26PlanGM)} &bull; Plan EBITDA: ${fmtFlash(fd.apr26PlanEbitda)}`;
+  // April plan card — with segment breakdown
+  if (curMonthCard) {
+    const aprSegs = fd.aprSegments;
+    let aprSegHtml = '';
+    if (aprSegs) {
+      aprSegHtml = '<table class="seg-table" style="margin-top:12px;"><thead><tr><th></th><th>Plan</th></tr></thead><tbody>';
+      aprSegs.forEach(s => { aprSegHtml += `<tr><td>${s.name}</td><td>${f(s.plan)}</td></tr>`; });
+      aprSegHtml += `<tr class="seg-total-row"><td>Total</td><td>${f(fd.apr26Plan)}</td></tr>`;
+      aprSegHtml += '</tbody></table>';
+    }
+    const dailyTarget = fd.apr26Plan / 30;
+    curMonthCard.innerHTML = `
+      <div class="fp-month">April 2026 Plan</div>
+      ${aprSegs ? aprSegHtml : '<div class="fp-value">' + f(fd.apr26Plan) + '</div><div class="fp-label">Revenue Target</div>'}
+      <div class="fp-detail" style="margin-top:8px;">~$${(dailyTarget/1e3).toFixed(0)}K/day &bull; Plan GM: ${f(fd.apr26PlanGM)} &bull; Plan EBITDA: ${f(fd.apr26PlanEbitda)}</div>
+    `;
+  }
 }
 // Initial render for consolidated
 renderSalesFlash('consolidated');
