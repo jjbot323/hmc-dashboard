@@ -128,7 +128,13 @@
   .flash-banner .flash-plan-card .fp-value { font-size: 32px; font-weight: 800; color: #fff; }
   .flash-banner .flash-plan-card .fp-label { font-size: 10px; color: #a1a1aa; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 4px; }
   .flash-banner .flash-plan-card .fp-detail { font-size: 11px; color: #a1a1aa; margin-top: 8px; }
-  @media (max-width: 768px) { .flash-banner .flash-grid { grid-template-columns: 1fr; } .flash-banner .flash-kpis { grid-template-columns: 1fr; } }
+  .flash-banner .seg-card { text-align: center; background: rgba(255,255,255,0.05); border-radius: 8px; padding: 14px 10px; border: 1px solid rgba(255,255,255,0.08); }
+  .flash-banner .seg-card .seg-name { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.6px; color: #a1a1aa; margin-bottom: 6px; }
+  .flash-banner .seg-card .seg-rev { font-size: 20px; font-weight: 800; color: #fff; }
+  .flash-banner .seg-card .seg-gm { font-size: 11px; font-weight: 600; margin-top: 4px; }
+  .flash-banner .seg-card .seg-share { font-size: 10px; color: #a1a1aa; margin-top: 2px; }
+  .flash-banner .seg-card .seg-py { font-size: 10px; color: #a1a1aa; margin-top: 4px; }
+  @media (max-width: 768px) { .flash-banner .flash-grid { grid-template-columns: 1fr; } .flash-banner .flash-kpis { grid-template-columns: 1fr; } #flashSegmentGrid { grid-template-columns: repeat(2, 1fr) !important; } }
 
   /* Password Gate */
   #auth-gate { position: fixed; inset: 0; z-index: 9999; background: var(--charcoal); display: flex; align-items: center; justify-content: center; }
@@ -200,6 +206,7 @@
     <h3>Sales Flash & Current Month Target</h3>
     <span class="flash-tag">Preliminary</span>
   </div>
+  <!-- Row 1: Total revenue KPIs + April plan -->
   <div class="flash-grid">
     <div class="flash-card">
       <div class="flash-card-header" id="flashLastMonthHeader">Last Month — Mar '26 (Sales Only, Books Not Yet Closed)</div>
@@ -212,6 +219,11 @@
       <div class="fp-label">Revenue Target</div>
       <div class="fp-detail" id="flashCurMonthDetail"></div>
     </div>
+  </div>
+  <!-- Row 2: Segment breakdown -->
+  <div class="flash-card" style="margin-top:16px;">
+    <div class="flash-card-header">Mar '26 Revenue by Segment (from Targit)</div>
+    <div id="flashSegmentGrid" style="display:grid;grid-template-columns:repeat(5,1fr);gap:14px;"></div>
   </div>
 </div>
 
@@ -1215,11 +1227,8 @@ function setEntity(entity) {
   currentEntity = entity;
   document.querySelectorAll('.entity-btn').forEach(b => b.classList.remove('active'));
   event.currentTarget.classList.add('active');
-  // Flash banner: only show for consolidated (entity-level March data not available)
-  const flashBanner = document.getElementById('salesFlashBanner');
-  if (flashBanner) {
-    flashBanner.style.display = entity === 'consolidated' ? '' : 'none';
-  }
+  // Re-render flash banner for selected entity
+  if (typeof renderSalesFlash === 'function') renderSalesFlash(entity);
   renderEntityKPIs(entity);
 }
 
@@ -1416,45 +1425,111 @@ function deltaClass(actual, comp, higherIsGood) {
 }
 
 // ===== SALES FLASH BANNER =====
-// Flash data: Mar '26 revenue & GM from Targit actuals (4/6/26); SGA/EBITDA still model forecast
-// Mar '26 actual sales = mRev index 14; Mar '25 PY = mRev index 2
-// Apr '26 plan = mPlanRev index 3
-(function renderSalesFlash() {
+// Flash data by entity. Mar '26 consolidated from Targit cloud (4/6/26).
+// Mar '25 PY from Targit export. Entity-level Mar '26 = model forecast (plan).
+const flashData = {
+  consolidated: {
+    mar26Rev: 17025917, // Targit actual
+    mar26Plan: mPlanRev[2],
+    mar25Rev: 35697760,
+    ytd26: [mRev[12], mRev[13], 17025917],
+    ytdPlan: [mPlanRev[0], mPlanRev[1], mPlanRev[2]],
+    ytdPY: [mRev[0], mRev[1], mRev[2]],
+    apr26Plan: mPlanRev[3],
+    apr26PlanGM: mPlanGM[3],
+    apr26PlanEbitda: mPlanEbitda[3],
+    isActual: true,
+    showBlockTrade: true, // $9.4M ACME block trade in Mar '25
+    segments: [
+      { name: 'New Equipment', rev: 8936662, gm: 1127133, pyRev: 26543844 },
+      { name: 'Used Equipment', rev: 1014356, gm: 105881, pyRev: 1814497 },
+      { name: 'Parts', rev: 3819000, gm: 1076421, pyRev: 3930105 },
+      { name: 'Service', rev: 1818607, gm: 1140046, pyRev: 1787023 },
+      { name: 'Rental', rev: 1437292, gm: 685049, pyRev: 1622290 },
+    ]
+  },
+  hmc: {
+    mar26Rev: entityData.hmc.mPlanRev[2], // plan/forecast — actuals not yet available
+    mar26Plan: entityData.hmc.mPlanRev[2],
+    mar25Rev: 29990009,
+    ytd26: [entityData.hmc.mRev[12], entityData.hmc.mRev[13], entityData.hmc.mPlanRev[2]],
+    ytdPlan: [entityData.hmc.mPlanRev[0], entityData.hmc.mPlanRev[1], entityData.hmc.mPlanRev[2]],
+    ytdPY: [entityData.hmc.mRev[0], entityData.hmc.mRev[1], 29990009],
+    apr26Plan: entityData.hmc.mPlanRev[3],
+    apr26PlanGM: entityData.hmc.mPlanGM[3],
+    apr26PlanEbitda: entityData.hmc.mPlanEbitda[3],
+    isActual: false,
+    showBlockTrade: true,
+    segments: [
+      { name: 'New Equipment', rev: null, gm: null, pyRev: 22218524 },
+      { name: 'Used Equipment', rev: null, gm: null, pyRev: 1813247 },
+      { name: 'Parts', rev: null, gm: null, pyRev: 3000135 },
+      { name: 'Service', rev: null, gm: null, pyRev: 1531032 },
+      { name: 'Rental', rev: null, gm: null, pyRev: 1427071 },
+    ]
+  },
+  rjv: {
+    mar26Rev: entityData.rjv.mPlanRev[2], // plan/forecast
+    mar26Plan: entityData.rjv.mPlanRev[2],
+    mar25Rev: 5707751,
+    ytd26: [entityData.rjv.mRev[12], entityData.rjv.mRev[13], entityData.rjv.mPlanRev[2]],
+    ytdPlan: [entityData.rjv.mPlanRev[0], entityData.rjv.mPlanRev[1], entityData.rjv.mPlanRev[2]],
+    ytdPY: [entityData.rjv.mRev[0], entityData.rjv.mRev[1], 5707751],
+    apr26Plan: entityData.rjv.mPlanRev[3],
+    apr26PlanGM: entityData.rjv.mPlanGM[3],
+    apr26PlanEbitda: entityData.rjv.mPlanEbitda[3],
+    isActual: false,
+    showBlockTrade: false,
+    segments: [
+      { name: 'New Equipment', rev: null, gm: null, pyRev: 4325320 },
+      { name: 'Used Equipment', rev: null, gm: null, pyRev: 1250 },
+      { name: 'Parts', rev: null, gm: null, pyRev: 929971 },
+      { name: 'Service', rev: null, gm: null, pyRev: 255992 },
+      { name: 'Rental', rev: null, gm: null, pyRev: 195219 },
+    ]
+  }
+};
+
+function renderSalesFlash(entity) {
+  const fd = flashData[entity];
+  if (!fd) return;
   const flashKPIs = document.getElementById('flashLastMonthKPIs');
   const curVal = document.getElementById('flashCurMonthValue');
   const curDetail = document.getElementById('flashCurMonthDetail');
+  const header = document.getElementById('flashLastMonthHeader');
+  const pyNote = document.getElementById('flashPYNote');
+  const segGrid = document.getElementById('flashSegmentGrid');
+  const segHeader = segGrid ? segGrid.previousElementSibling : null;
   if (!flashKPIs) return;
-
-  // Last month (Mar '26) — consolidated only
-  const mar26Rev = mRev[14];          // 17,026,519
-  const mar26Plan = mPlanRev[2];      // 19,241,957
-  const mar25Rev = mRev[2];           // 35,697,760 (PY)
-
-  const vsPlanPct = ((mar26Rev - mar26Plan) / Math.abs(mar26Plan) * 100).toFixed(1);
-  const vsPYPct = ((mar26Rev - mar25Rev) / Math.abs(mar25Rev) * 100).toFixed(1);
-
-  // YTD through Mar (Jan+Feb+Mar)
-  const ytdRev = mRev[12] + mRev[13] + mRev[14];
-  const ytdPlan = mPlanRev[0] + mPlanRev[1] + mPlanRev[2];
-  const ytdPY = mRev[0] + mRev[1] + mRev[2];
-  const ytdVsPlanPct = ((ytdRev - ytdPlan) / Math.abs(ytdPlan) * 100).toFixed(1);
-  const ytdVsPYPct = ((ytdRev - ytdPY) / Math.abs(ytdPY) * 100).toFixed(1);
 
   const fmtFlash = v => '$' + (v / 1e6).toFixed(1) + 'M';
   const deltaColor = v => parseFloat(v) >= 0 ? '#4ade80' : '#f87171';
   const deltaSign = v => parseFloat(v) >= 0 ? '+' : '';
+  const pctChg = (a,b) => ((a - b) / Math.abs(b) * 100).toFixed(1);
+
+  // Update header
+  const actualLabel = fd.isActual ? 'Targit Actuals' : 'Plan/Forecast';
+  header.textContent = `Last Month — Mar '26 (${actualLabel}, Books Not Yet Closed)`;
+
+  // Total KPIs
+  const vsPlanPct = pctChg(fd.mar26Rev, fd.mar26Plan);
+  const vsPYPct = pctChg(fd.mar26Rev, fd.mar25Rev);
+  const ytdRev = fd.ytd26.reduce((a,b)=>a+b,0);
+  const ytdPlan = fd.ytdPlan.reduce((a,b)=>a+b,0);
+  const ytdPY = fd.ytdPY.reduce((a,b)=>a+b,0);
+  const ytdVsPlanPct = pctChg(ytdRev, ytdPlan);
 
   flashKPIs.innerHTML = `
     <div class="flash-kpi">
       <div class="fk-label">Revenue</div>
-      <div class="fk-value">${fmtFlash(mar26Rev)}</div>
-      <div class="fk-delta" style="color:${deltaColor(vsPlanPct)}">vs Plan: ${deltaSign(vsPlanPct)}${vsPlanPct}%</div>
-      <div class="fk-sub">Plan: ${fmtFlash(mar26Plan)}</div>
+      <div class="fk-value">${fmtFlash(fd.mar26Rev)}</div>
+      <div class="fk-delta" style="color:${fd.isActual ? deltaColor(vsPlanPct) : '#a1a1aa'}">${fd.isActual ? 'vs Plan: '+deltaSign(vsPlanPct)+vsPlanPct+'%' : 'Plan (actuals pending)'}</div>
+      <div class="fk-sub">${fd.isActual ? 'Plan: '+fmtFlash(fd.mar26Plan) : ''}</div>
     </div>
     <div class="flash-kpi">
       <div class="fk-label">vs Prior Year</div>
       <div class="fk-value" style="color:${deltaColor(vsPYPct)}">${deltaSign(vsPYPct)}${vsPYPct}%</div>
-      <div class="fk-delta" style="color:#a1a1aa">PY: ${fmtFlash(mar25Rev)}</div>
+      <div class="fk-delta" style="color:#a1a1aa">PY: ${fmtFlash(fd.mar25Rev)}</div>
       <div class="fk-sub">Mar '25</div>
     </div>
     <div class="flash-kpi">
@@ -1465,24 +1540,64 @@ function deltaClass(actual, comp, higherIsGood) {
     </div>
   `;
 
-  // PY context note (block trade)
-  const pyNote = document.getElementById('flashPYNote');
+  // Block trade note (HMC and consolidated only)
   if (pyNote) {
-    const adjPY = mar25Rev - 9400000; // Mar '25 ex-block trade
-    const adjVsPYPct = ((mar26Rev - adjPY) / Math.abs(adjPY) * 100).toFixed(1);
-    pyNote.innerHTML = `Note: Mar '25 included a $9.4M block trade (ACME). Excluding that trade, PY adj. revenue was ${fmtFlash(adjPY)} and YoY change would be <span style="color:${deltaColor(adjVsPYPct)}">${deltaSign(adjVsPYPct)}${adjVsPYPct}%</span>.`;
+    if (fd.showBlockTrade) {
+      const adjPY = fd.mar25Rev - 9400000;
+      const adjVsPYPct = pctChg(fd.mar26Rev, adjPY);
+      pyNote.innerHTML = `Note: Mar '25 included a $9.4M block trade (ACME). Excluding that trade, PY adj. revenue was ${fmtFlash(adjPY)} and YoY would be <span style="color:${deltaColor(adjVsPYPct)}">${deltaSign(adjVsPYPct)}${adjVsPYPct}%</span>.`;
+      pyNote.style.display = '';
+    } else {
+      pyNote.style.display = 'none';
+    }
   }
 
-  // Current month (Apr '26) plan
-  const apr26Plan = mPlanRev[3]; // 24,199,629
-  curVal.textContent = fmtFlash(apr26Plan);
+  // Current month plan
+  curVal.textContent = fmtFlash(fd.apr26Plan);
+  const dailyTarget = fd.apr26Plan / 30;
+  curDetail.innerHTML = `~$${(dailyTarget/1e3).toFixed(0)}K/day &bull; Plan GM: ${fmtFlash(fd.apr26PlanGM)} &bull; Plan EBITDA: ${fmtFlash(fd.apr26PlanEbitda)}`;
 
-  // Daily run rate needed
-  const daysInApr = 30;
-  const dailyTarget = apr26Plan / daysInApr;
-  curDetail.innerHTML = `Daily target: ${fmtFlash(dailyTarget).replace('M','K').replace('$'+(apr26Plan/1e6).toFixed(1)+'K', '$'+(dailyTarget/1e3).toFixed(0)+'K')}`;
-  curDetail.innerHTML = `~$${(dailyTarget/1e3).toFixed(0)}K/day &bull; Plan GM: ${fmtFlash(mPlanGM[3])} &bull; Plan EBITDA: ${fmtFlash(mPlanEbitda[3])}`;
-})();
+  // Segment breakdown
+  if (segGrid) {
+    const segs = fd.segments;
+    const hasActualSegs = segs.some(s => s.rev !== null);
+    if (hasActualSegs) {
+      if (segHeader) segHeader.textContent = "Mar '26 Revenue by Segment (from Targit)";
+      const totalRev = segs.reduce((s,x) => s+x.rev, 0);
+      segGrid.innerHTML = segs.map(seg => {
+        const gmPct = (seg.gm / seg.rev * 100).toFixed(1);
+        const share = (seg.rev / totalRev * 100).toFixed(0);
+        const gmColor = parseFloat(gmPct) >= 25 ? '#4ade80' : (parseFloat(gmPct) >= 10 ? '#facc15' : '#f87171');
+        const pyChg = pctChg(seg.rev, seg.pyRev);
+        const pyColor = parseFloat(pyChg) >= 0 ? '#4ade80' : '#f87171';
+        return `<div class="seg-card">
+          <div class="seg-name">${seg.name}</div>
+          <div class="seg-rev">${fmtFlash(seg.rev)}</div>
+          <div class="seg-gm" style="color:${gmColor}">GM: ${gmPct}%</div>
+          <div class="seg-share">${share}% of total</div>
+          <div class="seg-py" style="color:${pyColor}">vs PY: ${deltaSign(pyChg)}${pyChg}%</div>
+        </div>`;
+      }).join('');
+      segGrid.parentElement.style.display = '';
+    } else {
+      // No actual segments — show PY breakdown instead
+      if (segHeader) segHeader.textContent = "Mar '25 Prior Year Revenue by Segment (from Targit)";
+      const totalPY = segs.reduce((s,x) => s+x.pyRev, 0);
+      segGrid.innerHTML = segs.map(seg => {
+        const share = (seg.pyRev / totalPY * 100).toFixed(0);
+        return `<div class="seg-card">
+          <div class="seg-name">${seg.name}</div>
+          <div class="seg-rev">${fmtFlash(seg.pyRev)}</div>
+          <div class="seg-share">${share}% of total</div>
+          <div class="seg-py" style="color:#a1a1aa">Mar '25 Actual</div>
+        </div>`;
+      }).join('');
+      segGrid.parentElement.style.display = '';
+    }
+  }
+}
+// Initial render for consolidated
+renderSalesFlash('consolidated');
 
 // ===== PERFORMANCE SNAPSHOT KPI CARDS =====
 (function() {
