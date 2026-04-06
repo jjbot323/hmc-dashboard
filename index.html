@@ -130,10 +130,12 @@
   .flash-banner .flash-plan-card .fp-label { font-size: 10px; color: #a1a1aa; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 4px; }
   .flash-banner .flash-plan-card .fp-detail { font-size: 11px; color: #a1a1aa; margin-top: 8px; }
   .flash-banner .seg-table { width: 100%; border-collapse: collapse; font-size: 12px; margin-bottom: 4px; }
-  .flash-banner .seg-table th { text-align: right; font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: #71717a; padding: 0 0 6px 8px; }
+  .flash-banner .seg-table thead { background: transparent; }
+  .flash-banner .seg-table th { text-align: right; font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: #71717a; padding: 0 0 6px 8px; border-bottom: none; }
   .flash-banner .seg-table th:first-child { text-align: left; padding-left: 0; }
   .flash-banner .seg-table td { padding: 4px 0 4px 8px; text-align: right; font-variant-numeric: tabular-nums; color: #d1d5db; border-bottom: 1px solid rgba(255,255,255,0.06); }
   .flash-banner .seg-table td:first-child { text-align: left; font-weight: 600; padding-left: 0; }
+  .flash-banner .seg-table tr:hover td { background: transparent; }
   .flash-banner .seg-table tr.seg-total-row td { border-top: 2px solid rgba(255,255,255,0.2); border-bottom: none; font-weight: 800; font-size: 14px; color: #fff; padding-top: 6px; }
   @media (max-width: 1024px) { .flash-banner .flash-kpis { grid-template-columns: 1fr 1fr; } .flash-banner .flash-kpi:first-child { grid-column: 1 / -1; } }
   @media (max-width: 768px) { .flash-banner { padding: 18px 16px; } .flash-banner .flash-grid { grid-template-columns: 1fr; } .flash-banner .flash-kpis { grid-template-columns: 1fr; } .flash-banner .flash-kpi:first-child { grid-column: auto; } .flash-banner .flash-kpi .fk-value { font-size: 20px; } .flash-banner .flash-plan-card .fp-value { font-size: 26px; }
