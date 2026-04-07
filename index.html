@@ -238,6 +238,8 @@
       <div class="fp-detail" id="flashCurMonthDetail"></div>
     </div>
   </div>
+  <!-- Availability strip -->
+  <div id="availStrip" style="margin-top:16px;display:flex;align-items:center;gap:16px;padding:12px 16px;background:rgba(255,255,255,0.05);border-radius:8px;border:1px solid rgba(255,255,255,0.08);"></div>
 </div>
 
 <!-- PERFORMANCE SNAPSHOT -->
@@ -556,34 +558,13 @@
 </div>
 
 <!-- CASH FLOW FORECAST -->
-<div class="section-title" onclick="toggleSection(this)">Cash Flow Forecast <span class="badge badge-info">as of 4/1/2026</span></div>
+<div class="section-title" onclick="toggleSection(this)">Cash Flow & Availability <span class="badge badge-info" id="availAsOfBadge">as of 3/31/2026</span></div>
 <div class="section-content">
-<div class="grid-4">
-  <div class="card kpi">
-    <div class="label">Current Availability (3/27)</div>
-    <div class="value" style="color:var(--yellow)">$6.5M</div>
-    <div class="delta warn">Below $8.0M target</div>
-  </div>
-  <div class="card kpi">
-    <div class="label">Low Point (Actual)</div>
-    <div class="value" style="color:var(--red)">$4.5M</div>
-    <div class="delta down">Feb 27 -- trough of cycle</div>
-  </div>
-  <div class="card kpi">
-    <div class="label">Apr End (w/ BBC Adj)</div>
-    <div class="value" style="color:var(--yellow)">$7.7M</div>
-    <div class="delta warn">+$1.7M BBC collateral increase</div>
-  </div>
-  <div class="card kpi">
-    <div class="label">May End (w/ BBC Adj)</div>
-    <div class="value" style="color:var(--yellow)">$7.0M</div>
-    <div class="delta warn">Trending toward target</div>
-  </div>
-</div>
+<div class="grid-4" id="availKPIGrid"></div>
 <div class="grid-2">
   <div class="card">
-    <div class="card-header">Weekly Availability Trend (Dec '25 - Apr '26)</div>
-    <div class="chart-container" style="height:340px;"><canvas id="cashFlowWeeklyChart"></canvas></div>
+    <div class="card-header">Daily Availability — From PNC Ledger <span style="font-weight:400;text-transform:none;letter-spacing:0;font-size:10px;color:#9ca3af;">(auto-updated via /avail)</span></div>
+    <div class="chart-container" style="height:340px;"><canvas id="dailyAvailChart"></canvas></div>
   </div>
   <div class="card">
     <div class="card-header">Monthly Cash Receipts vs Disbursements ($M)</div>
@@ -1734,6 +1715,34 @@ function renderSalesFlash(entity) {
 // Initial render for consolidated
 renderSalesFlash('consolidated');
 
+// ===== AVAILABILITY STRIP (in flash banner) =====
+(function() {
+  const strip = document.getElementById('availStrip');
+  if (!strip || typeof availLedger === 'undefined' || !availLedger.length) return;
+  // This will be populated after availLedger is defined (it's in the Liquidity section script below)
+  // Defer to DOMContentLoaded or use a global render function
+  window._renderAvailStrip = function() {
+    const latest = availLedger[availLedger.length - 1];
+    const prev = availLedger.length >= 2 ? availLedger[availLedger.length - 2] : latest;
+    const change = latest.available - prev.available;
+    const fmtDate = d => { const p = d.split('-'); return parseInt(p[1])+'/'+parseInt(p[2]); };
+    const fmtM = v => '$' + (v/1e6).toFixed(1) + 'M';
+    const color = v => v < 6500000 ? '#f87171' : v < 8000000 ? '#fbbf24' : '#4ade80';
+    const chgColor = change >= 0 ? '#4ade80' : '#f87171';
+    const chgStr = (change >= 0 ? '+' : '') + fmtM(change);
+    const dotColor = color(latest.available);
+
+    strip.innerHTML = `
+      <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${dotColor};flex-shrink:0;"></span>
+      <span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:#a1a1aa;">PNC Availability</span>
+      <span style="font-size:18px;font-weight:800;color:#fff;">${fmtM(latest.available)}</span>
+      <span style="font-size:10px;color:${chgColor};font-weight:600;">${chgStr} vs prior</span>
+      <span style="font-size:10px;color:#71717a;">as of ${fmtDate(latest.date)}</span>
+      <span style="font-size:10px;color:#71717a;margin-left:auto;">Outstanding: ${fmtM(latest.outstanding)} &bull; Limit: $80.0M &bull; Floor: $6.5M &bull; Target: $8.0M</span>
+    `;
+  };
+})();
+
 // ===== PERFORMANCE SNAPSHOT KPI CARDS =====
 (function() {
   const feb26 = 13, jan26 = 12, feb25 = 1, jan25 = 0;
@@ -2221,31 +2230,107 @@ new Chart(document.getElementById('locEbitdaChart'), {
   }
 });
 
-// ===== CASH FLOW FORECAST =====
-const cfWeekLabels = ['12/05','12/12','12/19','12/26','01/02','01/09','01/16','01/23','01/30','02/06','02/13','02/20','02/27','03/06','03/13','03/20','03/27','04/03','04/10'];
-const cfWeekEnd = [9.87,12.14,11.76,11.57,13.94,11.35,9.26,7.85,7.62,7.91,5.75,5.54,4.47,6.69,5.84,5.54,6.47,6.34,6.21];
-const cfWeekNet = [9.87,12.14,11.76,11.57,12.56,11.35,9.26,7.85,6.23,6.52,5.75,5.54,4.47,6.69,5.84,5.54,6.47,6.34,7.88];
-const cfWeekActual = [true,true,true,true,true,true,true,true,true,true,true,true,true,true,true,true,true,true,true];
-const cfTarget = cfWeekLabels.map(()=>8.0);
-const cfFloor = cfWeekLabels.map(()=>6.5);
+// ===== DAILY AVAILABILITY (from PNC Ledger emails — update via /avail) =====
+const availLedger = [
+  { date: '2026-03-04', outstanding: 46744281, available: 6577292 },
+  { date: '2026-03-05', outstanding: 43858513, available: 6628592 },
+  { date: '2026-03-06', outstanding: 43723064, available: 6764041 },
+  { date: '2026-03-09', outstanding: 43794568, available: 6692537 },
+  { date: '2026-03-10', outstanding: 43411700, available: 7075405 },
+  { date: '2026-03-11', outstanding: 43456665, available: 7030440 },
+  { date: '2026-03-12', outstanding: 43184162, available: 7302942 },
+  { date: '2026-03-13', outstanding: 44754339, available: 5732766 },
+  { date: '2026-03-16', outstanding: 44651326, available: 5835779 },
+  { date: '2026-03-17', outstanding: 44421422, available: 6065683 },
+  { date: '2026-03-18', outstanding: 44757952, available: 5729153 },
+  { date: '2026-03-19', outstanding: 44033195, available: 6453910 },
+  { date: '2026-03-20', outstanding: 44057578, available: 6429527 },
+  { date: '2026-03-23', outstanding: 44949907, available: 5537197 },
+  { date: '2026-03-24', outstanding: 44510752, available: 5976353 },
+  { date: '2026-03-25', outstanding: 44439049, available: 6048056 },
+  { date: '2026-03-26', outstanding: 43766639, available: 6720466 },
+  { date: '2026-03-27', outstanding: 44547116, available: 5939989 },
+  { date: '2026-03-28', outstanding: 44547116, available: 5939989 },
+  { date: '2026-03-31', outstanding: 44143859, available: 6343246 },
+];
 
-new Chart(document.getElementById('cashFlowWeeklyChart'), {
+// Render KPI cards from live data
+(function() {
+  const grid = document.getElementById('availKPIGrid');
+  const badge = document.getElementById('availAsOfBadge');
+  if (!grid || !availLedger.length) return;
+
+  const latest = availLedger[availLedger.length - 1];
+  const prev = availLedger.length >= 2 ? availLedger[availLedger.length - 2] : latest;
+  const low = availLedger.reduce((min, d) => d.available < min.available ? d : min, availLedger[0]);
+  const high = availLedger.reduce((max, d) => d.available > max.available ? d : max, availLedger[0]);
+  const avg = availLedger.reduce((s, d) => s + d.available, 0) / availLedger.length;
+  const change = latest.available - prev.available;
+  const changePct = ((change / prev.available) * 100).toFixed(1);
+
+  const fmtDate = d => { const p = d.split('-'); return `${parseInt(p[1])}/${parseInt(p[2])}`; };
+  const fmtM = v => '$' + (v/1e6).toFixed(1) + 'M';
+  const availColor = v => v < 6500000 ? 'var(--red)' : v < 8000000 ? 'var(--yellow)' : 'var(--green)';
+  const changeStr = change >= 0 ? '+' + fmtM(change) : '-' + fmtM(Math.abs(change));
+  const changeCls = change >= 0 ? 'up' : 'down';
+
+  badge.textContent = `as of ${fmtDate(latest.date)}`;
+
+  grid.innerHTML = `
+    <div class="card kpi">
+      <div class="label">Current Availability (${fmtDate(latest.date)})</div>
+      <div class="value" style="color:${availColor(latest.available)}">${fmtM(latest.available)}</div>
+      <div class="delta ${changeCls}">${changeStr} vs prior day (${changePct}%)</div>
+    </div>
+    <div class="card kpi">
+      <div class="label">Period Low</div>
+      <div class="value" style="color:${availColor(low.available)}">${fmtM(low.available)}</div>
+      <div class="delta down">${fmtDate(low.date)} — trough</div>
+    </div>
+    <div class="card kpi">
+      <div class="label">Period High</div>
+      <div class="value" style="color:${availColor(high.available)}">${fmtM(high.available)}</div>
+      <div class="delta up">${fmtDate(high.date)}</div>
+    </div>
+    <div class="card kpi">
+      <div class="label">Period Average</div>
+      <div class="value" style="color:${availColor(avg)}">${fmtM(avg)}</div>
+      <div class="delta" style="color:var(--text2)">Across ${availLedger.length} daily readings</div>
+    </div>
+  `;
+})();
+
+// Daily availability chart
+const dailyAvailLabels = availLedger.map(d => { const p = d.date.split('-'); return parseInt(p[1])+'/'+parseInt(p[2]); });
+const dailyAvailValues = availLedger.map(d => d.available / 1e6);
+const dailyOutstanding = availLedger.map(d => d.outstanding / 1e6);
+const dailyAvailTarget = dailyAvailLabels.map(() => 8.0);
+const dailyAvailFloor = dailyAvailLabels.map(() => 6.5);
+
+new Chart(document.getElementById('dailyAvailChart'), {
   type: 'line',
   data: {
-    labels: cfWeekLabels,
+    labels: dailyAvailLabels,
     datasets: [
-      { label: 'Ending Balance ($M)', data: cfWeekEnd, borderColor: '#1f1f1f', backgroundColor: 'rgba(31,31,31,0.05)', fill: true, pointRadius: 4, pointBackgroundColor: cfWeekEnd.map(v => v < 6.5 ? '#dc0505' : v < 8 ? '#ca8a04' : '#16a34a'), tension: 0.3, borderWidth: 2.5 },
-      { label: 'Net (w/ BBC Adj)', data: cfWeekNet, borderColor: '#7c3aed', pointRadius: 3, pointBackgroundColor: '#7c3aed', tension: 0.3, borderWidth: 2, borderDash: [5,3] },
-      { label: 'Target ($8M)', data: cfTarget, borderColor: '#ca8a04', pointRadius: 0, borderWidth: 2, borderDash: [8,4] },
-      { label: 'Covenant Floor ($6.5M)', data: cfFloor, borderColor: '#dc0505', pointRadius: 0, borderWidth: 2, borderDash: [10,5] },
+      { label: 'Available ($M)', data: dailyAvailValues, borderColor: '#1f1f1f', backgroundColor: 'rgba(31,31,31,0.05)', fill: true, pointRadius: 4, pointBackgroundColor: dailyAvailValues.map(v => v < 6.5 ? '#dc0505' : v < 8 ? '#ca8a04' : '#16a34a'), tension: 0.3, borderWidth: 2.5 },
+      { label: 'Outstanding ($M)', data: dailyOutstanding, borderColor: '#7c3aed', pointRadius: 2, pointBackgroundColor: '#7c3aed', tension: 0.3, borderWidth: 1.5, borderDash: [4,3], yAxisID: 'y1' },
+      { label: 'Target ($8M)', data: dailyAvailTarget, borderColor: '#ca8a04', pointRadius: 0, borderWidth: 2, borderDash: [8,4] },
+      { label: 'Covenant Floor ($6.5M)', data: dailyAvailFloor, borderColor: '#dc0505', pointRadius: 0, borderWidth: 2, borderDash: [10,5] },
     ]
   },
   options: {
     responsive: true, maintainAspectRatio: false,
-    plugins: { legend: { position: 'top', labels: { usePointStyle: true, padding: 12 } }, tooltip: { callbacks: { label: ctx => ctx.dataset.label + ': $' + ctx.parsed.y.toFixed(1) + 'M' }}},
-    scales: { y: { ...gridOpts, min: 0, max: 16, ticks: { callback: v => '$'+v+'M' } }, x: { ...gridOpts, ticks: { maxRotation: 45 }}}
+    plugins: { legend: { position: 'top', labels: { usePointStyle: true, padding: 12, font: { size: 10 } } }, tooltip: { callbacks: { label: ctx => ctx.dataset.label + ': $' + ctx.parsed.y.toFixed(2) + 'M' }}},
+    scales: {
+      y: { ...gridOpts, min: 0, max: 12, position: 'left', title: { display: true, text: 'Available ($M)', font: { size: 10 } }, ticks: { callback: v => '$'+v+'M' } },
+      y1: { ...gridOpts, min: 40, max: 50, position: 'right', grid: { display: false }, title: { display: true, text: 'Outstanding ($M)', font: { size: 10 } }, ticks: { callback: v => '$'+v+'M' } },
+      x: { ...gridOpts, ticks: { maxRotation: 45, font: { size: 9 } } }
+    }
   }
 });
+
+// Render availability strip in flash banner (now that availLedger is defined)
+if (typeof window._renderAvailStrip === 'function') window._renderAvailStrip();
 
 // Monthly receipts vs disbursements
 const cfMonthLabels = ['Dec 25','Jan 26','Feb 26','Mar 26F','Apr 26F','May 26F'];
