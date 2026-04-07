@@ -1716,32 +1716,29 @@ function renderSalesFlash(entity) {
 renderSalesFlash('consolidated');
 
 // ===== AVAILABILITY STRIP (in flash banner) =====
-(function() {
+// Register render function — called later after availLedger is defined
+window._renderAvailStrip = function(data) {
   const strip = document.getElementById('availStrip');
-  if (!strip || typeof availLedger === 'undefined' || !availLedger.length) return;
-  // This will be populated after availLedger is defined (it's in the Liquidity section script below)
-  // Defer to DOMContentLoaded or use a global render function
-  window._renderAvailStrip = function() {
-    const latest = availLedger[availLedger.length - 1];
-    const prev = availLedger.length >= 2 ? availLedger[availLedger.length - 2] : latest;
-    const change = latest.available - prev.available;
-    const fmtDate = d => { const p = d.split('-'); return parseInt(p[1])+'/'+parseInt(p[2]); };
-    const fmtM = v => '$' + (v/1e6).toFixed(1) + 'M';
-    const color = v => v < 6500000 ? '#f87171' : v < 8000000 ? '#fbbf24' : '#4ade80';
-    const chgColor = change >= 0 ? '#4ade80' : '#f87171';
-    const chgStr = (change >= 0 ? '+' : '') + fmtM(change);
-    const dotColor = color(latest.available);
+  if (!strip || !data || !data.length) return;
+  const latest = data[data.length - 1];
+  const prev = data.length >= 2 ? data[data.length - 2] : latest;
+  const change = latest.available - prev.available;
+  const fmtDate = d => { const p = d.split('-'); return parseInt(p[1])+'/'+parseInt(p[2]); };
+  const fmtM = v => '$' + (v/1e6).toFixed(1) + 'M';
+  const color = v => v < 6500000 ? '#f87171' : v < 8000000 ? '#fbbf24' : '#4ade80';
+  const chgColor = change >= 0 ? '#4ade80' : '#f87171';
+  const chgStr = (change >= 0 ? '+' : '') + fmtM(change);
+  const dotColor = color(latest.available);
 
-    strip.innerHTML = `
-      <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${dotColor};flex-shrink:0;"></span>
-      <span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:#a1a1aa;">PNC Availability</span>
-      <span style="font-size:18px;font-weight:800;color:#fff;">${fmtM(latest.available)}</span>
-      <span style="font-size:10px;color:${chgColor};font-weight:600;">${chgStr} vs prior</span>
-      <span style="font-size:10px;color:#71717a;">as of ${fmtDate(latest.date)}</span>
-      <span style="font-size:10px;color:#71717a;margin-left:auto;">Outstanding: ${fmtM(latest.outstanding)} &bull; Limit: $80.0M &bull; Floor: $6.5M &bull; Target: $8.0M</span>
-    `;
-  };
-})();
+  strip.innerHTML = `
+    <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${dotColor};flex-shrink:0;"></span>
+    <span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:#a1a1aa;">PNC Availability</span>
+    <span style="font-size:18px;font-weight:800;color:#fff;">${fmtM(latest.available)}</span>
+    <span style="font-size:10px;color:${chgColor};font-weight:600;">${chgStr} vs prior</span>
+    <span style="font-size:10px;color:#71717a;">as of ${fmtDate(latest.date)}</span>
+    <span style="font-size:10px;color:#71717a;margin-left:auto;">Outstanding: ${fmtM(latest.outstanding)} &bull; Limit: $80.0M &bull; Floor: $6.5M &bull; Target: $8.0M</span>
+  `;
+};
 
 // ===== PERFORMANCE SNAPSHOT KPI CARDS =====
 (function() {
@@ -2330,7 +2327,7 @@ new Chart(document.getElementById('dailyAvailChart'), {
 });
 
 // Render availability strip in flash banner (now that availLedger is defined)
-if (typeof window._renderAvailStrip === 'function') window._renderAvailStrip();
+if (typeof window._renderAvailStrip === 'function') window._renderAvailStrip(availLedger);
 
 // Monthly receipts vs disbursements
 const cfMonthLabels = ['Dec 25','Jan 26','Feb 26','Mar 26F','Apr 26F','May 26F'];
