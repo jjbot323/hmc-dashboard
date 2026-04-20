@@ -3128,6 +3128,10 @@ new Chart(document.getElementById('caseVsAllChart'), {
   const actualData = cfAvail.map((v, i) => i <= lastActualIdx ? v / 1e6 : null);
   const forecastData = cfRevised.map((v, i) => i >= lastActualIdx ? v / 1e6 : null);
 
+  // Monthly average E/A — step line showing each month's avg (covenant is tested on this)
+  const monthAvgs = { '12': 11.670, '01': 9.841, '02': 6.402, '03': 6.228, '04': 7.811, '05': 6.886 };
+  const monthAvgData = cfDates.map(d => { const mm = d.split('/')[0]; return monthAvgs[mm] || null; });
+
   // Availability Chart
   new Chart(document.getElementById('cfAvailChart'), {
     type: 'line',
@@ -3136,6 +3140,7 @@ new Chart(document.getElementById('caseVsAllChart'), {
       datasets: [
         { label: 'Actual', data: actualData, borderColor: '#1f1f1f', backgroundColor: 'rgba(31,31,31,0.08)', borderWidth: 2, pointRadius: 0, fill: false, tension: 0.1 },
         { label: 'Forecast (w/ Revisions)', data: forecastData, borderColor: '#dc0505', backgroundColor: 'rgba(220,5,5,0.06)', borderWidth: 2, borderDash: [6,3], pointRadius: 0, fill: false, tension: 0.1 },
+        { label: 'Monthly Avg E/A (Covenant Test)', data: monthAvgData, borderColor: '#7c3aed', backgroundColor: 'rgba(124,58,237,0.06)', borderWidth: 2.5, borderDash: [8,4], pointRadius: 0, fill: false, stepped: 'middle' },
         { label: 'Target ($8M)', data: Array(cfDates.length).fill(TARGET / 1e6), borderColor: '#16a34a', borderWidth: 1.5, borderDash: [4,4], pointRadius: 0, fill: false }
       ]
     },
