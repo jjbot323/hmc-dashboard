@@ -202,6 +202,7 @@
   <button class="tab-btn" onclick="switchTab('branch')">Branch-Level Performance</button>
   <button class="tab-btn" onclick="switchTab('liquidity')">Liquidity & Covenants</button>
   <button class="tab-btn" onclick="switchTab('market')">Market Intelligence</button>
+  <button class="tab-btn" onclick="switchTab('cashflow')">Cash Flow Forecast</button>
 </div>
 
 <!-- ==================== TAB 1: FINANCIAL OVERVIEW ==================== -->
@@ -772,6 +773,123 @@
 </div>
 
 </div>
+</div>
+</div>
+
+<!-- ==================== TAB 7: CASH FLOW FORECAST ==================== -->
+<div class="tab-panel" id="tab-cashflow">
+<div class="container">
+
+<!-- SOURCE BANNER -->
+<div style="background:linear-gradient(135deg,#1f1f1f,#2d2d2d);border-radius:12px;padding:20px 24px;margin-bottom:24px;color:#fff;border:1px solid #404040;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
+  <div>
+    <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;color:#a1a1aa;margin-bottom:4px;">Cash Flow Projection &mdash; Hills Holdco Consolidated</div>
+    <div style="font-size:14px;font-weight:800;">13-Week Cash Flow Forecast</div>
+    <div style="font-size:11px;color:#a1a1aa;margin-top:4px;">Actuals through 4/16/26 &bull; Forecast through 5/31/26</div>
+  </div>
+  <div style="text-align:right;">
+    <div style="font-size:10px;color:#a1a1aa;text-transform:uppercase;letter-spacing:0.5px;">Source</div>
+    <div style="font-size:12px;font-weight:600;">Rick Hewitt &mdash; 4/17/2026</div>
+    <div style="font-size:10px;color:#71717a;font-style:italic;margin-top:2px;">Reflecting estimated decrease in collateral</div>
+  </div>
+</div>
+
+<!-- KPIs -->
+<div class="grid-4" id="cfKPIs">
+  <div class="card kpi">
+    <div class="label">Current Availability (4/16)</div>
+    <div class="value" style="color:var(--green);" id="cfCurrent"></div>
+    <div style="font-size:11px;color:var(--text2);margin-top:4px;">Last actual daily balance</div>
+  </div>
+  <div class="card kpi">
+    <div class="label">Forecast Minimum</div>
+    <div class="value" id="cfMin"></div>
+    <div style="font-size:11px;margin-top:4px;" id="cfMinNote"></div>
+  </div>
+  <div class="card kpi">
+    <div class="label">Target Minimum</div>
+    <div class="value" style="color:var(--charcoal);">$8.0M</div>
+    <div style="font-size:11px;color:var(--text2);margin-top:4px;">Internal operating target</div>
+  </div>
+  <div class="card kpi">
+    <div class="label">Floor Covenant</div>
+    <div class="value" style="color:var(--charcoal);">$6.5M</div>
+    <div style="font-size:11px;color:var(--text2);margin-top:4px;">Trailing month avg. E/A test</div>
+  </div>
+</div>
+
+<!-- AVAILABILITY TREND CHART -->
+<div class="section-title" onclick="toggleSection(this)">Daily Availability Trend</div>
+<div class="section-content">
+<div class="card" style="margin-bottom:24px;">
+  <div class="card-header">Daily Ending Availability &mdash; Actual vs. Forecast ($M) <span style="font-weight:400;font-size:10px;color:var(--text2);text-transform:none;letter-spacing:0;">Note: $6.5M covenant is tested on trailing month avg, not daily</span></div>
+  <div style="position:relative;height:340px;"><canvas id="cfAvailChart"></canvas></div>
+</div>
+</div>
+
+<!-- MONTHLY SUMMARY TABLE -->
+<div class="section-title" onclick="toggleSection(this)">Monthly Cash Flow Summary</div>
+<div class="section-content">
+<div class="card" style="margin-bottom:24px;">
+  <div class="card-header">Monthly Cash Flow Summary ($000s)</div>
+  <div class="scroll-x">
+  <table>
+    <thead>
+      <tr><th>Month</th><th class="num">Beginning Avail.</th><th class="num">Total Receipts</th><th class="num">Total Disbursements</th><th class="num">Net Cash Flow</th><th class="num">Ending Avail.</th><th class="num">Monthly Avg. E/A</th><th class="num">Covenant Test</th><th>Status</th></tr>
+    </thead>
+    <tbody id="cfMonthlyTable"></tbody>
+  </table>
+  </div>
+</div>
+</div>
+
+<!-- WEEKLY DETAIL TABLE -->
+<div class="section-title" onclick="toggleSection(this)">Weekly Cash Flow Detail</div>
+<div class="section-content">
+<div class="card" style="margin-bottom:24px;">
+  <div class="card-header">Weekly Cash Receipts &amp; Disbursements ($000s)</div>
+  <div class="scroll-x">
+  <table>
+    <thead>
+      <tr><th>Week Ending</th><th class="num">Beginning</th><th class="num">Total Receipts</th><th class="num">Total Disb.</th><th class="num">Net</th><th class="num">Ending Avail.</th><th>Type</th></tr>
+    </thead>
+    <tbody id="cfWeeklyTable"></tbody>
+  </table>
+  </div>
+</div>
+</div>
+
+<!-- RECEIPTS VS DISBURSEMENTS CHART -->
+<div class="section-title" onclick="toggleSection(this)">Receipts vs. Disbursements</div>
+<div class="section-content">
+<div class="grid-2">
+  <div class="card">
+    <div class="card-header">Weekly Receipts vs. Disbursements ($M)</div>
+    <div class="chart-container"><canvas id="cfRvsD"></canvas></div>
+  </div>
+  <div class="card">
+    <div class="card-header">Monthly Net Cash Flow ($000s)</div>
+    <div class="chart-container"><canvas id="cfMonthlyChart"></canvas></div>
+  </div>
+</div>
+</div>
+
+<!-- REVISION IMPACT -->
+<div class="section-title" onclick="toggleSection(this)">BBC Revision Impact (Parts Inventory Cap)</div>
+<div class="section-content">
+<div class="card" style="margin-bottom:24px;">
+  <div class="card-header">May Availability: Base vs. Revised (Parts Cap $7.5M from $5.0M)</div>
+  <div style="position:relative;height:280px;"><canvas id="cfRevisionChart"></canvas></div>
+  <div style="margin-top:12px;font-size:11px;color:var(--text2);line-height:1.6;">
+    <strong>Revision Detail:</strong> Parts inventory cap increase to $7.5M from $5.0M adds ~$967K to availability for May period.
+    Aged parts return and replacement one-time impact &mdash; NQ impact likely not until March BBC and May adjustment.
+    <br><strong>BBC Adjustment:</strong> -$2.17M estimated borrowing base adjustment impacting May availability (estimated decrease in collateral).
+    <br><strong>Covenant Note:</strong> The $6.5M floor is tested on a trailing month average basis &mdash; each month's average ending availability must exceed $6.5M.
+    Feb ($6.4M avg) and Mar ($6.2M avg) failed this test. The parts cap revision helps keep May ($6.9M avg) above the threshold.
+  </div>
+</div>
+</div>
+
 </div>
 </div>
 
@@ -2976,6 +3094,166 @@ new Chart(document.getElementById('caseVsAllChart'), {
     scales: { y: { ...gridOpts, stacked: true, ticks: { callback: v => '$'+v+'M' } }, x: { ...gridOpts, stacked: true, ticks: { maxRotation: 45, font: { size: 9 }}}}
   }
 });
+
+// ===== CASH FLOW FORECAST TAB =====
+(function() {
+  const cfDates = ["12/01","12/02","12/03","12/04","12/05","12/08","12/09","12/10","12/11","12/12","12/15","12/16","12/17","12/18","12/19","12/22","12/23","12/24","12/25","12/26","12/29","12/30","12/31","01/01","01/02","01/05","01/06","01/07","01/08","01/09","01/12","01/13","01/14","01/15","01/16","01/19","01/20","01/21","01/22","01/23","01/26","01/27","01/28","01/29","01/30","02/02","02/03","02/04","02/05","02/06","02/09","02/10","02/11","02/12","02/13","02/16","02/17","02/18","02/19","02/20","02/23","02/24","02/25","02/26","02/27","03/02","03/03","03/04","03/05","03/06","03/09","03/10","03/11","03/12","03/13","03/16","03/17","03/18","03/19","03/20","03/23","03/24","03/25","03/26","03/27","03/30","03/31","04/01","04/02","04/03","04/06","04/07","04/08","04/09","04/10","04/13","04/14","04/15","04/16","04/17","04/20","04/21","04/22","04/23","04/24","04/27","04/28","04/29","04/30","05/01","05/04","05/05","05/06","05/07","05/08","05/11","05/12","05/13","05/14","05/15","05/18","05/19","05/20","05/21","05/22","05/25","05/26","05/27","05/28","05/29"];
+  const cfAvail = [10259939,10875263,11041928,10437326,9866487,11088975,11793166,11820859,12143708,12137610,11372245,11652161,12173641,12116112,11756484,11995715,11209905,11244590,11244590,11569896,13048727,15113375,15135156,15135156,13935509,11188681,9701843,10204858,11280744,11345368,10173007,10588885,9834724,9255456,9255456,8516596,7924761,8022554,8006483,7851824,8143752,8392227,8472897,7834442,7621983,7923464,8070285,8151097,8384185,7913130,8284845,6463193,6559503,5749193,5749193,5414213,5873493,5616779,5611462,5537244,5863646,5908685,6171120,5051335,4471447,5573420,6577292,6628592,6764041,6692537,7075405,7030440,7302942,5732766,5835779,6065683,5729153,6453910,6429807,5537197,5976400,6048056,6720466,5939989,6445856,6343246,6678618,6690920,7155960,7767072,8643349,9452178,9584330,9720860,7881683,7570014,7362710,7505864,7679761,7059877,7602539,8446580,9301229,7619567,7031739,7210323,7582495,7954667,8021839,7594011,8079005,8585141,9091276,8550158,8157432,7887706,8144979,8552253,8959526,8561144,8553417,8960691,8950964,8068238,7105511,7105511,6842214,7089488,7496761,7291798];
+  const cfRevised = [10259939,10875263,11041928,10437326,9866487,11088975,11793166,11820859,12143708,12137610,11372245,11652161,12173641,12116112,11756484,11995715,11209905,11244590,11244590,11569896,13048727,15113375,15135156,15135156,13935509,11188681,9701843,10204858,11280744,11345368,10173007,10588885,9834724,9255456,9255456,8516596,7924761,8022554,8006483,7851824,8143752,8392227,8472897,7834442,7621983,7923464,8070285,8151097,8384185,7913130,8284845,6463193,6559503,5749193,5749193,5414213,5873493,5616779,5611462,5537244,5863646,5908685,6171120,5051335,4471447,5573420,6577292,6628592,6764041,6692537,7075405,7030440,7302942,5732766,5835779,6065683,5729153,6453910,6429807,5537197,5976400,6048056,6720466,5939989,6445856,6343246,6678618,6690920,7155960,7767072,8643349,9452178,9584330,9720860,7881683,7570014,7362710,7505864,7679761,7059877,7602539,8446580,9301229,7619567,7031739,7210323,7582495,7954667,8021839,7594011,6880151,7386287,7892422,7351304,6958578,6688852,6946125,7353399,7760672,7362290,7354563,7761837,7752110,6869384,5906657,5906657,5643360,5890634,6297907,6092944];
+  const lastActualIdx = 98;
+  const TARGET = 8000000;
+  const FLOOR = 6500000;
+
+  // KPIs
+  const currentAvail = cfAvail[lastActualIdx];
+  const forecastMin = Math.min(...cfRevised.slice(lastActualIdx));
+  const forecastMinIdx = cfRevised.indexOf(forecastMin, lastActualIdx);
+  document.getElementById('cfCurrent').textContent = '$' + (currentAvail / 1e6).toFixed(1) + 'M';
+  const minEl = document.getElementById('cfMin');
+  minEl.textContent = '$' + (forecastMin / 1e6).toFixed(1) + 'M';
+  minEl.style.color = forecastMin < FLOOR ? 'var(--red)' : forecastMin < TARGET ? 'var(--yellow)' : 'var(--green)';
+  // Note: covenant is monthly avg test, not daily — this KPI shows lowest single-day forecast for awareness
+  document.getElementById('cfMinNote').innerHTML = (forecastMin < TARGET ? '<span style="color:var(--yellow);font-weight:700;">Below $8M target</span>' : '<span style="color:var(--green);">Above target</span>') + ' &bull; ' + cfDates[forecastMinIdx] + ' (single-day low)';
+
+  // Build actual/forecast split datasets
+  const actualData = cfAvail.map((v, i) => i <= lastActualIdx ? v / 1e6 : null);
+  const forecastData = cfRevised.map((v, i) => i >= lastActualIdx ? v / 1e6 : null);
+
+  // Availability Chart
+  new Chart(document.getElementById('cfAvailChart'), {
+    type: 'line',
+    data: {
+      labels: cfDates,
+      datasets: [
+        { label: 'Actual', data: actualData, borderColor: '#1f1f1f', backgroundColor: 'rgba(31,31,31,0.08)', borderWidth: 2, pointRadius: 0, fill: false, tension: 0.1 },
+        { label: 'Forecast (w/ Revisions)', data: forecastData, borderColor: '#dc0505', backgroundColor: 'rgba(220,5,5,0.06)', borderWidth: 2, borderDash: [6,3], pointRadius: 0, fill: false, tension: 0.1 },
+        { label: 'Target ($8M)', data: Array(cfDates.length).fill(TARGET / 1e6), borderColor: '#16a34a', borderWidth: 1.5, borderDash: [4,4], pointRadius: 0, fill: false }
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { position: 'top', labels: { usePointStyle: true, padding: 16, font: { size: 11 } } },
+        tooltip: { callbacks: { label: ctx => ctx.dataset.label + ': $' + (ctx.parsed.y).toFixed(2) + 'M' } },
+        annotation: { annotations: { todayLine: { type: 'line', xMin: lastActualIdx, xMax: lastActualIdx, borderColor: '#9ca3af', borderWidth: 1, borderDash: [3,3] } } }
+      },
+      scales: {
+        y: { grid: { color: '#f0f1f3' }, ticks: { callback: v => '$' + v.toFixed(0) + 'M', font: { size: 10 } }, min: 3 },
+        x: { grid: { display: false }, ticks: { maxRotation: 45, autoSkip: true, maxTicksLimit: 20, font: { size: 9 } } }
+      }
+    }
+  });
+
+  // Monthly Summary Table — avg E/A is the trailing month average ending availability (covenant tested monthly)
+  const monthly = [
+    { m: "Dec '25", beg: 12663, rec: 22045, disb: 19521, net: 2472, end: 15135, avg: 11670, status: 'Actual' },
+    { m: "Jan '26", beg: 15135, rec: 13092, disb: 17942, net: -4894, end: 7622, avg: 9841, status: 'Actual' },
+    { m: "Feb '26", beg: 7622, rec: 8497, disb: 10140, net: -1685, end: 4471, avg: 6402, status: 'Actual' },
+    { m: "Mar '26", beg: 4471, rec: 19177, disb: 14094, net: 5042, end: 6679, avg: 6228, status: 'Actual' },
+    { m: "Apr '26", beg: 6679, rec: 18295, disb: 17663, net: 248, end: 8022, avg: 7811, status: 'Mixed' },
+    { m: "May '26", beg: 8022, rec: 21739, disb: 22072, net: -730, end: 6093, avg: 6886, status: 'Forecast' },
+  ];
+  const tb = document.getElementById('cfMonthlyTable');
+  monthly.forEach(r => {
+    const avgPass = r.avg * 1000 >= FLOOR;
+    const avgColor = avgPass ? 'pos' : 'neg';
+    const covenantBadge = avgPass ? '<span class="badge badge-pass">Pass</span>' : '<span class="badge badge-fail">Fail</span>';
+    const statusBadge = r.status === 'Actual' ? '<span class="badge badge-pass">Actual</span>' : r.status === 'Mixed' ? '<span class="badge badge-warn">Mixed</span>' : '<span class="badge badge-info">Forecast</span>';
+    tb.innerHTML += '<tr><td style="font-weight:700;">' + r.m + '</td><td class="num">$' + r.beg.toLocaleString() + '</td><td class="num pos">$' + r.rec.toLocaleString() + '</td><td class="num neg">($' + Math.abs(r.disb).toLocaleString() + ')</td><td class="num ' + (r.net >= 0 ? 'pos' : 'neg') + '">' + (r.net >= 0 ? '$' + r.net.toLocaleString() : '($' + Math.abs(r.net).toLocaleString() + ')') + '</td><td class="num">$' + r.end.toLocaleString() + '</td><td class="num ' + avgColor + '" style="font-weight:700;">$' + r.avg.toLocaleString() + '</td><td>' + covenantBadge + '</td><td>' + statusBadge + '</td></tr>';
+  });
+
+  // Weekly Detail Table
+  const weeks = [
+    {d:"12/05/25",s:"A",b:12663,r:2922,di:5709,n:-2796,e:9866},
+    {d:"12/12/25",s:"A",b:9866,r:4501,di:2216,n:2271,e:12138},
+    {d:"12/19/25",s:"A",b:12138,r:4113,di:4480,n:-381,e:11756},
+    {d:"12/26/25",s:"A",b:11756,r:3647,di:3832,n:-187,e:11570},
+    {d:"01/02/26",s:"A",b:11570,r:7659,di:5272,n:2366,e:13936},
+    {d:"01/09/26",s:"A",b:13936,r:4251,di:4200,n:29,e:11345},
+    {d:"01/16/26",s:"A",b:11345,r:3183,di:5261,n:-2090,e:9255},
+    {d:"01/23/26",s:"A",b:9255,r:1937,di:3339,n:-1404,e:7852},
+    {d:"01/30/26",s:"A",b:7852,r:2924,di:3154,n:-230,e:7622},
+    {d:"02/06/26",s:"A",b:7622,r:1650,di:1340,n:291,e:7913},
+    {d:"02/13/26",s:"A",b:7913,r:1950,di:2626,n:-698,e:5749},
+    {d:"02/20/26",s:"A",b:5749,r:2082,di:2293,n:-212,e:5537},
+    {d:"02/27/26",s:"A",b:5537,r:2815,di:3881,n:-1066,e:4471},
+    {d:"03/06/26",s:"A",b:4471,r:6542,di:1454,n:5056,e:6693},
+    {d:"03/13/26",s:"A",b:6693,r:3053,di:3909,n:-857,e:5836},
+    {d:"03/20/26",s:"A",b:5836,r:3427,di:3725,n:-299,e:5537},
+    {d:"03/27/26",s:"A",b:5537,r:4919,di:4004,n:909,e:6446},
+    {d:"04/03/26",s:"A",b:6446,r:2910,di:2677,n:226,e:7767},
+    {d:"04/10/26",s:"A",b:7767,r:4972,di:4842,n:115,e:7882},
+  ];
+  const wt = document.getElementById('cfWeeklyTable');
+  weeks.forEach(w => {
+    const badge = w.s === 'A' ? '<span class="badge badge-pass">Actual</span>' : '<span class="badge badge-info">Forecast</span>';
+    wt.innerHTML += '<tr><td style="font-weight:700;">' + w.d + '</td><td class="num">$' + w.b.toLocaleString() + '</td><td class="num pos">$' + w.r.toLocaleString() + '</td><td class="num neg">($' + Math.abs(w.di).toLocaleString() + ')</td><td class="num ' + (w.n >= 0 ? 'pos' : 'neg') + '">' + (w.n >= 0 ? '$' + w.n.toLocaleString() : '($' + Math.abs(w.n).toLocaleString() + ')') + '</td><td class="num">' + '$' + w.e.toLocaleString() + '</td><td>' + badge + '</td></tr>';
+  });
+
+  // Receipts vs Disbursements Chart
+  const wkLabels = weeks.map(w => w.d);
+  new Chart(document.getElementById('cfRvsD'), {
+    type: 'bar',
+    data: {
+      labels: wkLabels,
+      datasets: [
+        { label: 'Receipts', data: weeks.map(w => w.r / 1000), backgroundColor: 'rgba(22,163,74,0.7)', borderRadius: 3 },
+        { label: 'Disbursements', data: weeks.map(w => -w.di / 1000), backgroundColor: 'rgba(220,38,38,0.7)', borderRadius: 3 }
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { position: 'top' }, tooltip: { callbacks: { label: ctx => ctx.dataset.label + ': $' + Math.abs(ctx.parsed.y).toFixed(1) + 'M' } } },
+      scales: {
+        y: { grid: { color: '#f0f1f3' }, ticks: { callback: v => '$' + Math.abs(v).toFixed(0) + 'M' } },
+        x: { grid: { display: false }, ticks: { maxRotation: 45, font: { size: 9 } } }
+      }
+    }
+  });
+
+  // Monthly Net Cash Flow Chart
+  new Chart(document.getElementById('cfMonthlyChart'), {
+    type: 'bar',
+    data: {
+      labels: monthly.map(r => r.m),
+      datasets: [{ label: 'Net Cash Flow', data: monthly.map(r => r.net), backgroundColor: monthly.map(r => r.net >= 0 ? 'rgba(22,163,74,0.75)' : 'rgba(220,38,38,0.75)'), borderRadius: 4 }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => 'Net: $' + ctx.parsed.y.toLocaleString() + 'K' } } },
+      scales: {
+        y: { grid: { color: '#f0f1f3' }, ticks: { callback: v => '$' + v.toLocaleString() + 'K' } },
+        x: { grid: { display: false } }
+      }
+    }
+  });
+
+  // Revision Impact Chart - May only (base vs revised)
+  const mayDates = cfDates.slice(109);
+  const mayBase = cfAvail.slice(109).map(v => v / 1e6);
+  const mayRevised = cfRevised.slice(109).map(v => v / 1e6);
+  new Chart(document.getElementById('cfRevisionChart'), {
+    type: 'line',
+    data: {
+      labels: mayDates,
+      datasets: [
+        { label: 'Base (w/o Revision)', data: mayBase, borderColor: '#6b7280', backgroundColor: 'rgba(107,114,128,0.08)', borderWidth: 2, pointRadius: 2, fill: false, tension: 0.1 },
+        { label: 'Revised (Parts Cap $7.5M)', data: mayRevised, borderColor: '#dc0505', backgroundColor: 'rgba(220,5,5,0.08)', borderWidth: 2, pointRadius: 2, fill: false, tension: 0.1 },
+        { label: 'Target ($8M)', data: Array(mayDates.length).fill(TARGET / 1e6), borderColor: '#16a34a', borderWidth: 1.5, borderDash: [4,4], pointRadius: 0, fill: false },
+        { label: 'Covenant Avg ($6.5M)', data: Array(mayDates.length).fill(FLOOR / 1e6), borderColor: '#dc2626', borderWidth: 1.5, borderDash: [2,2], pointRadius: 0, fill: false }
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { position: 'top', labels: { usePointStyle: true, padding: 12, font: { size: 11 } } },
+        tooltip: { callbacks: { label: ctx => ctx.dataset.label + ': $' + ctx.parsed.y.toFixed(2) + 'M' } }
+      },
+      scales: {
+        y: { grid: { color: '#f0f1f3' }, ticks: { callback: v => '$' + v.toFixed(0) + 'M', font: { size: 10 } }, min: 4 },
+        x: { grid: { display: false }, ticks: { maxRotation: 45, font: { size: 9 } } }
+      }
+    }
+  });
+})();
 </script>
 
 </div><!-- /dashboard-content -->
