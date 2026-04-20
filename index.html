@@ -797,9 +797,9 @@
 <!-- KPIs -->
 <div class="grid-4" id="cfKPIs">
   <div class="card kpi">
-    <div class="label">Current Availability (4/16)</div>
-    <div class="value" style="color:var(--green);" id="cfCurrent"></div>
-    <div style="font-size:11px;color:var(--text2);margin-top:4px;">Last actual daily balance</div>
+    <div class="label" id="cfCurrentLabel">Current Availability</div>
+    <div class="value" id="cfCurrent"></div>
+    <div style="font-size:11px;color:var(--text2);margin-top:4px;" id="cfCurrentSub">From PNC availability ledger</div>
   </div>
   <div class="card kpi">
     <div class="label">Forecast Minimum</div>
@@ -3104,11 +3104,20 @@ new Chart(document.getElementById('caseVsAllChart'), {
   const TARGET = 8000000;
   const FLOOR = 6500000;
 
-  // KPIs
-  const currentAvail = cfAvail[lastActualIdx];
+  // KPIs — Current Availability always from availLedger (PNC ledger, updated via /avail)
+  const latestLedger = (typeof availLedger !== 'undefined' && availLedger.length) ? availLedger[availLedger.length - 1] : null;
+  const currentAvail = latestLedger ? latestLedger.available : cfAvail[lastActualIdx];
+  const currentDate = latestLedger ? latestLedger.date : '2026-04-16';
+  const dp = currentDate.split('-');
+  const currentDateFmt = parseInt(dp[1]) + '/' + parseInt(dp[2]);
+  const cfCurrentEl = document.getElementById('cfCurrent');
+  cfCurrentEl.textContent = '$' + (currentAvail / 1e6).toFixed(1) + 'M';
+  cfCurrentEl.style.color = currentAvail < FLOOR ? 'var(--red)' : currentAvail < TARGET ? 'var(--yellow)' : 'var(--green)';
+  document.getElementById('cfCurrentLabel').textContent = 'Current Availability (' + currentDateFmt + ')';
+  document.getElementById('cfCurrentSub').textContent = 'PNC ledger via /avail';
+
   const forecastMin = Math.min(...cfRevised.slice(lastActualIdx));
   const forecastMinIdx = cfRevised.indexOf(forecastMin, lastActualIdx);
-  document.getElementById('cfCurrent').textContent = '$' + (currentAvail / 1e6).toFixed(1) + 'M';
   const minEl = document.getElementById('cfMin');
   minEl.textContent = '$' + (forecastMin / 1e6).toFixed(1) + 'M';
   minEl.style.color = forecastMin < FLOOR ? 'var(--red)' : forecastMin < TARGET ? 'var(--yellow)' : 'var(--green)';
