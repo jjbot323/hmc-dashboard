@@ -1743,22 +1743,27 @@ function renderSalesFlash(entity) {
     }
   }
 
-  // April plan card — with segment breakdown
+  // April plan card — only show for consolidated (HMC/RJV already show goal in MTD card)
   if (curMonthCard) {
-    const aprSegs = fd.aprSegments;
-    let aprSegHtml = '';
-    if (aprSegs) {
-      aprSegHtml = '<table class="seg-table" style="margin-top:12px;"><thead><tr><th></th><th>Plan</th></tr></thead><tbody>';
-      aprSegs.forEach(s => { aprSegHtml += `<tr><td>${s.name}</td><td>${f(s.plan)}</td></tr>`; });
-      aprSegHtml += `<tr class="seg-total-row"><td>Total</td><td>${f(fd.apr26Plan)}</td></tr>`;
-      aprSegHtml += '</tbody></table>';
+    if (entity === 'consolidated') {
+      const aprSegs = fd.aprSegments;
+      let aprSegHtml = '';
+      if (aprSegs) {
+        aprSegHtml = '<table class="seg-table" style="margin-top:12px;"><thead><tr><th></th><th>Plan</th></tr></thead><tbody>';
+        aprSegs.forEach(s => { aprSegHtml += `<tr><td>${s.name}</td><td>${f(s.plan)}</td></tr>`; });
+        aprSegHtml += `<tr class="seg-total-row"><td>Total</td><td>${f(fd.apr26Plan)}</td></tr>`;
+        aprSegHtml += '</tbody></table>';
+      }
+      const dailyTarget = fd.apr26Plan / 30;
+      curMonthCard.innerHTML = `
+        <div class="fp-month">April 2026 Plan</div>
+        ${aprSegs ? aprSegHtml : '<div class="fp-value">' + f(fd.apr26Plan) + '</div><div class="fp-label">Revenue Target</div>'}
+        <div class="fp-detail" style="margin-top:8px;">~$${(dailyTarget/1e3).toFixed(0)}K/day &bull; Plan GM: ${f(fd.apr26PlanGM)} &bull; Plan EBITDA: ${f(fd.apr26PlanEbitda)}</div>
+      `;
+      curMonthCard.style.display = '';
+    } else {
+      curMonthCard.style.display = 'none';
     }
-    const dailyTarget = fd.apr26Plan / 30;
-    curMonthCard.innerHTML = `
-      <div class="fp-month">April 2026 Plan</div>
-      ${aprSegs ? aprSegHtml : '<div class="fp-value">' + f(fd.apr26Plan) + '</div><div class="fp-label">Revenue Target</div>'}
-      <div class="fp-detail" style="margin-top:8px;">~$${(dailyTarget/1e3).toFixed(0)}K/day &bull; Plan GM: ${f(fd.apr26PlanGM)} &bull; Plan EBITDA: ${f(fd.apr26PlanEbitda)}</div>
-    `;
   }
 
   // === MTD SALES FLASH CARD ===
