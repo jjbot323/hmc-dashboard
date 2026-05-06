@@ -192,7 +192,7 @@
 <div class="header">
   <div class="accent-bar"></div>
   <h1>Hills Holdco - Operating Model Dashboard</h1>
-  <p>Confidential | Data through February 2026 (Actuals) | March 2026 Sales Flash | Model as of April 2, 2026</p>
+  <p>Confidential | Data through February 2026 (Actuals) | April 2026 EOM Flash | Model as of April 2, 2026</p>
 </div>
 
 <div class="tab-nav">
@@ -1543,23 +1543,23 @@ function deltaClass(actual, comp, higherIsGood) {
 // Combined = New+Used Equipment into "Equipment"
 const flashData = {
   consolidated: {
-    mar26Rev: 17025917,
-    mar26Plan: mPlanRev[2],
-    mar25Rev: 35697760,
-    ytd26: [mRev[12], mRev[13], 17025917],
-    ytdPlan: [mPlanRev[0], mPlanRev[1], mPlanRev[2]],
-    ytdPY: [mRev[0], mRev[1], mRev[2]],
+    apr26Rev: 15119961+6304926,
+    apr26Plan: mPlanRev[3],
+    apr25Rev: 14119357+4337112,
+    ytd26: [mRev[12], mRev[13], 17025917, 15119961+6304926],
+    ytdPlan: [mPlanRev[0], mPlanRev[1], mPlanRev[2], mPlanRev[3]],
+    ytdPY: [mRev[0], mRev[1], mRev[2], mRev[3]],
     may26Plan: mPlanRev[4],
     may26PlanGM: mPlanGM[4],
     may26PlanEbitda: mPlanEbitda[4],
     isActual: true,
-    showBlockTrade: true,
-    // segments: { name, rev (actual), plan, py } — Equipment = New+Used combined
+    showBlockTrade: false,
+    // segments: { name, rev (actual), plan, py } — Equipment = New+Used combined (April EOM)
     segments: [
-      { name: 'Equipment', rev: 8936662+1014356, plan: 11412172+408891, py: 26543844+1814497 },
-      { name: 'Parts',     rev: 3819000,         plan: 3771180,         py: 3930106 },
-      { name: 'Service',   rev: 1818607,         plan: 1927343,         py: 1787024 },
-      { name: 'Rental',    rev: 1437292,         plan: 1722371,         py: 1622290 },
+      { name: 'Equipment', rev: 8787012+4857153, plan: 12043849+4526798, py: 9183788+3092048 },
+      { name: 'Parts',     rev: 3213434+1043799, plan: 2839668+1008606,  py: 2536416+812887 },
+      { name: 'Service',   rev: 1564157+295466,  plan: 1673344+268560,   py: 1195279+251208 },
+      { name: 'Rental',    rev: 1555358+108508,  plan: 1645000+193803,   py: 1203874+180969 },
     ],
     // May plan by segment (from Sales Flash goals)
     maySegments: [
@@ -1582,23 +1582,23 @@ const flashData = {
     }
   },
   hmc: {
-    mar26Rev: entityData.hmc.mPlanRev[2],
-    mar26Plan: entityData.hmc.mPlanRev[2],
-    mar25Rev: 29990009,
-    ytd26: [entityData.hmc.mRev[12], entityData.hmc.mRev[13], entityData.hmc.mPlanRev[2]],
-    ytdPlan: [entityData.hmc.mPlanRev[0], entityData.hmc.mPlanRev[1], entityData.hmc.mPlanRev[2]],
-    ytdPY: [entityData.hmc.mRev[0], entityData.hmc.mRev[1], 29990009],
+    apr26Rev: 15119961,
+    apr26Plan: entityData.hmc.mPlanRev[3],
+    apr25Rev: 14119357,
+    ytd26: [entityData.hmc.mRev[12], entityData.hmc.mRev[13], entityData.hmc.mPlanRev[2], 15119961],
+    ytdPlan: [entityData.hmc.mPlanRev[0], entityData.hmc.mPlanRev[1], entityData.hmc.mPlanRev[2], entityData.hmc.mPlanRev[3]],
+    ytdPY: [entityData.hmc.mRev[0], entityData.hmc.mRev[1], 29990009, 14119357],
     may26Plan: entityData.hmc.mPlanRev[4],
     may26PlanGM: entityData.hmc.mPlanGM[4],
     may26PlanEbitda: entityData.hmc.mPlanEbitda[4],
-    isActual: false,
-    showBlockTrade: true,
-    // HMC: monthly budget from HMC 2026 tab; PY from Targit export
+    isActual: true,
+    showBlockTrade: false,
+    // HMC: April EOM actuals from TARGIT; plan from HMC 2026 tab; PY from EOM flash
     segments: [
-      { name: 'Equipment', rev: null, plan: 8739884+387188, py: 22218524+1813247 },
-      { name: 'Parts',     rev: null, plan: 2807444,        py: 3000135 },
-      { name: 'Service',   rev: null, plan: 1655829,        py: 1531032 },
-      { name: 'Rental',    rev: null, plan: 1535000,        py: 1427071 },
+      { name: 'Equipment', rev: 8787012, plan: 12043849, py: 9183788 },
+      { name: 'Parts',     rev: 3213434, plan: 2839668,  py: 2536416 },
+      { name: 'Service',   rev: 1564157, plan: 1673344,  py: 1195279 },
+      { name: 'Rental',    rev: 1555358, plan: 1645000,  py: 1203874 },
     ],
     maySegments: [
       { name: 'Equipment', plan: 14158538 },
@@ -1620,23 +1620,23 @@ const flashData = {
     }
   },
   rjv: {
-    mar26Rev: entityData.rjv.mPlanRev[2],
-    mar26Plan: entityData.rjv.mPlanRev[2],
-    mar25Rev: 5707751,
-    ytd26: [entityData.rjv.mRev[12], entityData.rjv.mRev[13], entityData.rjv.mPlanRev[2]],
-    ytdPlan: [entityData.rjv.mPlanRev[0], entityData.rjv.mPlanRev[1], entityData.rjv.mPlanRev[2]],
-    ytdPY: [entityData.rjv.mRev[0], entityData.rjv.mRev[1], 5707751],
+    apr26Rev: 6304926,
+    apr26Plan: entityData.rjv.mPlanRev[3],
+    apr25Rev: 4337112,
+    ytd26: [entityData.rjv.mRev[12], entityData.rjv.mRev[13], entityData.rjv.mPlanRev[2], 6304926],
+    ytdPlan: [entityData.rjv.mPlanRev[0], entityData.rjv.mPlanRev[1], entityData.rjv.mPlanRev[2], entityData.rjv.mPlanRev[3]],
+    ytdPY: [entityData.rjv.mRev[0], entityData.rjv.mRev[1], 5707751, 4337112],
     may26Plan: entityData.rjv.mPlanRev[4],
     may26PlanGM: entityData.rjv.mPlanGM[4],
     may26PlanEbitda: entityData.rjv.mPlanEbitda[4],
-    isActual: false,
+    isActual: true,
     showBlockTrade: false,
-    // RJV: monthly budget from RJV 2026 tab; PY from Targit export
+    // RJV: April EOM actuals from TARGIT; plan from RJV 2026 tab; PY from EOM flash
     segments: [
-      { name: 'Equipment', rev: null, plan: 2672288+21703, py: 4325320+1250 },
-      { name: 'Parts',     rev: null, plan: 963736,        py: 929971 },
-      { name: 'Service',   rev: null, plan: 271514,        py: 255992 },
-      { name: 'Rental',    rev: null, plan: 187371,        py: 195219 },
+      { name: 'Equipment', rev: 4857153, plan: 4526798, py: 3092048 },
+      { name: 'Parts',     rev: 1043799, plan: 1008606, py: 812887 },
+      { name: 'Service',   rev: 295466,  plan: 268560,  py: 251208 },
+      { name: 'Rental',    rev: 108508,  plan: 193803,  py: 180969 },
     ],
     maySegments: [
       { name: 'Equipment', plan: 4186077 },
@@ -1674,10 +1674,10 @@ function renderSalesFlash(entity) {
   const pctChg = (a,b) => b ? ((a - b) / Math.abs(b) * 100).toFixed(1) : '–';
 
   const actualLabel = fd.isActual ? 'Targit Actuals' : 'Plan/Forecast';
-  header.textContent = `Last Month — Mar '26 (${actualLabel}, Books Not Yet Closed)`;
+  header.textContent = `Last Month — Apr '26 (${actualLabel}, Books Not Yet Closed)`;
 
-  const vsPlanPct = pctChg(fd.mar26Rev, fd.mar26Plan);
-  const vsPYPct = pctChg(fd.mar26Rev, fd.mar25Rev);
+  const vsPlanPct = pctChg(fd.apr26Rev, fd.apr26Plan);
+  const vsPYPct = pctChg(fd.apr26Rev, fd.apr25Rev);
   const ytdRev = fd.ytd26.reduce((a,b)=>a+b,0);
   const ytdPlan = fd.ytdPlan.reduce((a,b)=>a+b,0);
   const ytdPY = fd.ytdPY.reduce((a,b)=>a+b,0);
@@ -1713,18 +1713,18 @@ function renderSalesFlash(entity) {
 
   flashKPIs.innerHTML = `
     <div class="flash-kpi">
-      <div class="fk-label">Revenue — Mar '26 vs Plan vs PY</div>
+      <div class="fk-label">Revenue — Apr '26 vs Plan vs PY</div>
       ${segTable}
       <div class="fk-delta" style="color:${fd.isActual ? deltaColor(vsPlanPct) : '#a1a1aa'};margin-top:6px;">${fd.isActual ? 'vs Plan: '+deltaSign(vsPlanPct)+vsPlanPct+'%' : 'Plan (actuals pending)'}</div>
     </div>
     <div class="flash-kpi">
       <div class="fk-label">vs Prior Year</div>
       <div class="fk-value" style="color:${deltaColor(vsPYPct)}">${deltaSign(vsPYPct)}${vsPYPct}%</div>
-      <div class="fk-delta" style="color:#a1a1aa">PY: ${f(fd.mar25Rev)}</div>
-      <div class="fk-sub">Mar '25</div>
+      <div class="fk-delta" style="color:#a1a1aa">PY: ${f(fd.apr25Rev)}</div>
+      <div class="fk-sub">Apr '25</div>
     </div>
     <div class="flash-kpi">
-      <div class="fk-label">YTD Rev (Jan-Mar)</div>
+      <div class="fk-label">YTD Rev (Jan-Apr)</div>
       <div class="fk-value">${f(ytdRev)}</div>
       <div class="fk-delta" style="color:${deltaColor(ytdVsPlanPct)}">vs Plan: ${deltaSign(ytdVsPlanPct)}${ytdVsPlanPct}%</div>
       <div class="fk-sub">Plan: ${f(ytdPlan)} | PY: ${f(ytdPY)}</div>
@@ -1734,9 +1734,9 @@ function renderSalesFlash(entity) {
   // Block trade note
   if (pyNote) {
     if (fd.showBlockTrade) {
-      const adjPY = fd.mar25Rev - 9400000;
-      const adjVsPYPct = pctChg(fd.mar26Rev, adjPY);
-      pyNote.innerHTML = `Note: Mar '25 included a $9.4M block trade (ACME). Excluding that trade, PY adj. revenue was ${f(adjPY)} and YoY would be <span style="color:${deltaColor(adjVsPYPct)}">${deltaSign(adjVsPYPct)}${adjVsPYPct}%</span>.`;
+      const adjPY = fd.apr25Rev;
+      const adjVsPYPct = pctChg(fd.apr26Rev, adjPY);
+      pyNote.innerHTML = `Note: PY comparison for context.`;
       pyNote.style.display = '';
     } else {
       pyNote.style.display = 'none';
