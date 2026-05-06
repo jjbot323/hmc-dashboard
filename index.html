@@ -224,7 +224,7 @@
     <h3>Sales Flash & Current Month Target</h3>
     <span class="flash-tag">Preliminary</span>
   </div>
-  <!-- Row: April MTD Tracker + March Recap + April Plan -->
+  <!-- Row: May MTD Tracker + March Recap + May Plan -->
   <div style="display:grid;grid-template-columns:2fr 2fr 1fr;gap:20px;" id="flashGridMain">
     <div class="flash-card" id="flashMTDCard"></div>
     <div class="flash-card">
@@ -233,7 +233,7 @@
       <div id="flashPYNote" style="margin-top:10px;font-size:10px;color:#a1a1aa;font-style:italic;line-height:1.5;"></div>
     </div>
     <div class="flash-card flash-plan-card" id="flashCurrentMonthCard">
-      <div class="fp-month" id="flashCurMonthLabel">April 2026 Plan</div>
+      <div class="fp-month" id="flashCurMonthLabel">May 2026 Plan</div>
       <div class="fp-value" id="flashCurMonthValue"></div>
       <div class="fp-label">Revenue Target</div>
       <div class="fp-detail" id="flashCurMonthDetail"></div>
@@ -1549,9 +1549,9 @@ const flashData = {
     ytd26: [mRev[12], mRev[13], 17025917],
     ytdPlan: [mPlanRev[0], mPlanRev[1], mPlanRev[2]],
     ytdPY: [mRev[0], mRev[1], mRev[2]],
-    apr26Plan: mPlanRev[3],
-    apr26PlanGM: mPlanGM[3],
-    apr26PlanEbitda: mPlanEbitda[3],
+    may26Plan: mPlanRev[4],
+    may26PlanGM: mPlanGM[4],
+    may26PlanEbitda: mPlanEbitda[4],
     isActual: true,
     showBlockTrade: true,
     // segments: { name, rev (actual), plan, py } — Equipment = New+Used combined
@@ -1561,23 +1561,23 @@ const flashData = {
       { name: 'Service',   rev: 1818607,         plan: 1927343,         py: 1787024 },
       { name: 'Rental',    rev: 1437292,         plan: 1722371,         py: 1622290 },
     ],
-    // April plan by segment (from PNC 2026 SENT col 19)
-    aprSegments: [
-      { name: 'Equipment', plan: 15947321+623326 },
-      { name: 'Parts',     plan: 3848274 },
-      { name: 'Service',   plan: 1941904 },
-      { name: 'Rental',    plan: 1838803 },
+    // May plan by segment (from Sales Flash goals)
+    maySegments: [
+      { name: 'Equipment', plan: 14158538+4186077 },
+      { name: 'Parts',     plan: 2752460+914886 },
+      { name: 'Service',   plan: 1609960+266281 },
+      { name: 'Rental',    plan: 1775000+218513 },
     ],
     // MTD Sales Flash — consolidated HMC+RJV (update these values when new flash arrives)
     mtd: {
-      asOfDate: '2026-04-27',
-      bizDaysElapsed: 19,
-      bizDaysTotal: 22,
+      asOfDate: '2026-05-04',
+      bizDaysElapsed: 2,
+      bizDaysTotal: 20,
       segments: [
-        { name: 'Equipment', mtd: 1480816+3904261, goal: 12043849+4526798, py: 9183788+3756819 },
-        { name: 'Parts',     mtd: 2393432+687417,  goal: 2839668+1008606,  py: 2536416+955437 },
-        { name: 'Service',   mtd: 1181632+161359,  goal: 1673344+268560,   py: 1195279+243878 },
-        { name: 'Rental',    mtd: 1333730+91583,   goal: 1645000+193803,   py: 1203874+189706 },
+        { name: 'Equipment', mtd: 0+46740,        goal: 14158538+4186077, py: 6148268+3092048 },
+        { name: 'Parts',     mtd: 128743+77645,    goal: 2752460+914886,  py: 2859013+812887 },
+        { name: 'Service',   mtd: 82439+3739,      goal: 1609960+266281,  py: 1462734+251208 },
+        { name: 'Rental',    mtd: 77832+41400,     goal: 1775000+218513,  py: 1567113+180969 },
       ]
     }
   },
@@ -1588,9 +1588,9 @@ const flashData = {
     ytd26: [entityData.hmc.mRev[12], entityData.hmc.mRev[13], entityData.hmc.mPlanRev[2]],
     ytdPlan: [entityData.hmc.mPlanRev[0], entityData.hmc.mPlanRev[1], entityData.hmc.mPlanRev[2]],
     ytdPY: [entityData.hmc.mRev[0], entityData.hmc.mRev[1], 29990009],
-    apr26Plan: entityData.hmc.mPlanRev[3],
-    apr26PlanGM: entityData.hmc.mPlanGM[3],
-    apr26PlanEbitda: entityData.hmc.mPlanEbitda[3],
+    may26Plan: entityData.hmc.mPlanRev[4],
+    may26PlanGM: entityData.hmc.mPlanGM[4],
+    may26PlanEbitda: entityData.hmc.mPlanEbitda[4],
     isActual: false,
     showBlockTrade: true,
     // HMC: monthly budget from HMC 2026 tab; PY from Targit export
@@ -1600,22 +1600,22 @@ const flashData = {
       { name: 'Service',   rev: null, plan: 1655829,        py: 1531032 },
       { name: 'Rental',    rev: null, plan: 1535000,        py: 1427071 },
     ],
-    aprSegments: [
-      { name: 'Equipment', plan: 11466661+577188 },
-      { name: 'Parts',     plan: 2839668 },
-      { name: 'Service',   plan: 1673344 },
-      { name: 'Rental',    plan: 1645000 },
+    maySegments: [
+      { name: 'Equipment', plan: 14158538 },
+      { name: 'Parts',     plan: 2752460 },
+      { name: 'Service',   plan: 1609960 },
+      { name: 'Rental',    plan: 1775000 },
     ],
     // MTD Sales Flash — HMC only (from TARGIT Sales Flash report)
     mtd: {
-      asOfDate: '2026-04-24',
-      bizDaysElapsed: 18,
-      bizDaysTotal: 22,
+      asOfDate: '2026-05-04',
+      bizDaysElapsed: 2,
+      bizDaysTotal: 20,
       segments: [
-        { name: 'Equipment', mtd: 1480816, goal: 12043849, py: 9183788 },
-        { name: 'Parts',     mtd: 2393432, goal: 2839668,  py: 2536416 },
-        { name: 'Service',   mtd: 1181632, goal: 1673344,  py: 1195279 },
-        { name: 'Rental',    mtd: 1333730, goal: 1645000,  py: 1203874 },
+        { name: 'Equipment', mtd: 0,      goal: 14158538, py: 6148268 },
+        { name: 'Parts',     mtd: 128743, goal: 2752460,  py: 2859013 },
+        { name: 'Service',   mtd: 82439,  goal: 1609960,  py: 1462734 },
+        { name: 'Rental',    mtd: 77832,  goal: 1775000,  py: 1567113 },
       ]
     }
   },
@@ -1626,9 +1626,9 @@ const flashData = {
     ytd26: [entityData.rjv.mRev[12], entityData.rjv.mRev[13], entityData.rjv.mPlanRev[2]],
     ytdPlan: [entityData.rjv.mPlanRev[0], entityData.rjv.mPlanRev[1], entityData.rjv.mPlanRev[2]],
     ytdPY: [entityData.rjv.mRev[0], entityData.rjv.mRev[1], 5707751],
-    apr26Plan: entityData.rjv.mPlanRev[3],
-    apr26PlanGM: entityData.rjv.mPlanGM[3],
-    apr26PlanEbitda: entityData.rjv.mPlanEbitda[3],
+    may26Plan: entityData.rjv.mPlanRev[4],
+    may26PlanGM: entityData.rjv.mPlanGM[4],
+    may26PlanEbitda: entityData.rjv.mPlanEbitda[4],
     isActual: false,
     showBlockTrade: false,
     // RJV: monthly budget from RJV 2026 tab; PY from Targit export
@@ -1638,22 +1638,22 @@ const flashData = {
       { name: 'Service',   rev: null, plan: 271514,        py: 255992 },
       { name: 'Rental',    rev: null, plan: 187371,        py: 195219 },
     ],
-    aprSegments: [
-      { name: 'Equipment', plan: 4480660+46138 },
-      { name: 'Parts',     plan: 1008606 },
-      { name: 'Service',   plan: 268560 },
-      { name: 'Rental',    plan: 193803 },
+    maySegments: [
+      { name: 'Equipment', plan: 4186077 },
+      { name: 'Parts',     plan: 914886 },
+      { name: 'Service',   plan: 266281 },
+      { name: 'Rental',    plan: 218513 },
     ],
     // MTD Sales Flash — RJV (from TARGIT Sales Flash report)
     mtd: {
-      asOfDate: '2026-04-27',
-      bizDaysElapsed: 19,
-      bizDaysTotal: 22,
+      asOfDate: '2026-05-04',
+      bizDaysElapsed: 2,
+      bizDaysTotal: 21,
       segments: [
-        { name: 'Equipment', mtd: 3904261, goal: 4526798, py: 3756819 },
-        { name: 'Parts',     mtd: 687417,  goal: 1008606, py: 955437 },
-        { name: 'Service',   mtd: 161359,  goal: 268560,  py: 243878 },
-        { name: 'Rental',    mtd: 91583,   goal: 193803,  py: 189706 },
+        { name: 'Equipment', mtd: 46740,  goal: 4186077, py: 3092048 },
+        { name: 'Parts',     mtd: 77645,  goal: 914886,  py: 812887 },
+        { name: 'Service',   mtd: 3739,   goal: 266281,  py: 251208 },
+        { name: 'Rental',    mtd: 41400,  goal: 218513,  py: 180969 },
       ]
     }
   }
@@ -1743,22 +1743,22 @@ function renderSalesFlash(entity) {
     }
   }
 
-  // April plan card — only show for consolidated (HMC/RJV already show goal in MTD card)
+  // May plan card — only show for consolidated (HMC/RJV already show goal in MTD card)
   if (curMonthCard) {
     if (entity === 'consolidated') {
-      const aprSegs = fd.aprSegments;
-      let aprSegHtml = '';
-      if (aprSegs) {
-        aprSegHtml = '<table class="seg-table" style="margin-top:12px;"><thead><tr><th></th><th>Plan</th></tr></thead><tbody>';
-        aprSegs.forEach(s => { aprSegHtml += `<tr><td>${s.name}</td><td>${f(s.plan)}</td></tr>`; });
-        aprSegHtml += `<tr class="seg-total-row"><td>Total</td><td>${f(fd.apr26Plan)}</td></tr>`;
-        aprSegHtml += '</tbody></table>';
+      const maySegs = fd.maySegments;
+      let maySegHtml = '';
+      if (maySegs) {
+        maySegHtml = '<table class="seg-table" style="margin-top:12px;"><thead><tr><th></th><th>Plan</th></tr></thead><tbody>';
+        maySegs.forEach(s => { maySegHtml += `<tr><td>${s.name}</td><td>${f(s.plan)}</td></tr>`; });
+        maySegHtml += `<tr class="seg-total-row"><td>Total</td><td>${f(fd.may26Plan)}</td></tr>`;
+        maySegHtml += '</tbody></table>';
       }
-      const dailyTarget = fd.apr26Plan / 30;
+      const dailyTarget = fd.may26Plan / 30;
       curMonthCard.innerHTML = `
-        <div class="fp-month">April 2026 Plan</div>
-        ${aprSegs ? aprSegHtml : '<div class="fp-value">' + f(fd.apr26Plan) + '</div><div class="fp-label">Revenue Target</div>'}
-        <div class="fp-detail" style="margin-top:8px;">~$${(dailyTarget/1e3).toFixed(0)}K/day &bull; Plan GM: ${f(fd.apr26PlanGM)} &bull; Plan EBITDA: ${f(fd.apr26PlanEbitda)}</div>
+        <div class="fp-month">May 2026 Plan</div>
+        ${maySegs ? maySegHtml : '<div class="fp-value">' + f(fd.may26Plan) + '</div><div class="fp-label">Revenue Target</div>'}
+        <div class="fp-detail" style="margin-top:8px;">~$${(dailyTarget/1e3).toFixed(0)}K/day &bull; Plan GM: ${f(fd.may26PlanGM)} &bull; Plan EBITDA: ${f(fd.may26PlanEbitda)}</div>
       `;
       curMonthCard.style.display = '';
     } else {
@@ -1804,7 +1804,7 @@ function renderSalesFlash(entity) {
     });
 
     mtdCard.innerHTML = `
-      <div class="flash-card-header">April MTD Sales Flash <span style="float:right;font-weight:400;font-style:italic;text-transform:none;letter-spacing:0;">as of ${dateStr} (Day ${m.bizDaysElapsed} of ${m.bizDaysTotal})</span></div>
+      <div class="flash-card-header">May MTD Sales Flash <span style="float:right;font-weight:400;font-style:italic;text-transform:none;letter-spacing:0;">as of ${dateStr} (Day ${m.bizDaysElapsed} of ${m.bizDaysTotal})</span></div>
       <div style="display:flex;align-items:baseline;gap:12px;margin-bottom:4px;">
         <span style="font-size:28px;font-weight:800;color:#fff;">${fk(totalMTD)}</span>
         <span style="font-size:12px;color:#a1a1aa;">of ${fk(totalGoal)} goal</span>
@@ -1832,7 +1832,7 @@ function renderSalesFlash(entity) {
       </div>
     `;
   } else if (mtdCard) {
-    mtdCard.innerHTML = '<div class="flash-card-header">April MTD Sales Flash</div><div style="color:#71717a;font-size:12px;padding:20px 0;text-align:center;">No MTD data available for this entity</div>';
+    mtdCard.innerHTML = '<div class="flash-card-header">May MTD Sales Flash</div><div style="color:#71717a;font-size:12px;padding:20px 0;text-align:center;">No MTD data available for this entity</div>';
   }
 }
 // Initial render for consolidated
@@ -2398,8 +2398,17 @@ const availLedger = [
   { date: '2026-04-22', outstanding: 44098831, available: 7483938 },
   { date: '2026-04-23', outstanding: 43412618, available: 8170151 },
   { date: '2026-04-24', outstanding: 44031644, available: 7551125 },
+  { date: '2026-04-25', outstanding: 44292906, available: 7289862 },
+  { date: '2026-04-26', outstanding: 44292906, available: 7289862 },
   { date: '2026-04-27', outstanding: 45311883, available: 6270885 },
-  { date: '2026-04-28', outstanding: 45223071, available: 6221097 },
+  { date: '2026-04-28', outstanding: 45223072, available: 6221097 },
+  { date: '2026-04-29', outstanding: 44768773, available: 6675396 },
+  { date: '2026-04-30', outstanding: 44263231, available: 7180937 },
+  { date: '2026-05-01', outstanding: 43678313, available: 7838456 },
+  { date: '2026-05-02', outstanding: 43763166, available: 7753603 },
+  { date: '2026-05-03', outstanding: 43763166, available: 7753603 },
+  { date: '2026-05-04', outstanding: 43042492, available: 8474277 },
+  { date: '2026-05-05', outstanding: 42352969, available: 9163800 },
 ];
 
 // Render KPI cards from live data
