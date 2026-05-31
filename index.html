@@ -1570,14 +1570,14 @@ const flashData = {
     ],
     // MTD Sales Flash — consolidated HMC+RJV (update these values when new flash arrives)
     mtd: {
-      asOfDate: '2026-05-04',
-      bizDaysElapsed: 2,
+      asOfDate: '2026-05-28',
+      bizDaysElapsed: 19,
       bizDaysTotal: 20,
       segments: [
-        { name: 'Equipment', mtd: 0+46740,        goal: 14158538+4186077, py: 6148268+3092048 },
-        { name: 'Parts',     mtd: 128743+77645,    goal: 2752460+914886,  py: 2859013+812887 },
-        { name: 'Service',   mtd: 82439+3739,      goal: 1609960+266281,  py: 1462734+251208 },
-        { name: 'Rental',    mtd: 77832+41400,     goal: 1775000+218513,  py: 1567113+180969 },
+        { name: 'Equipment', mtd: 6352240+1559662,  goal: 14158538+4186077, py: 6148268+3092048 },
+        { name: 'Parts',     mtd: 2374512+758166,    goal: 2752460+914886,  py: 2859013+812887 },
+        { name: 'Service',   mtd: 1143122+166987,    goal: 1609960+266281,  py: 1462734+251208 },
+        { name: 'Rental',    mtd: 1626192+116636,    goal: 1775000+218513,  py: 1567113+180969 },
       ]
     }
   },
@@ -1608,14 +1608,14 @@ const flashData = {
     ],
     // MTD Sales Flash — HMC only (from TARGIT Sales Flash report)
     mtd: {
-      asOfDate: '2026-05-04',
-      bizDaysElapsed: 2,
+      asOfDate: '2026-05-28',
+      bizDaysElapsed: 19,
       bizDaysTotal: 20,
       segments: [
-        { name: 'Equipment', mtd: 0,      goal: 14158538, py: 6148268 },
-        { name: 'Parts',     mtd: 128743, goal: 2752460,  py: 2859013 },
-        { name: 'Service',   mtd: 82439,  goal: 1609960,  py: 1462734 },
-        { name: 'Rental',    mtd: 77832,  goal: 1775000,  py: 1567113 },
+        { name: 'Equipment', mtd: 6352240, goal: 14158538, py: 6148268 },
+        { name: 'Parts',     mtd: 2374512, goal: 2752460,  py: 2859013 },
+        { name: 'Service',   mtd: 1143122, goal: 1609960,  py: 1462734 },
+        { name: 'Rental',    mtd: 1626192, goal: 1775000,  py: 1567113 },
       ]
     }
   },
@@ -1646,14 +1646,14 @@ const flashData = {
     ],
     // MTD Sales Flash — RJV (from TARGIT Sales Flash report)
     mtd: {
-      asOfDate: '2026-05-04',
-      bizDaysElapsed: 2,
+      asOfDate: '2026-05-28',
+      bizDaysElapsed: 20,
       bizDaysTotal: 21,
       segments: [
-        { name: 'Equipment', mtd: 46740,  goal: 4186077, py: 3092048 },
-        { name: 'Parts',     mtd: 77645,  goal: 914886,  py: 812887 },
-        { name: 'Service',   mtd: 3739,   goal: 266281,  py: 251208 },
-        { name: 'Rental',    mtd: 41400,  goal: 218513,  py: 180969 },
+        { name: 'Equipment', mtd: 1559662, goal: 4186077, py: 3092048 },
+        { name: 'Parts',     mtd: 758166,  goal: 914886,  py: 812887 },
+        { name: 'Service',   mtd: 166987,  goal: 266281,  py: 251208 },
+        { name: 'Rental',    mtd: 116636,  goal: 218513,  py: 180969 },
       ]
     }
   }
@@ -2414,6 +2414,18 @@ const availLedger = [
   { date: '2026-05-08', outstanding: 41736723, available: 7424375 },
   { date: '2026-05-11', outstanding: 41905920, available: 7255179 },
   { date: '2026-05-12', outstanding: 44029617, available: 5131482 },
+  { date: '2026-05-13', outstanding: 43562952, available: 5598148 },
+  { date: '2026-05-14', outstanding: 41986231, available: 7174869 },
+  { date: '2026-05-15', outstanding: 41497485, available: 7663614 },
+  { date: '2026-05-18', outstanding: 41945470, available: 7215629 },
+  { date: '2026-05-19', outstanding: 41201760, available: 7959340 },
+  { date: '2026-05-20', outstanding: 41039090, available: 8122009 },
+  { date: '2026-05-21', outstanding: 41296517, available: 7864582 },
+  { date: '2026-05-22', outstanding: 42275559, available: 6885541 },
+  { date: '2026-05-26', outstanding: 44428100, available: 4732999 },
+  { date: '2026-05-27', outstanding: 44200395, available: 4960705 },
+  { date: '2026-05-28', outstanding: 44487913, available: 4673186 },
+  { date: '2026-05-29', outstanding: 44287104, available: 6290325 },
 ];
 
 // Render KPI cards from live data
